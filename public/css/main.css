@@ -1,0 +1,12 @@
+:root{--accent:#2ecc71;--muted:#666}
+body{font-family:Georgia,serif;padding:24px;background:#fff;color:#111}
+header{font-size:36px;font-weight:700;margin-bottom:12px}
+#chat{max-width:720px;margin:0 auto}
+.msg{margin:8px 0}
+.meta{font-weight:700;margin-right:6px}
+.input-row{display:flex;align-items:center;gap:8px;margin-top:18px}
+.label{min-width:48px;color:var(--muted);font-weight:700}
+input{flex:1;padding:8px;border:1px solid #ddd;border-radius:4px}
+.send-btn{padding:6px 10px;border-radius:4px;border:1px solid #ccc;background:transparent;cursor:pointer;font-weight:700}
+.send-btn.hidden{display:none}
+.send-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
