@@ -12,28 +12,27 @@
 ## Архитектура
 ```
 pavilion/  
-├── 'df
-├── .gitignore
-├── README.md
-├── chat.sqlite
-├── config
-├── migrate.php
-├── pavilion.sqlite
-├── public
-│   ├── assets
-│   ├── css
-│   │   └── main.css
-│   ├── index.html
-│   ├── index.php
-│   └── js
-│       └── main.js
-├── server
-│   ├── MessageRepository.php
-│   ├── SessionRepository.php
-│   ├── api.php
-│   ├── db.php
-│   └── lib
-└── tests
+├── 'df                         # хз, временная или мусорная папка
+├── .gitignore                  # что Git игнорит
+├── README.md                   # описание проекта
+├── chat.sqlite                 # локальная база чата
+├── config                      # конфиги проекта
+├── migrate.php                 # скрипт миграции базы
+├── pavilion.sqlite             # доп. база (для истории или тестов)
+├── public                      # фронтенд
+│   ├── assets                  # картинки, шрифты и т.п.
+│   ├── css/main.css            # стили
+│   ├── index.html              # шаблон/страница
+│   ├── index.php               # главная страница чата
+│   └── js/main.js              # логика чата: init, send, poll
+├── server                      # бэкенд
+│   ├── MessageRepository.php   # работа с сообщениями
+│   ├── SessionRepository.php   # сессии и имена
+│   ├── api.php                 # API (init, send, poll)
+│   ├── db.php                  # подключение к SQLite
+│   └── lib                     # вспомогательные функции
+└── tests                       # тесты проекта
+
 ```
 
 ## Данные
