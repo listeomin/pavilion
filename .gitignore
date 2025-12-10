@@ -1,3 +1,4 @@
 chat/chat.sqlite
 *.sqlite
 .DS_Store
+FETCH_HEAD
