@@ -1,18 +1,17 @@
 // public/js/main.js
 (function(){
-  const API = '/pavilion/server/api.php';   // путь к API
+  const API = CONFIG.API_PATH;   // путь к API
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
   let myName = '';
   let lastId = 0;
   let pollInterval = 3000;
   const chatLog = document.getElementById('chat-log');
-  const youEl = document.getElementById('you');
 
   function setCookie(name, value, days) {
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
-    document.cookie = name + "=" + value + ";path=/pavilion;expires=" + d.toUTCString() + ";SameSite=Lax";
+    document.cookie = name + "=" + value + ";path=/;expires=" + d.toUTCString() + ";SameSite=Lax";
   }
   function getCookie(name) {
     const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
@@ -43,6 +42,17 @@
     chatLog.scrollTop = chatLog.scrollHeight;
   }
 
+  function updateYouText() {
+    const input = document.getElementById('text');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    if (input.value.trim().length > 0) {
+      sendBtn.classList.add('visible');
+    } else {
+      sendBtn.classList.remove('visible');
+    }
+  }
+
   async function apiInit() {
     const form = new FormData();
     if (sessionId) form.append('session_id', sessionId);
@@ -50,7 +60,7 @@
     const data = await res.json();
     sessionId = data.session_id;
     myName = data.name;
-    youEl.textContent = 'Вы: ' + myName;
+    updateYouText();
     setCookie(COOKIE_NAME, sessionId, 30);
     renderMessages(data.messages || []);
   }
@@ -83,6 +93,9 @@
     }
   }
 
+  const inputEl = document.getElementById('text');
+  inputEl.addEventListener('input', updateYouText);
+
   document.getElementById('sendForm').addEventListener('submit', function(e){
     e.preventDefault();
     const input = document.getElementById('text');
@@ -90,11 +103,14 @@
     if (!text) return;
     apiSend(text);
     input.value = '';
+    updateYouText();
     input.focus();
   });
 
   // init
   apiInit().then(() => {
     setTimeout(apiPoll, pollInterval);
+    // Устанавливаем фокус на инпут
+    document.getElementById('text').focus();
   });
 })();
