@@ -1,1 +1,3 @@
 chat/chat.sqlite
+*.sqlite
+.DS_Store
