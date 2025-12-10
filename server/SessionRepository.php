@@ -21,22 +21,25 @@ class SessionRepository {
         $id = bin2hex(random_bytes(16));
         $now = (new DateTime())->format(DateTime::ATOM);
 
-        // find last user_NNN
-        $stmt = $this->db->query("SELECT name FROM sessions WHERE name LIKE 'user_%' ORDER BY name DESC LIMIT 1");
-        $last = $stmt->fetchColumn();
+        // load available names from JSON
+        $namesFile = __DIR__ . '/user_names.json';
+        $allNames = json_decode(file_get_contents($namesFile), true);
 
-        if ($last) {
-            // extract number
-            if (preg_match('/user_(\d+)/', $last, $m)) {
-                $num = intval($m[1]) + 1;
-            } else {
-                $num = 1;
-            }
-        } else {
-            $num = 1;
+        // get already taken names
+        $stmt = $this->db->query("SELECT name FROM sessions");
+        $takenNames = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        // find available names
+        $availableNames = array_diff($allNames, $takenNames);
+
+        // if no available names, reuse all names (shuffle and pick random)
+        if (empty($availableNames)) {
+            $availableNames = $allNames;
         }
 
-        $name = 'user_' . str_pad((string)$num, 3, '0', STR_PAD_LEFT);
+        // pick random name from available
+        $availableNames = array_values($availableNames); // reindex
+        $name = $availableNames[array_rand($availableNames)];
 
         $ins = $this->db->prepare('INSERT INTO sessions (id, name, created_at) VALUES (:id, :name, :created_at)');
         $ins->execute([
