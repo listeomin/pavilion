@@ -155,6 +155,22 @@
   button:hover { 
     color: rgba(0, 0, 0, 0.8);
   }
+  
+  code {
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  
+  strong {
+    font-weight: bold;
+  }
+  
+  em {
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
