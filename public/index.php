@@ -114,7 +114,7 @@
     margin-top: auto;
   }
   
-  input[type="text"] { 
+  #text { 
     flex: 1;
     padding: 0;
     margin: 0;
@@ -125,11 +125,36 @@
     background: transparent;
     color: rgba(0, 0, 0, 0.8);
     caret-color: rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 24px;
+    max-height: 200px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
   
-  input[type="text"]::placeholder {
+  #text:empty:before {
+    content: attr(data-placeholder);
     color: rgba(0, 0, 0, 0.4);
     font-style: italic;
+    pointer-events: none;
+  }
+  
+  #text strong {
+    font-weight: bold;
+  }
+  
+  #text em {
+    font-style: italic;
+  }
+  
+  #text code {
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 16px;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 4px;
+    border-radius: 3px;
   }
   
   button { 
@@ -171,16 +196,63 @@
   em {
     font-style: italic;
   }
+  
+  #format-menu {
+    position: absolute;
+    display: none;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 6px;
+    padding: 4px 6px;
+    gap: 12px;
+    align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  
+  #format-menu.visible {
+    display: flex;
+    pointer-events: all;
+    opacity: 1;
+  }
+  
+  #format-menu button {
+    all: unset;
+    font-family: Georgia, serif;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    padding: 2px 4px;
+    margin: 0;
+    opacity: 1;
+    pointer-events: all;
+    transition: color 0.15s;
+  }
+  
+  #format-menu button:hover {
+    color: rgba(255, 255, 255, 1);
+  }
+  
+  #format-menu button.mono {
+    font-family: 'Ubuntu Mono', monospace;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Беседка</h1>
   <div id="chat-log" aria-live="polite"></div>
+  <div id="format-menu">
+    <button data-format="bold" title="Bold">B</button>
+    <button data-format="italic" title="Italic">i</button>
+    <button data-format="code" class="mono" title="Code">`</button>
+  </div>
   <form id="sendForm">
     <div class="you">
       <span id="you-label">Вы:</span>
-      <input id="text" type="text" autocomplete="off" placeholder="напишите что-нибудь" />
+      <div id="text" contenteditable="true" data-placeholder="напишите что-нибудь"></div>
     </div>
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>

@@ -1,18 +1,24 @@
 // public/js/main.js
 (function(){
-  const API = CONFIG.API_PATH;   // путь к API
+  const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
   let myName = '';
   let lastId = 0;
   let pollInterval = 3000;
   const chatLog = document.getElementById('chat-log');
+  const inputEl = document.getElementById('text');
+  const formatMenu = document.getElementById('format-menu');
+  
+  // Store raw markdown text separately
+  let markdownText = '';
 
   function setCookie(name, value, days) {
     const d = new Date();
     d.setTime(d.getTime() + (days*24*60*60*1000));
     document.cookie = name + "=" + value + ";path=/;expires=" + d.toUTCString() + ";SameSite=Lax";
   }
+  
   function getCookie(name) {
     const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return v ? v.pop() : null;
@@ -20,6 +26,24 @@
 
   function escapeHtml(s) {
     return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function parseMarkdown(text) {
+    const urlPlaceholders = [];
+    const urlRegex = /(https?:\/\/[^\s<>"]+)/gi;
+    let protected = text.replace(urlRegex, (url) => {
+      const idx = urlPlaceholders.length;
+      urlPlaceholders.push(url);
+      return `__URL_${idx}__`;
+    });
+
+    protected = protected.replace(/`([^`]+)`/g, '<code>$1</code>');
+    protected = protected.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    protected = protected.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    protected = protected.replace(/\b_([^_]+)_\b/g, '<em>$1</em>');
+    protected = protected.replace(/__URL_(\d+)__/g, (_, idx) => urlPlaceholders[parseInt(idx)]);
+
+    return protected;
   }
 
   function linkifyImages(text) {
@@ -44,7 +68,7 @@
       meta.className = 'meta';
       meta.textContent = m.author + ':';
       const text = document.createElement('span');
-      text.innerHTML = ' ' + linkifyImages(escapeHtml(m.text));
+      text.innerHTML = ' ' + linkifyImages(parseMarkdown(escapeHtml(m.text)));
       div.appendChild(meta);
       div.appendChild(text);
       frag.appendChild(div);
@@ -54,11 +78,14 @@
     chatLog.scrollTop = chatLog.scrollHeight;
   }
 
+  function getPlainText(el) {
+    return (el.textContent || '');
+  }
+
   function updateYouText() {
-    const input = document.getElementById('text');
     const sendBtn = document.getElementById('sendBtn');
     
-    if (input.value.trim().length > 0) {
+    if (markdownText.trim().length > 0) {
       sendBtn.classList.add('visible');
     } else {
       sendBtn.classList.remove('visible');
@@ -72,7 +99,6 @@
     const data = await res.json();
     sessionId = data.session_id;
     myName = data.name;
-    updateYouText();
     setCookie(COOKIE_NAME, sessionId, 30);
     renderMessages(data.messages || []);
   }
@@ -105,24 +131,194 @@
     }
   }
 
-  const inputEl = document.getElementById('text');
-  inputEl.addEventListener('input', updateYouText);
+  function saveCursorPosition() {
+    const sel = window.getSelection();
+    if (sel.rangeCount === 0) return null;
+    const range = sel.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(inputEl);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    return preCaretRange.toString().length;
+  }
+
+  function restoreCursorPosition(pos) {
+    if (pos === null) return;
+    const sel = window.getSelection();
+    const range = document.createRange();
+    let charCount = 0;
+    let nodeStack = [inputEl];
+    let node, foundStart = false;
+
+    while (!foundStart && (node = nodeStack.pop())) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const nextCharCount = charCount + node.length;
+        if (pos <= nextCharCount) {
+          range.setStart(node, pos - charCount);
+          range.setEnd(node, pos - charCount);
+          foundStart = true;
+        }
+        charCount = nextCharCount;
+      } else {
+        for (let i = node.childNodes.length - 1; i >= 0; i--) {
+          nodeStack.push(node.childNodes[i]);
+        }
+      }
+    }
+
+    if (foundStart) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  function renderLiveMarkdown() {
+    const cursorPos = saveCursorPosition();
+    const rendered = parseMarkdown(escapeHtml(markdownText));
+    
+    if (inputEl.innerHTML !== rendered) {
+      inputEl.innerHTML = rendered;
+      restoreCursorPosition(cursorPos);
+    }
+  }
+
+  function syncMarkdownText() {
+    markdownText = getPlainText(inputEl);
+  }
+
+  inputEl.addEventListener('input', () => {
+    syncMarkdownText();
+    renderLiveMarkdown();
+    updateYouText();
+  });
+
+  inputEl.addEventListener('keydown', (e) => {
+    // Hotkeys for formatting
+    const isMod = e.metaKey || e.ctrlKey;
+    
+    if (isMod && e.key === 'b') {
+      e.preventDefault();
+      applyFormat('bold');
+      return;
+    }
+    
+    if (isMod && e.key === 'i') {
+      e.preventDefault();
+      applyFormat('italic');
+      return;
+    }
+    
+    if (isMod && e.key === 'e') {
+      e.preventDefault();
+      applyFormat('code');
+      return;
+    }
+    
+    // Submit on Enter
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('sendForm').dispatchEvent(new Event('submit'));
+    }
+  });
+
+  function showFormatMenu() {
+    const sel = window.getSelection();
+    
+    if (!sel.rangeCount || sel.isCollapsed || document.activeElement !== inputEl) {
+      formatMenu.classList.remove('visible');
+      return;
+    }
+    
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    
+    const menuX = rect.left + window.scrollX;
+    const menuY = rect.top + window.scrollY - 40;
+    
+    formatMenu.style.left = menuX + 'px';
+    formatMenu.style.top = menuY + 'px';
+    formatMenu.classList.add('visible');
+  }
+  
+  inputEl.addEventListener('mouseup', showFormatMenu);
+  inputEl.addEventListener('keyup', showFormatMenu);
+  
+  document.addEventListener('mousedown', (e) => {
+    if (!formatMenu.contains(e.target) && e.target !== inputEl) {
+      formatMenu.classList.remove('visible');
+    }
+  });
+  
+  function applyFormat(format) {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    
+    const range = sel.getRangeAt(0);
+    
+    // Get selection position in plain text
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(inputEl);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const start = preRange.toString().length;
+    const end = start + range.toString().length;
+    
+    // If no selection, do nothing
+    if (start === end) return;
+    
+    let wrapper;
+    switch(format) {
+      case 'bold':
+        wrapper = '**';
+        break;
+      case 'italic':
+        wrapper = '*';
+        break;
+      case 'code':
+        wrapper = '`';
+        break;
+      default:
+        return;
+    }
+    
+    // Update markdown text
+    markdownText = markdownText.slice(0, start) + 
+                   wrapper + 
+                   markdownText.slice(start, end) + 
+                   wrapper + 
+                   markdownText.slice(end);
+    
+    // Render and restore cursor
+    const newCursorPos = end + wrapper.length * 2;
+    renderLiveMarkdown();
+    restoreCursorPosition(newCursorPos);
+    
+    inputEl.focus();
+    updateYouText();
+  }
+
+  formatMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    
+    e.preventDefault();
+    
+    const format = btn.dataset.format;
+    applyFormat(format);
+    formatMenu.classList.remove('visible');
+  });
 
   document.getElementById('sendForm').addEventListener('submit', function(e){
     e.preventDefault();
-    const input = document.getElementById('text');
-    const text = input.value.trim();
+    const text = markdownText.trim();
     if (!text) return;
     apiSend(text);
-    input.value = '';
+    inputEl.innerHTML = '';
+    markdownText = '';
     updateYouText();
-    input.focus();
+    inputEl.focus();
   });
 
-  // init
   apiInit().then(() => {
     setTimeout(apiPoll, pollInterval);
-    // Устанавливаем фокус на инпут
-    document.getElementById('text').focus();
+    inputEl.focus();
   });
 })();
