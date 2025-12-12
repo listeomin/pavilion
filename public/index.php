@@ -16,9 +16,8 @@
     font-family: Georgia, serif; 
     margin: 0; 
     padding: 0; 
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; 
+    height: 100vh;
+    overflow: hidden;
     background: #fff;
   }
   
@@ -26,9 +25,9 @@
     margin: 0 auto; 
     width: 100%; 
     max-width: 720px; 
+    height: 100vh;
     padding: 120px 16px 160px; 
     box-sizing: border-box;
-    flex: 1;
     display: flex;
     flex-direction: column;
   }
@@ -43,11 +42,9 @@
   
   #chat-log { 
     flex: 1;
-    max-height: none;
     overflow-y: auto;
     margin-bottom: 48px;
     padding-right: 8px;
-    position: relative;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
   }
