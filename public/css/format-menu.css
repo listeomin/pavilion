@@ -1,0 +1,41 @@
+#format-menu {
+  position: absolute;
+  display: none;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 6px;
+  padding: 4px 6px;
+  gap: 12px;
+  align-items: center;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+#format-menu.visible {
+  display: flex;
+  pointer-events: all;
+  opacity: 1;
+}
+
+#format-menu button {
+  all: unset;
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  padding: 2px 4px;
+  margin: 0;
+  opacity: 1;
+  pointer-events: all;
+  transition: color 0.15s;
+}
+
+#format-menu button:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+#format-menu button.mono {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 14px;
+}
