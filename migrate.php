@@ -1,6 +1,6 @@
 <?php
 try {
-    $path = __DIR__ . '/pavilion.sqlite';
+    $path = __DIR__ . '/chat.sqlite';
     $pdo = new PDO('sqlite:' . $path);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec('PRAGMA foreign_keys = ON');
