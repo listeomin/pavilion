@@ -14,6 +14,9 @@
 <link rel="stylesheet" href="css/chat.css?v=4">
 <link rel="stylesheet" href="css/input.css?v=4">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
+<link rel="stylesheet" href="css/colors.css?v=1">
+<link rel="stylesheet" href="css/inline-input.css?v=1">
+<link rel="stylesheet" href="css/music.css?v=1">
 </head>
 <body>
 <div class="wrap">

@@ -1,0 +1,111 @@
+:root {
+  /* =======================
+     Garden (Nature Tones)
+     ======================= */
+  --color-iris: #5A57D9;
+  --color-wisteria: #BDBCE4;
+
+  --color-fig: #C46686;
+  --color-coral: #EBCECE;
+
+  --color-olive: #788C5D;
+  --color-cactus: #BCD1CA;
+
+  --color-sky: #6A9BCC;
+  --color-heather: #CBCADB;
+
+  /* =======================
+     Cloudscape (Grayscale)
+     ======================= */
+  --color-cumulonimbus-dark: #141413;
+  --color-cumulonimbus-medium: #3D3D3A;
+  --color-cumulonimbus-light: #5E5D59;
+
+  --color-nimbus-dark: #87867F;
+  --color-nimbus-medium: #B0AEA5;
+  --color-nimbus-light: #D1CFC5;
+
+  --color-cloud-dark: #D9D9D9;
+  --color-cloud-medium: #F0EEE6;
+  --color-cloud-light: #FAF9F5;
+
+  /* =======================
+     Semantic aliases
+     ======================= */
+  --color-primary: var(--color-iris);
+  --color-secondary: var(--color-fig);
+  --color-accent: var(--color-wisteria);
+  --color-bg: var(--color-cloud-light);
+  --color-text: var(--color-cumulonimbus-dark);
+  --color-border: var(--color-nimbus-medium);
+}
+
+/* =======================
+   Utility classes (background)
+   ======================= */
+.bg-iris { background-color: var(--color-iris); }
+.bg-wisteria { background-color: var(--color-wisteria); }
+.bg-fig { background-color: var(--color-fig); }
+.bg-coral { background-color: var(--color-coral); }
+.bg-olive { background-color: var(--color-olive); }
+.bg-cactus { background-color: var(--color-cactus); }
+.bg-sky { background-color: var(--color-sky); }
+.bg-heather { background-color: var(--color-heather); }
+
+.bg-cumulonimbus-dark { background-color: var(--color-cumulonimbus-dark); }
+.bg-cumulonimbus-medium { background-color: var(--color-cumulonimbus-medium); }
+.bg-cumulonimbus-light { background-color: var(--color-cumulonimbus-light); }
+
+.bg-nimbus-dark { background-color: var(--color-nimbus-dark); }
+.bg-nimbus-medium { background-color: var(--color-nimbus-medium); }
+.bg-nimbus-light { background-color: var(--color-nimbus-light); }
+
+.bg-cloud-dark { background-color: var(--color-cloud-dark); }
+.bg-cloud-medium { background-color: var(--color-cloud-medium); }
+.bg-cloud-light { background-color: var(--color-cloud-light); }
+
+/* =======================
+   Utility classes (text)
+   ======================= */
+.text-iris { color: var(--color-iris); }
+.text-wisteria { color: var(--color-wisteria); }
+.text-fig { color: var(--color-fig); }
+.text-coral { color: var(--color-coral); }
+.text-olive { color: var(--color-olive); }
+.text-cactus { color: var(--color-cactus); }
+.text-sky { color: var(--color-sky); }
+.text-heather { color: var(--color-heather); }
+
+.text-cumulonimbus-dark { color: var(--color-cumulonimbus-dark); }
+.text-cumulonimbus-medium { color: var(--color-cumulonimbus-medium); }
+.text-cumulonimbus-light { color: var(--color-cumulonimbus-light); }
+
+.text-nimbus-dark { color: var(--color-nimbus-dark); }
+.text-nimbus-medium { color: var(--color-nimbus-medium); }
+.text-nimbus-light { color: var(--color-nimbus-light); }
+
+.text-cloud-dark { color: var(--color-cloud-dark); }
+.text-cloud-medium { color: var(--color-cloud-medium); }
+.text-cloud-light { color: var(--color-cloud-light); }
+
+/* =======================
+   Utility classes (border)
+   ======================= */
+.border-iris { border-color: var(--color-iris); }
+.border-wisteria { border-color: var(--color-wisteria); }
+.border-fig { border-color: var(--color-fig); }
+.border-coral { border-color: var(--color-coral); }
+.border-olive { border-color: var(--color-olive); }
+.border-cactus { border-color: var(--color-cactus); }
+.border-sky { border-color: var(--color-sky); }
+.border-heather { border-color: var(--color-heather); }
+
+/* =======================
+   Utility classes (hover)
+   ======================= */
+.hover-bg-iris:hover { background-color: var(--color-iris); }
+.hover-bg-fig:hover { background-color: var(--color-fig); }
+.hover-bg-wisteria:hover { background-color: var(--color-wisteria); }
+.hover-text-iris:hover { color: var(--color-iris); }
+.hover-text-fig:hover { color: var(--color-fig); }
+.hover-text-wisteria:hover { color: var(--color-wisteria); }
