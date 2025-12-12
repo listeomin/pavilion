@@ -5,6 +5,7 @@ import { renderMessages, updateSendButton } from './render.js?v=5';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
+import { InlineInput } from './inline-input.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -22,6 +23,7 @@ import { setupHotkeys } from './hotkeys.js?v=5';
 
   const editor = new Editor(inputEl);
   const formatMenuController = new FormatMenu(formatMenu, inputEl, editor);
+  const inlineInput = new InlineInput(inputEl, editor);
 
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
@@ -35,10 +37,10 @@ import { setupHotkeys } from './hotkeys.js?v=5';
 
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const text = editor.getText().trim();
-    if (!text) return;
+    const content = inlineInput.getContent();
+    if (!content.text) return;
 
-    const msg = await apiSend(API, sessionId, text);
+    const msg = await apiSend(API, sessionId, content.text, content.metadata);
     if (msg) {
       renderMessages(chatLog, [msg], lastIdRef);
     }

@@ -1,0 +1,14 @@
+[
+  {
+    "command": "/music",
+    "description": "Search and share music tracks"
+  },
+  {
+    "command": "/video",
+    "description": "Share video content"
+  },
+  {
+    "command": "/code",
+    "description": "Share code snippets"
+  }
+]

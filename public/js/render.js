@@ -1,6 +1,7 @@
 // public/js/render.js
 import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=4';
 import { renderGitHubPreview } from './github.js?v=5';
+import { renderMusicPlayer } from './music.js?v=1';
 
 export function renderMessages(chatLog, messages, lastIdRef) {
   if (!messages || !messages.length) return;
@@ -13,11 +14,20 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     meta.textContent = m.author + ':';
     const text = document.createElement('span');
     
-    let content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
+    let content = '';
     
-    // Add GitHub preview if metadata exists
-    if (m.metadata) {
-      content += renderGitHubPreview(m.metadata);
+    // Check metadata type
+    if (m.metadata && m.metadata.type === 'music') {
+      // Music player instead of text
+      content = renderMusicPlayer(m.metadata);
+    } else {
+      // Regular text with markdown
+      content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
+      
+      // Add GitHub preview if metadata exists
+      if (m.metadata) {
+        content += renderGitHubPreview(m.metadata);
+      }
     }
     
     text.innerHTML = ' ' + content;
