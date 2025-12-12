@@ -66,6 +66,7 @@ if ($action === 'send') {
     $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
     $session_id = $input['session_id'] ?? null;
     $text = trim($input['text'] ?? '');
+    $clientMetadata = $input['metadata'] ?? null;
 
     if (!$session_id || $text === '') {
         http_response_code(400);
@@ -78,8 +79,11 @@ if ($action === 'send') {
         json(['error' => 'invalid session']);
     }
 
-    // Check for GitHub URLs and fetch metadata
-    $metadata = $githubService->enrichMessage($text);
+    // Priority: client metadata (music commands) > GitHub enrichment
+    $metadata = $clientMetadata;
+    if (!$metadata) {
+        $metadata = $githubService->enrichMessage($text);
+    }
 
     $message = $msgRepo->add($session_id, $session['name'], $text, $metadata);
     json($message);

@@ -8,6 +8,7 @@ export class Editor {
     this.history = [''];
     this.historyIndex = 0;
     this.maxHistory = maxHistory;
+    this.paused = false;
   }
 
   getPlainText() {
@@ -55,6 +56,8 @@ export class Editor {
   }
 
   renderLiveMarkdown() {
+    if (this.paused) return;
+    
     const cursorPos = this.saveCursorPosition();
     const rendered = parseMarkdown(escapeHtml(this.markdownText));
 
@@ -65,6 +68,8 @@ export class Editor {
   }
 
   syncMarkdownText() {
+    if (this.paused) return;
+    
     this.markdownText = this.getPlainText();
     this.saveToHistory();
   }
@@ -114,5 +119,15 @@ export class Editor {
 
   getText() {
     return this.markdownText || '';
+  }
+
+  pause() {
+    this.paused = true;
+  }
+
+  resume() {
+    this.paused = false;
+    this.syncMarkdownText();
+    this.renderLiveMarkdown();
   }
 }

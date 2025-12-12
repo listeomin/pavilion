@@ -1,0 +1,21 @@
+/* Inline command styles */
+
+/* Command mode indicator */
+#text.command-mode {
+  color: var(--color-iris);
+}
+
+/* Command parts highlighting */
+.cmd-prefix {
+  color: var(--color-iris);
+  font-weight: bold;
+}
+
+.cmd-query {
+  color: var(--color-nimbus-dark);
+}
+
+/* Autocomplete suggestion */
+.cmd-suggestion {
+  color: var(--color-olive);
+}
