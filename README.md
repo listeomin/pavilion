@@ -19,9 +19,8 @@
 
 ## Технологии
 * **Backend:** PHP 8.5+, SQLite
-* **Frontend:** Vanilla JS, contenteditable для WYSIWYG, Georgia + Ubuntu Mono
-* **Архитектура:** Repository pattern, REST API
-* **Форматирование:** Live markdown parsing (client-side)
+* **Frontend:** Vanilla JS ES6 modules, contenteditable для WYSIWYG, Georgia + Ubuntu Mono
+* **Архитектура:** Repository pattern, REST API, модульная структура
 
 ## Быстрый старт
 
@@ -67,11 +66,21 @@ pavilion/
 ├── router.php              # роутер для PHP dev server
 ├── seed_messages.php       # скрипт для заполнения тестовыми данными
 ├── public/                 # фронтенд (document root)
-│   ├── index.php          # главная страница с WYSIWYG редактором
-│   ├── css/main.css       # стили (не используется, всё inline)
-│   └── js/
+│   ├── index.php          # главная страница
+│   ├── css/               # стили (модульная структура)
+│   │   ├── base.css       # типография, layout, общие стили
+│   │   ├── chat.css       # сообщения, анимации, градиент
+│   │   ├── input.css      # форма ввода, кнопка отправить
+│   │   └── format-menu.css # всплывающее меню форматирования
+│   └── js/                # логика (ES6 модули)
 │       ├── config.js      # конфигурация путей (localhost vs production)
-│       └── main.js        # логика чата (markdown, format menu, hotkeys)
+│       ├── api.js         # API запросы (init, send, poll, cookies)
+│       ├── markdown.js    # парсинг markdown, linkify изображений
+│       ├── render.js      # рендеринг сообщений, управление UI
+│       ├── editor.js      # Editor class (cursor, history, undo/redo)
+│       ├── format.js      # FormatMenu class (всплывающее меню)
+│       ├── hotkeys.js     # горячие клавиши (Cmd+B/I/E, Enter, Undo/Redo)
+│       └── main.js        # entry point (68 строк)
 └── server/                 # бэкенд
     ├── api.php            # REST API (init, send, poll)
     ├── db.php             # подключение к SQLite + миграции
@@ -79,6 +88,27 @@ pavilion/
     ├── MessageRepository.php   # управление сообщениями
     └── user_names.json    # список рандомных имён с эмодзи
 ```
+
+## Архитектура фронтенда
+
+### Модульная структура
+Код разбит на независимые модули с четким разделением ответственности:
+
+**CSS модули:**
+- `base.css` — базовые стили, типография, layout
+- `chat.css` — стили чата, анимации сообщений
+- `input.css` — стили формы ввода
+- `format-menu.css` — стили всплывающего меню
+
+**JS модули (ES6):**
+- `config.js` — конфигурация окружения
+- `api.js` — работа с API, управление cookies
+- `markdown.js` — парсинг markdown, обработка ссылок/изображений
+- `render.js` — рендеринг DOM, обновление UI
+- `editor.js` — класс Editor для работы с contenteditable
+- `format.js` — класс FormatMenu для всплывающего меню
+- `hotkeys.js` — обработка горячих клавиш
+- `main.js` — точка входа, инициализация приложения
 
 ## База данных
 
