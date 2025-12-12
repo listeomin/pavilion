@@ -1,0 +1,85 @@
+.you {
+  margin-bottom: 8px;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.you-placeholder {
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+}
+
+form {
+  display: block;
+  margin-top: auto;
+}
+
+#text {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.8);
+  caret-color: rgba(0, 0, 0, 0.8);
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 24px;
+  max-height: 200px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+#text:empty:before {
+  content: attr(data-placeholder);
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+  pointer-events: none;
+}
+
+#text strong {
+  font-weight: bold;
+}
+
+#text em {
+  font-style: italic;
+}
+
+#text code {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+button {
+  display: block;
+  padding: 0;
+  margin: 12px 0 0 0;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 18px;
+  border: none;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+button.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+button:hover {
+  color: rgba(0, 0, 0, 0.8);
+}

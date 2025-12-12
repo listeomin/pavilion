@@ -1,0 +1,54 @@
+#chat-log {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 48px;
+  padding-right: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#chat-log::before {
+  content: '';
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  z-index: 1;
+  display: block;
+  margin-bottom: -40px;
+}
+
+#chat-log::-webkit-scrollbar {
+  display: none;
+}
+
+.msg {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.meta {
+  font-weight: normal;
+}
+
+.msg-text {
+  display: inline;
+}
