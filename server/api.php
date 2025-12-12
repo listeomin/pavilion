@@ -7,12 +7,14 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
 require_once __DIR__ . '/SessionRepository.php';
 require_once __DIR__ . '/MessageRepository.php';
+require_once __DIR__ . '/GitHubService.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? null;
 $sessionRepo = new SessionRepository();
 $msgRepo = new MessageRepository();
+$githubService = new GitHubService();
 
 function json($data) {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -76,8 +78,10 @@ if ($action === 'send') {
         json(['error' => 'invalid session']);
     }
 
-    // sanitize text minimally (store raw, escape on render)
-    $message = $msgRepo->add($session_id, $session['name'], $text);
+    // Check for GitHub URLs and fetch metadata
+    $metadata = $githubService->enrichMessage($text);
+
+    $message = $msgRepo->add($session_id, $session['name'], $text, $metadata);
     json($message);
 }
 
