@@ -247,7 +247,7 @@
   <div id="format-menu">
     <button data-format="bold" title="Bold">B</button>
     <button data-format="italic" title="Italic">i</button>
-    <button data-format="code" class="mono" title="Code">`</button>
+    <button data-format="code" class="mono" title="Code">code</button>
   </div>
   <form id="sendForm">
     <div class="you">
@@ -257,7 +257,7 @@
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>
 </div>
-<script src="js/config.js"></script>
-<script src="js/main.js"></script>
+<script src="js/config.js?v=3"></script>
+<script src="js/main.js?v=3"></script>
 </body>
 </html>

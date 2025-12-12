@@ -12,6 +12,11 @@
   
   // Store raw markdown text separately
   let markdownText = '';
+  
+  // Undo/redo history
+  let markdownHistory = [''];
+  let historyIndex = 0;
+  const MAX_HISTORY = 50;
 
   function setCookie(name, value, days) {
     const d = new Date();
@@ -183,6 +188,44 @@
 
   function syncMarkdownText() {
     markdownText = getPlainText(inputEl);
+    saveToHistory();
+  }
+  
+  function saveToHistory() {
+    // Remove any future history if we're not at the end
+    if (historyIndex < markdownHistory.length - 1) {
+      markdownHistory = markdownHistory.slice(0, historyIndex + 1);
+    }
+    
+    // Don't save if text hasn't changed
+    if (markdownHistory[historyIndex] === markdownText) return;
+    
+    markdownHistory.push(markdownText);
+    
+    // Limit history size
+    if (markdownHistory.length > MAX_HISTORY) {
+      markdownHistory.shift();
+    } else {
+      historyIndex++;
+    }
+  }
+  
+  function undo() {
+    if (historyIndex > 0) {
+      historyIndex--;
+      markdownText = markdownHistory[historyIndex];
+      renderLiveMarkdown();
+      updateYouText();
+    }
+  }
+  
+  function redo() {
+    if (historyIndex < markdownHistory.length - 1) {
+      historyIndex++;
+      markdownText = markdownHistory[historyIndex];
+      renderLiveMarkdown();
+      updateYouText();
+    }
   }
 
   inputEl.addEventListener('input', () => {
@@ -194,6 +237,19 @@
   inputEl.addEventListener('keydown', (e) => {
     // Hotkeys for formatting
     const isMod = e.metaKey || e.ctrlKey;
+    
+    // Undo/Redo
+    if (isMod && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undo();
+      return;
+    }
+    
+    if (isMod && e.key === 'z' && e.shiftKey) {
+      e.preventDefault();
+      redo();
+      return;
+    }
     
     if (isMod && e.key === 'b') {
       e.preventDefault();
@@ -285,6 +341,9 @@
                    markdownText.slice(start, end) + 
                    wrapper + 
                    markdownText.slice(end);
+    
+    // Save to history
+    saveToHistory();
     
     // Render and restore cursor
     const newCursorPos = end + wrapper.length * 2;
