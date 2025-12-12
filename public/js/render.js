@@ -1,5 +1,6 @@
 // public/js/render.js
 import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=4';
+import { renderGitHubPreview } from './github.js?v=5';
 
 export function renderMessages(chatLog, messages, lastIdRef) {
   if (!messages || !messages.length) return;
@@ -11,7 +12,15 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     meta.className = 'meta';
     meta.textContent = m.author + ':';
     const text = document.createElement('span');
-    text.innerHTML = ' ' + linkifyImages(parseMarkdown(escapeHtml(m.text)));
+    
+    let content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
+    
+    // Add GitHub preview if metadata exists
+    if (m.metadata) {
+      content += renderGitHubPreview(m.metadata);
+    }
+    
+    text.innerHTML = ' ' + content;
     div.appendChild(meta);
     div.appendChild(text);
     frag.appendChild(div);
