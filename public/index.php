@@ -32,6 +32,6 @@
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>
 </div>
-<script type="module" src="js/main.js?v=4"></script>
+<script type="module" src="js/main.js?v=5"></script>
 </body>
 </html>

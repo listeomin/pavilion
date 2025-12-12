@@ -1,10 +1,10 @@
 // public/js/main.js
-import { CONFIG } from './config.js?v=4';
-import { getCookie, apiInit, apiSend, apiPoll } from './api.js?v=4';
-import { renderMessages, updateSendButton } from './render.js?v=4';
-import { Editor } from './editor.js?v=4';
-import { FormatMenu } from './format.js?v=4';
-import { setupHotkeys } from './hotkeys.js?v=4';
+import { CONFIG } from './config.js?v=5';
+import { getCookie, apiInit, apiSend, apiPoll } from './api.js?v=5';
+import { renderMessages, updateSendButton } from './render.js?v=5';
+import { Editor } from './editor.js?v=5';
+import { FormatMenu } from './format.js?v=5';
+import { setupHotkeys } from './hotkeys.js?v=5';
 
 (function () {
   const API = CONFIG.API_PATH;
