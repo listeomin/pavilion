@@ -1,0 +1,127 @@
+.audio-player {
+  background: #F0EEE6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  margin-left: 20px;
+  transition: background 0.2s;
+  position: relative;
+  padding-left: 32px;
+  overflow: visible;
+  width: 360px;
+}
+
+.audio-player:hover {
+  background: #E8E6DE;
+}
+
+.audio-player:hover .audio-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.audio-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: red;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.audio-play-btn:hover {
+  background: #A5A4D4;
+}
+
+.audio-play-btn::before {
+  content: '[плей]';
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 10px;
+  color: #FAF9F5;
+}
+
+.audio-play-btn.playing::before {
+  content: '[пауза]';
+}
+
+.audio-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.audio-artist {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--color-cumulonimbus-light);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audio-track {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--color-cumulonimbus-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.audio-time {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--color-wisteria);
+  flex-shrink: 0;
+}
+
+.audio-progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 12px 12px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, height 0.2s;
+}
+
+.audio-player:hover .audio-progress-container {
+  opacity: 1;
+  height: 4px;
+}
+
+.audio-progress-bar {
+  height: 100%;
+  background: #BDBCE4;
+  border-radius: 0 0 0 12px;
+  transition: width 0.1s linear;
+}
+
+.audio-tooltip {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(94, 93, 89, 0.9);
+  color: #FAF9F5;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
