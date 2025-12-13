@@ -1,0 +1,31 @@
+/* Track preview overlay */
+.track-preview {
+  position: absolute;
+  pointer-events: none;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.4;
+  z-index: 1000;
+}
+
+.track-preview-item {
+  white-space: nowrap;
+  padding: 2px 0;
+}
+
+/* Distance-based color gradient */
+.track-preview-item.distance-3 {
+  color: var(--color-nimbus-light);
+}
+
+.track-preview-item.distance-2 {
+  color: var(--color-nimbus-medium);
+}
+
+.track-preview-item.distance-1 {
+  color: var(--color-nimbus-dark);
+}
+
+.track-preview-item.current {
+  color: var(--color-olive);
+}
