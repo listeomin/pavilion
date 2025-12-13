@@ -1,21 +1,23 @@
 /* Inline command styles */
 
-/* Command mode indicator */
-#text.command-mode {
-  color: var(--color-iris);
-}
-
-/* Command parts highlighting */
+/* Command prefix: /music: */
 .cmd-prefix {
   color: var(--color-iris);
-  font-weight: bold;
 }
 
+/* Hint text (gray): music after / */
+.cmd-hint {
+  color: var(--color-nimbus-medium);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* User query (black) */
 .cmd-query {
-  color: var(--color-nimbus-dark);
+  color: var(--color-cumulonimbus-dark);
 }
 
-/* Autocomplete suggestion */
+/* Autocomplete suggestion (green) */
 .cmd-suggestion {
   color: var(--color-olive);
 }

@@ -34,6 +34,12 @@ export class FormatMenu {
       this.hide();
       return;
     }
+    
+    // Hide in command mode
+    if (this.inputEl.classList.contains('command-mode')) {
+      this.hide();
+      return;
+    }
 
     const range = sel.getRangeAt(0);
     const rect = range.getBoundingClientRect();
