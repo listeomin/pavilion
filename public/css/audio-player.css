@@ -1,7 +1,7 @@
 .audio-player {
   background: #F0EEE6;
-  border-radius: 12px;
-  padding: 12px 16px;
+  border-radius: 16px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -10,8 +10,10 @@
   transition: background 0.2s;
   position: relative;
   padding-left: 32px;
-  overflow: visible;
+  overflow: hidden;
   width: 360px;
+  height: 60px;
+  box-sizing: border-box;
 }
 
 .audio-player:hover {
@@ -27,7 +29,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: red;
+  background: #BDBCE4;
   border: none;
   cursor: pointer;
   display: flex;
@@ -39,23 +41,33 @@
 }
 
 .audio-play-btn:hover {
-  background: #A5A4D4;
+  background: var(--color-iris);
 }
 
-.audio-play-btn::before {
-  content: '[плей]';
-  font-family: 'Ubuntu Mono', monospace;
-  font-size: 10px;
-  color: #FAF9F5;
+.audio-play-btn svg {
+  width: 10px;
+  height: 12px;
+  display: block;
 }
 
-.audio-play-btn.playing::before {
-  content: '[пауза]';
+.audio-play-btn .pause-icon {
+  display: none;
+}
+
+.audio-play-btn.playing .play-icon {
+  display: none;
+}
+
+.audio-play-btn.playing .pause-icon {
+  display: block;
 }
 
 .audio-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .audio-artist {
@@ -79,8 +91,36 @@
 .audio-time {
   font-family: 'Ubuntu Mono', monospace;
   font-size: 13px;
-  color: var(--color-wisteria);
+  color: var(--color-nimbus-medium);
   flex-shrink: 0;
+  transition: color 0.2s;
+  align-self: flex-start;
+  margin-top: -2px;
+}
+
+.audio-player.playing .audio-time {
+  color: var(--color-iris);
+}
+
+.audio-download-btn {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--color-cumulonimbus-light);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+}
+
+.audio-player:hover .audio-download-btn {
+  opacity: 1;
+}
+
+.audio-download-btn:hover {
+  color: var(--color-cumulonimbus-dark);
 }
 
 .audio-progress-container {
@@ -90,13 +130,14 @@
   right: 0;
   height: 3px;
   background: rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 16px 16px;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s, height 0.2s;
 }
 
-.audio-player:hover .audio-progress-container {
+.audio-player:hover .audio-progress-container,
+.audio-player.playing .audio-progress-container {
   opacity: 1;
   height: 4px;
 }

@@ -28,16 +28,7 @@ class AudioPlayer {
     this.metadata = metadata;
     this.manager = manager;
     
-    console.log('AudioPlayer init:', { audioUrl, metadata });
-    console.log('Full audio URL:', window.location.origin + '/' + audioUrl);
-    
     this.audio = new Audio(audioUrl);
-    this.audio.addEventListener('error', (e) => {
-      console.error('Audio load error:', e);
-      console.error('Attempted URL:', audioUrl);
-      console.error('Audio error code:', this.audio.error?.code);
-      console.error('Audio error message:', this.audio.error?.message);
-    });
     this.isPlaying = false;
     
     this.playBtn = playBtn || element.querySelector('.audio-play-btn');
@@ -54,8 +45,28 @@ class AudioPlayer {
     // Play/Pause
     this.playBtn.addEventListener('click', () => this.togglePlay());
     
-    // Progress bar click
-    this.progressContainer.addEventListener('click', (e) => this.seek(e));
+    // Progress bar drag/click
+    let isDragging = false;
+    
+    this.progressContainer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      isDragging = true;
+      this.seek(e);
+    });
+    
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        this.seek(e);
+      }
+    };
+    
+    const handleMouseUp = () => {
+      isDragging = false;
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
     
     // Audio events
     this.audio.addEventListener('timeupdate', () => this.updateProgress());
@@ -72,58 +83,28 @@ class AudioPlayer {
   }
 
   play() {
-    console.log('play() called');
     this.manager.pauseOthers(this);
-    console.log('Attempting to play audio:', this.audio.src);
-    console.log('Audio element:', this.audio);
-    console.log('Audio duration:', this.audio.duration);
-    console.log('Audio paused:', this.audio.paused);
-    console.log('Audio muted:', this.audio.muted);
-    console.log('Audio volume:', this.audio.volume);
-    
-    this.audio.play().then(() => {
-      console.log('Audio started playing successfully');
-      console.log('Current time:', this.audio.currentTime);
-      console.log('Paused after play:', this.audio.paused);
-      
-      // Check after 3 seconds
-      setTimeout(() => {
-        console.log('=== 3 SECONDS CHECK ===');
-        console.log('Still playing:', !this.audio.paused);
-        console.log('Current time after 3s:', this.audio.currentTime);
-        if (this.audio.currentTime > 2.5) {
-          console.log('✅ SUCCESS! Audio is playing!');
-        } else {
-          console.log('❌ FAIL! Audio not progressing');
-        }
-      }, 3000);
-    }).catch(err => {
-      console.error('Play failed:', err);
-    });
+    this.audio.play();
     this.isPlaying = true;
     this.playBtn.classList.add('playing');
-    
-    const playIcon = this.playBtn.querySelector('.play-icon');
-    const pauseIcon = this.playBtn.querySelector('.pause-icon');
-    if (playIcon) playIcon.style.display = 'none';
-    if (pauseIcon) pauseIcon.style.display = 'block';
+    this.element.classList.add('playing');
   }
 
   pause() {
     this.audio.pause();
     this.isPlaying = false;
     this.playBtn.classList.remove('playing');
-    
-    const playIcon = this.playBtn.querySelector('.play-icon');
-    const pauseIcon = this.playBtn.querySelector('.pause-icon');
-    if (playIcon) playIcon.style.display = 'block';
-    if (pauseIcon) pauseIcon.style.display = 'none';
+    this.element.classList.remove('playing');
   }
 
   seek(e) {
+    if (!this.audio.duration) return;
     const rect = this.progressContainer.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    this.audio.currentTime = percent * this.audio.duration;
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const newTime = percent * this.audio.duration;
+    if (!isNaN(newTime)) {
+      this.audio.currentTime = newTime;
+    }
   }
 
   updateProgress() {
@@ -133,9 +114,10 @@ class AudioPlayer {
   }
 
   updateTime() {
-    const current = this.formatTime(this.audio.currentTime);
-    const duration = this.formatTime(this.audio.duration);
-    this.timeDisplay.textContent = `${current}`;
+    const remaining = this.audio.duration - this.audio.currentTime;
+    const time = this.formatTime(remaining);
+    const prefix = this.isPlaying ? '-' : '';
+    this.timeDisplay.textContent = `${prefix}${time}`;
   }
 
   formatTime(seconds) {
