@@ -57,12 +57,33 @@ export class InlineInput {
       let newCursorPos = cursorPos;
       
       if (e.inputType === 'insertText' && e.data) {
-        newText = text.slice(0, cursorPos) + e.data + text.slice(cursorPos);
-        newCursorPos = cursorPos + e.data.length;
+        // Check if cursor is right after " –" - force space first
+        const beforeCursor = text.substring(0, cursorPos);
+        if (beforeCursor.endsWith(' –')) {
+          // Add space before the character
+          newText = text.slice(0, cursorPos) + ' ' + e.data + text.slice(cursorPos);
+          newCursorPos = cursorPos + 2; // After space and new char
+        } else {
+          newText = text.slice(0, cursorPos) + e.data + text.slice(cursorPos);
+          newCursorPos = cursorPos + e.data.length;
+        }
       } else if (e.inputType === 'deleteContentBackward') {
         if (cursorPos > 0) {
-          newText = text.slice(0, cursorPos - 1) + text.slice(cursorPos);
-          newCursorPos = cursorPos - 1;
+          // Check if we're deleting from right after " – " or " –"
+          const beforeCursor = text.substring(0, cursorPos);
+          if (beforeCursor.endsWith(' – ')) {
+            // Remove entire " – " block
+            newText = text.slice(0, cursorPos - 3) + text.slice(cursorPos);
+            newCursorPos = cursorPos - 3;
+          } else if (beforeCursor.endsWith(' –')) {
+            // Remove " –" (dash without trailing space)
+            newText = text.slice(0, cursorPos - 2) + text.slice(cursorPos);
+            newCursorPos = cursorPos - 2;
+          } else {
+            // Normal backspace
+            newText = text.slice(0, cursorPos - 1) + text.slice(cursorPos);
+            newCursorPos = cursorPos - 1;
+          }
         }
       }
       
@@ -139,16 +160,14 @@ export class InlineInput {
     
     // Parse command structure
     if (text === '/') {
-      // Show hint for available commands
       this.renderCommandHint();
-      this.restoreCursorPosition(1); // After /
+      this.restoreCursorPosition(1);
       return;
     }
     
     const colonIndex = text.indexOf(':');
     
     if (colonIndex === -1) {
-      // Still typing command name: /mus
       this.renderCommandName(text);
       this.restoreCursorPosition(savedCursorPos);
       return;
@@ -156,18 +175,32 @@ export class InlineInput {
     
     // Full command with query: /music: query
     const cmdName = text.substring(0, colonIndex + 1); // /music:
-    const query = text.substring(colonIndex + 1).trim();
+    const fullQuery = text.substring(colonIndex + 1).trim();
     
     this.currentCommand = {
       name: cmdName.slice(0, -1), // /music
-      query: query,
+      query: fullQuery,
       full: text
     };
     
     if (cmdName === '/music:') {
-      this.renderMusicCommand(cmdName, query, savedCursorPos);
+      // Check if we have artist separator (with or without space after)
+      let dashIndex = fullQuery.indexOf(' – ');
+      if (dashIndex === -1) {
+        dashIndex = fullQuery.indexOf(' –');
+      }
+      
+      if (dashIndex !== -1) {
+        // Has separator: artist – track
+        const artistPart = fullQuery.substring(0, dashIndex);
+        let trackPart = fullQuery.substring(dashIndex + 2).trim(); // Skip " –" and trim
+        this.renderMusicWithTrack(cmdName, artistPart, trackPart, savedCursorPos);
+      } else {
+        // Just artist search
+        this.renderMusicCommand(cmdName, fullQuery, savedCursorPos);
+      }
     } else {
-      this.renderGenericCommand(cmdName, query, savedCursorPos);
+      this.renderGenericCommand(cmdName, fullQuery, savedCursorPos);
     }
   }
 
@@ -208,14 +241,76 @@ export class InlineInput {
     const match = this.searchMusic(query);
     
     if (match) {
-      // Found suggestion
-      const suggestion = `${match.artist} – ${match.track}`;
-      const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(suggestion)}</span>`;
-      this.input.innerHTML = html;
-      this.setCursorToEnd();
+      const queryLower = query.toLowerCase();
+      const artistLower = match.artist.toLowerCase();
+      
+      // Check if full artist name is typed
+      if (queryLower === artistLower) {
+        // Full match - show in green
+        const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(match.artist)}</span>`;
+        this.input.innerHTML = html;
+        this.restoreCursorPosition(cursorPos);
+      } else {
+        // Partial match - show typed + hint
+        const typed = match.artist.substring(0, query.length);
+        const hint = match.artist.substring(query.length);
+        
+        const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-query">${this.escapeHtml(typed)}</span><span class="cmd-hint">${this.escapeHtml(hint)}</span>`;
+        this.input.innerHTML = html;
+        this.restoreCursorPosition(cursorPos);
+      }
     } else {
-      // No match, show query in default color
+      // No match - show query in black
       const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-query">${this.escapeHtml(query)}</span>`;
+      this.input.innerHTML = html;
+      this.restoreCursorPosition(cursorPos);
+    }
+  }
+
+  renderMusicWithTrack(cmdPrefix, artist, trackQuery, cursorPos) {
+    // Artist is locked, search tracks for this artist
+    const artistMatch = this.searchMusic(artist);
+    
+    if (!artistMatch) {
+      // Artist not found - shouldn't happen but handle it
+      const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-query">${this.escapeHtml(artist)} – ${this.escapeHtml(trackQuery)}</span>`;
+      this.input.innerHTML = html;
+      this.restoreCursorPosition(cursorPos);
+      return;
+    }
+    
+    // Artist is valid (green), now search for track
+    if (!trackQuery) {
+      // No track query yet
+      const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(artistMatch.artist)} – </span>`;
+      this.input.innerHTML = html;
+      this.restoreCursorPosition(cursorPos);
+      return;
+    }
+    
+    const trackMatch = this.searchTrack(artistMatch.artist, trackQuery);
+    
+    if (trackMatch) {
+      const queryLower = trackQuery.toLowerCase();
+      const trackLower = trackMatch.toLowerCase();
+      
+      if (queryLower === trackLower) {
+        // Full track match - all green
+        const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(artistMatch.artist)} – ${this.escapeHtml(trackMatch)}</span>`;
+        this.input.innerHTML = html;
+        this.restoreCursorPosition(cursorPos);
+      } else {
+        // Partial track match - artist green, track black+hint
+        const typed = trackMatch.substring(0, trackQuery.length);
+        const hint = trackMatch.substring(trackQuery.length);
+        
+        const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(artistMatch.artist)} – </span><span class="cmd-query">${this.escapeHtml(typed)}</span><span class="cmd-hint">${this.escapeHtml(hint)}</span>`;
+        this.input.innerHTML = html;
+        this.restoreCursorPosition(cursorPos);
+      }
+    } else {
+      // No track match - artist green, track black
+      const html = `<span class="cmd-prefix">${cmdPrefix}</span> <span class="cmd-suggestion">${this.escapeHtml(artistMatch.artist)} – </span><span class="cmd-query">${this.escapeHtml(trackQuery)}</span>`;
       this.input.innerHTML = html;
       this.restoreCursorPosition(cursorPos);
     }
@@ -230,21 +325,30 @@ export class InlineInput {
   searchMusic(query) {
     const lowerQuery = query.toLowerCase();
     
+    // Search only by artist name start
     for (const artist of this.musicData) {
-      if (artist.artist.toLowerCase().includes(lowerQuery)) {
+      if (artist.artist.toLowerCase().startsWith(lowerQuery)) {
         return {
           artist: artist.artist,
-          track: artist.tracks[0]
+          track: null // Don't return track yet
         };
       }
-      
-      for (const track of artist.tracks) {
-        if (track.toLowerCase().includes(lowerQuery)) {
-          return {
-            artist: artist.artist,
-            track: track
-          };
-        }
+    }
+    
+    return null;
+  }
+
+  searchTrack(artistName, trackQuery) {
+    const lowerQuery = trackQuery.toLowerCase();
+    
+    // Find the artist
+    const artistData = this.musicData.find(a => a.artist === artistName);
+    if (!artistData) return null;
+    
+    // Search tracks for this artist only
+    for (const track of artistData.tracks) {
+      if (track.toLowerCase().startsWith(lowerQuery)) {
+        return track;
       }
     }
     
@@ -265,6 +369,14 @@ export class InlineInput {
 
   restoreCursorPosition(pos) {
     if (pos === null || pos === undefined) return;
+    
+    // Check if cursor would be right after "–" without space
+    const text = this.getPlainText();
+    const dashIndex = text.indexOf(' –');
+    if (dashIndex !== -1 && pos === dashIndex + 2) {
+      // Cursor is right after "–", move it after the space
+      pos = dashIndex + 3; // After " – "
+    }
     
     const sel = window.getSelection();
     const range = document.createRange();
@@ -307,15 +419,22 @@ export class InlineInput {
   }
 
   handleKeydown(e) {
-    if (e.key === 'Tab' && this.commandMode) {
+    const text = this.getPlainText();
+    
+    // Arrow Up in empty field: enter command mode with /
+    if (e.key === 'ArrowUp' && !this.commandMode && text === '') {
       e.preventDefault();
-      // TODO: autocomplete on tab
+      this.input.innerHTML = `<span class="cmd-prefix">/</span><span class="cmd-hint">music</span>`;
+      this.restoreCursorPosition(1);
+      this.enterCommandMode();
+      return;
     }
     
-    // Arrow up: autocomplete command
-    if (e.key === 'ArrowUp' && this.commandMode) {
+    if (!this.commandMode) return;
+    
+    // Tab or Arrow Up: autocomplete forward
+    if ((e.key === 'Tab' || e.key === 'ArrowUp') && this.commandMode) {
       e.preventDefault();
-      const text = this.getPlainText();
       
       // If typing command name without colon
       if (!text.includes(':')) {
@@ -328,6 +447,85 @@ export class InlineInput {
           this.input.innerHTML = `<span class="cmd-prefix">${completed}</span> `;
           this.setCursorToEnd();
         }
+      } else {
+        // Inside /music: - check if we have artist separator
+        const colonIndex = text.indexOf(':');
+        const fullQuery = text.substring(colonIndex + 1).trim();
+        const dashIndex = fullQuery.indexOf(' – ');
+        
+        if (dashIndex !== -1) {
+          // Has artist – track: autocomplete track
+          const artistPart = fullQuery.substring(0, dashIndex);
+          const trackPart = fullQuery.substring(dashIndex + 3);
+          
+          if (trackPart) {
+            const trackMatch = this.searchTrack(artistPart, trackPart);
+            if (trackMatch) {
+              // Complete to full track name
+              const html = `<span class="cmd-prefix">/music:</span> <span class="cmd-suggestion">${this.escapeHtml(artistPart)} – ${this.escapeHtml(trackMatch)}</span>`;
+              this.input.innerHTML = html;
+              this.setCursorToEnd();
+            }
+          }
+        } else {
+          // Just artist query: autocomplete artist + add dash
+          const query = fullQuery;
+          
+          if (query) {
+            const match = this.searchMusic(query);
+            if (match) {
+              // Complete to full artist name + dash for track
+              const html = `<span class="cmd-prefix">/music:</span> <span class="cmd-suggestion">${this.escapeHtml(match.artist)} – </span>`;
+              this.input.innerHTML = html;
+              this.setCursorToEnd();
+            }
+          }
+        }
+      }
+    }
+    
+    // Arrow Down: step back
+    if (e.key === 'ArrowDown' && this.commandMode) {
+      e.preventDefault();
+      
+      if (text.includes(':')) {
+        const colonIndex = text.indexOf(':');
+        const fullQuery = text.substring(colonIndex + 1).trim();
+        const dashIndex = fullQuery.indexOf(' – ');
+        
+        if (dashIndex !== -1) {
+          // Has artist – track separator
+          const trackPart = fullQuery.substring(dashIndex + 3);
+          
+          if (trackPart) {
+            // Has track query -> clear track, keep artist
+            const artistPart = fullQuery.substring(0, dashIndex);
+            this.input.innerHTML = `<span class="cmd-prefix">/music:</span> <span class="cmd-suggestion">${this.escapeHtml(artistPart)} – </span>`;
+            this.setCursorToEnd();
+          } else {
+            // Just "artist – " -> remove dash, back to artist only
+            const artistPart = fullQuery.substring(0, dashIndex);
+            this.input.innerHTML = `<span class="cmd-prefix">/music:</span> <span class="cmd-suggestion">${this.escapeHtml(artistPart)}</span>`;
+            this.setCursorToEnd();
+          }
+        } else {
+          // No dash separator
+          const query = fullQuery;
+          
+          if (query) {
+            // Has artist query -> clear to /music:
+            this.input.innerHTML = `<span class="cmd-prefix">/music:</span> `;
+            this.setCursorToEnd();
+          } else {
+            // Just /music: -> back to /
+            this.input.innerHTML = `<span class="cmd-prefix">/</span><span class="cmd-hint">music</span>`;
+            this.restoreCursorPosition(1);
+          }
+        }
+      } else if (text === '/') {
+        // / -> empty (exit command mode)
+        this.input.textContent = '';
+        this.exitCommandMode();
       }
     }
   }
