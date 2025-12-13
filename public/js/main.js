@@ -5,7 +5,7 @@ import { renderMessages, updateSendButton } from './render.js?v=5';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
-import { InlineInput } from './inline-input.js?v=10';
+import { InlineInput } from './inline-input.js?v=24';
 
 (function () {
   const API = CONFIG.API_PATH;
