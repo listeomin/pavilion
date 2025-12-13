@@ -151,6 +151,13 @@ export class InlineInput {
     this.commandMode = false;
     this.input.classList.remove('command-mode');
     this.currentCommand = null;
+    
+    // Clear input completely when exiting command mode
+    const text = this.getPlainText();
+    if (text === '/' || text === '') {
+      this.input.textContent = '';
+    }
+    
     this.editor.resume();
   }
 
@@ -563,5 +570,45 @@ export class InlineInput {
       text: this.editor.getText(),
       metadata: null
     };
+  }
+
+  isCommandReady() {
+    if (!this.commandMode) return false;
+    
+    const text = this.getPlainText();
+    
+    // Check if /music: has complete artist – track
+    if (text.startsWith('/music:')) {
+      const fullQuery = text.substring(8).trim();
+      
+      // Look for dash with space before (" –" or " – ")
+      let dashIndex = fullQuery.indexOf(' – ');
+      let hasDash = dashIndex !== -1;
+      let dashLength = 3; // " – "
+      
+      if (!hasDash) {
+        dashIndex = fullQuery.indexOf(' –');
+        hasDash = dashIndex !== -1;
+        dashLength = 2; // " –"
+      }
+      
+      if (hasDash) {
+        const artistPart = fullQuery.substring(0, dashIndex);
+        const trackPart = fullQuery.substring(dashIndex + dashLength).trim();
+        
+        if (artistPart && trackPart) {
+          // Check if both artist and track are found
+          const artistMatch = this.searchMusic(artistPart);
+          if (artistMatch && artistMatch.artist.toLowerCase() === artistPart.toLowerCase()) {
+            const trackMatch = this.searchTrack(artistMatch.artist, trackPart);
+            if (trackMatch && trackMatch.toLowerCase() === trackPart.toLowerCase()) {
+              return true; // Complete match!
+            }
+          }
+        }
+      }
+    }
+    
+    return false;
   }
 }

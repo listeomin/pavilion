@@ -40,10 +40,35 @@ export function renderMessages(chatLog, messages, lastIdRef) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-export function updateSendButton(sendBtn, editor) {
-  if (editor.getText().trim().length > 0) {
-    sendBtn.classList.add('visible');
+export function updateSendButton(sendBtn, editor, inlineInput) {
+  const inCommandMode = inlineInput && inlineInput.commandMode;
+  const plainText = inlineInput ? inlineInput.getPlainText() : '';
+  const editorText = editor.getText().trim();
+  
+  // Check if we're in command mode
+  if (inCommandMode) {
+    // In command mode: only show button if we have query after colon
+    const hasCommandQuery = plainText.includes(':') && plainText.substring(plainText.indexOf(':') + 1).trim().length > 0;
+    
+    if (hasCommandQuery) {
+      sendBtn.classList.add('visible');
+    } else {
+      sendBtn.classList.remove('visible');
+    }
   } else {
-    sendBtn.classList.remove('visible');
+    // Not in command mode: show button if there's any text AND it doesn't start with /
+    if (editorText.length > 0 && !editorText.startsWith('/')) {
+      sendBtn.classList.add('visible');
+    } else {
+      sendBtn.classList.remove('visible');
+    }
+  }
+  
+  // Add purple color if command is complete
+  const commandReady = inlineInput && inlineInput.isCommandReady();
+  if (commandReady) {
+    sendBtn.classList.add('command-ready');
+  } else {
+    sendBtn.classList.remove('command-ready');
   }
 }

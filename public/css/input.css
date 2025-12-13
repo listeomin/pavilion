@@ -80,6 +80,10 @@ button.visible {
   pointer-events: all;
 }
 
+button.command-ready {
+  color: var(--color-iris);
+}
+
 button:hover {
   color: rgba(0, 0, 0, 0.8);
 }
