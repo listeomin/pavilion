@@ -29,3 +29,9 @@
 .track-preview-item.current {
   color: var(--color-olive);
 }
+
+/* Hide current track to avoid duplication */
+.track-preview-item.current.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
