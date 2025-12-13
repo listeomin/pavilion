@@ -95,6 +95,24 @@ if ($action === 'poll') {
     json(['messages' => $messages]);
 }
 
+if ($action === 'change_name') {
+    $input = $_POST;
+    $session_id = $input['session_id'] ?? null;
+
+    if (!$session_id) {
+        http_response_code(400);
+        json(['error' => 'session_id required']);
+    }
+
+    $session = $sessionRepo->changeName($session_id);
+    if (!$session) {
+        http_response_code(403);
+        json(['error' => 'invalid session']);
+    }
+
+    json($session);
+}
+
 // unknown action
 http_response_code(400);
 json(['error' => 'unknown action']);

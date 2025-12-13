@@ -23,7 +23,7 @@
 <div class="wrap">
   <div id="header-container">
     <div id="user-header">
-      <span id="user-emoji"></span>
+      <span id="user-emoji" class="user-emoji-clickable"></span>
       <span id="user-label-header">– это вы!</span>
     </div>
     <h1>Беседка</h1>
