@@ -37,3 +37,11 @@ export async function apiPoll(API, lastId) {
   if (!res.ok) return null;
   return await res.json();
 }
+
+export async function apiChangeName(API, sessionId) {
+  const form = new FormData();
+  form.append('session_id', sessionId);
+  const res = await fetch(API + '?action=change_name', { method: 'POST', body: form });
+  if (!res.ok) return null;
+  return await res.json();
+}

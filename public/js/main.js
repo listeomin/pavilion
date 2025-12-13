@@ -1,6 +1,6 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiPoll } from './api.js?v=5';
+import { getCookie, apiInit, apiSend, apiPoll, apiChangeName } from './api.js?v=5';
 import { renderMessages, updateSendButton } from './render.js?v=5';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
@@ -71,6 +71,20 @@ import { WheelScroll } from './wheel-scroll.js?v=1';
       setTimeout(pollLoop, pollInterval);
     }
   }
+
+  userEmojiEl.addEventListener('click', async () => {
+    userEmojiEl.classList.add('user-emoji-fade');
+    
+    setTimeout(async () => {
+      const data = await apiChangeName(API, sessionId);
+      if (data && data.name) {
+        myName = data.name;
+        const emoji = myName.split(' ')[0];
+        userEmojiEl.textContent = emoji;
+        userEmojiEl.classList.remove('user-emoji-fade');
+      }
+    }, 250);
+  });
 
   apiInit(API, sessionId, COOKIE_NAME).then((data) => {
     sessionId = data.session_id;

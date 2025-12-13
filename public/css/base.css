@@ -45,6 +45,19 @@ h1 {
   line-height: 1;
 }
 
+.user-emoji-clickable {
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.user-emoji-clickable:hover {
+  opacity: 0.7;
+}
+
+.user-emoji-fade {
+  opacity: 0;
+}
+
 #user-label-header {
   font-family: Georgia, serif;
   font-size: 15px;
