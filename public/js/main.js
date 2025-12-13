@@ -5,7 +5,7 @@ import { renderMessages, updateSendButton } from './render.js?v=5';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
-import { InlineInput } from './inline-input.js?v=24';
+import { InlineInput } from './inline-input.js?v=28';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -28,7 +28,7 @@ import { InlineInput } from './inline-input.js?v=24';
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
     editor.renderLiveMarkdown();
-    updateSendButton(sendBtn, editor);
+    updateSendButton(sendBtn, editor, inlineInput);
   });
 
   setupHotkeys(inputEl, editor, () => {
@@ -46,7 +46,7 @@ import { InlineInput } from './inline-input.js?v=24';
     }
 
     editor.clear();
-    updateSendButton(sendBtn, editor);
+    updateSendButton(sendBtn, editor, inlineInput);
     inputEl.focus();
   });
 
