@@ -3,6 +3,8 @@
  * Allows scrolling through artist/track matches with mouse wheel
  */
 
+import { TrackPreview } from './track-preview.js?v=1';
+
 export class WheelScroll {
   constructor(inlineInput, updateCallback) {
     this.inlineInput = inlineInput;
@@ -18,6 +20,9 @@ export class WheelScroll {
     
     // Current artist for track search context
     this.currentArtist = null;
+    
+    // Track preview overlay
+    this.trackPreview = new TrackPreview();
   }
 
   /**
@@ -26,6 +31,19 @@ export class WheelScroll {
    */
   attachListener(inputElement) {
     inputElement.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
+    
+    // Show preview on hover, hide on mouseout
+    inputElement.addEventListener('mouseover', (e) => {
+      if (e.target.classList.contains('cmd-suggestion')) {
+        this.showPreview(e.target);
+      }
+    });
+    
+    inputElement.addEventListener('mouseout', (e) => {
+      if (e.target.classList.contains('cmd-suggestion')) {
+        this.trackPreview.hide();
+      }
+    });
   }
 
   /**
@@ -174,9 +192,37 @@ export class WheelScroll {
     this.inlineInput.input.innerHTML = html;
     this.inlineInput.setCursorToEnd();
     
+    // Update preview with new current track
+    const newTarget = this.inlineInput.input.querySelector('.cmd-suggestion');
+    if (newTarget) {
+      this.trackPreview.show(this.trackMatches, this.currentTrackIndex, newTarget);
+    }
+    
     // Trigger update
     if (this.updateCallback) {
       this.updateCallback();
+    }
+  }
+
+  /**
+   * Show preview for current state
+   */
+  showPreview(target) {
+    const text = this.inlineInput.getPlainText();
+    const colonIndex = text.indexOf(':');
+    if (colonIndex === -1) return;
+    
+    const fullQuery = text.substring(colonIndex + 1).trim();
+    const dashIndex = fullQuery.indexOf(' – ');
+    
+    if (dashIndex !== -1) {
+      // Has track - show track preview
+      const artistPart = fullQuery.substring(0, dashIndex);
+      const trackPart = fullQuery.substring(dashIndex + 3);
+      
+      if (trackPart && this.trackMatches.length > 0) {
+        this.trackPreview.show(this.trackMatches, this.currentTrackIndex, target);
+      }
     }
   }
 
