@@ -21,8 +21,8 @@ export class InlineInput {
   async loadData() {
     try {
       const [musicRes, commandsRes] = await Promise.all([
-        fetch('/public/data/music-test.json'),
-        fetch('/public/data/commands-test.json')
+        fetch('/data/music-test.json'),
+        fetch('/data/commands-test.json')
       ]);
       
       if (!musicRes.ok || !commandsRes.ok) {
