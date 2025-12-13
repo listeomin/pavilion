@@ -48,7 +48,19 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
   // Check if we're in command mode
   if (inCommandMode) {
     // In command mode: only show button if we have query after colon
-    const hasCommandQuery = plainText.includes(':') && plainText.substring(plainText.indexOf(':') + 1).trim().length > 0;
+    const colonIndex = plainText.indexOf(':');
+    const hasColon = colonIndex !== -1;
+    const afterColon = hasColon ? plainText.substring(colonIndex + 1).trim() : '';
+    const hasCommandQuery = hasColon && afterColon.length > 0;
+    
+    console.log('DEBUG updateSendButton:', {
+      inCommandMode,
+      plainText,
+      hasColon,
+      afterColon,
+      trimmedLength: afterColon.length,
+      hasCommandQuery
+    });
     
     if (hasCommandQuery) {
       sendBtn.classList.add('visible');

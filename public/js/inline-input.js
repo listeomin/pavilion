@@ -1,9 +1,10 @@
 // public/js/inline-input.js
 
 export class InlineInput {
-  constructor(inputElement, editor) {
+  constructor(inputElement, editor, updateCallback = null) {
     this.input = inputElement;
     this.editor = editor;
+    this.updateCallback = updateCallback;
     this.musicData = [];
     this.commands = [];
     this.commandMode = false;
@@ -107,6 +108,11 @@ export class InlineInput {
       this.processCommandInput(text);
     } else {
       this.exitCommandMode();
+    }
+    
+    // Trigger update callback after processing
+    if (this.updateCallback) {
+      this.updateCallback();
     }
   }
 
@@ -533,6 +539,11 @@ export class InlineInput {
         // / -> empty (exit command mode)
         this.input.textContent = '';
         this.exitCommandMode();
+      }
+      
+      // Trigger update callback after Arrow Down
+      if (this.updateCallback) {
+        this.updateCallback();
       }
     }
   }

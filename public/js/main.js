@@ -23,7 +23,9 @@ import { InlineInput } from './inline-input.js?v=28';
 
   const editor = new Editor(inputEl);
   const formatMenuController = new FormatMenu(formatMenu, inputEl, editor);
-  const inlineInput = new InlineInput(inputEl, editor);
+  const inlineInput = new InlineInput(inputEl, editor, () => {
+    updateSendButton(sendBtn, editor, inlineInput);
+  });
 
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
