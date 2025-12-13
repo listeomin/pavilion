@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="css/inline-input.css?v=3">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
+<link rel="stylesheet" href="css/nightshift.css?v=1">
 </head>
 <body>
 <div class="wrap">
@@ -42,6 +43,9 @@
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>
 </div>
+<button id="nightshift-toggle">
+  <img src="assets/moon.svg" alt="Night Shift">
+</button>
 <script type="module" src="js/main.js?v=5"></script>
 </body>
 </html>
