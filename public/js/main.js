@@ -6,6 +6,7 @@ import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
+import { WheelScroll } from './wheel-scroll.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -26,6 +27,11 @@ import { InlineInput } from './inline-input.js?v=28';
   const inlineInput = new InlineInput(inputEl, editor, () => {
     updateSendButton(sendBtn, editor, inlineInput);
   });
+  
+  const wheelScroll = new WheelScroll(inlineInput, () => {
+    updateSendButton(sendBtn, editor, inlineInput);
+  });
+  wheelScroll.attachListener(inputEl);
 
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
