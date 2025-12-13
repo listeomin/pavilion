@@ -10,7 +10,7 @@ if (preg_match('/^\/server\/api\.php/', $uri)) {
 }
 
 // Для статических файлов - пусть сервер обрабатывает сам
-if (preg_match('/\.(css|js|png|jpg|jpeg|gif|ico|svg)$/', $uri)) {
+if (preg_match('/\.(css|js|json|png|jpg|jpeg|gif|ico|svg)$/', $uri)) {
     return false;
 }
 
