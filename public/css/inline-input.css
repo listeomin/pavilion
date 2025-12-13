@@ -20,4 +20,5 @@
 /* Autocomplete suggestion (green) */
 .cmd-suggestion {
   color: var(--color-olive);
+  cursor: pointer;
 }
