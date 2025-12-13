@@ -21,6 +21,7 @@ import { WheelScroll } from './wheel-scroll.js?v=1';
   const formatMenu = document.getElementById('format-menu');
   const sendBtn = document.getElementById('sendBtn');
   const sendForm = document.getElementById('sendForm');
+  const userEmojiEl = document.getElementById('user-emoji');
 
   const editor = new Editor(inputEl);
   const formatMenuController = new FormatMenu(formatMenu, inputEl, editor);
@@ -74,6 +75,9 @@ import { WheelScroll } from './wheel-scroll.js?v=1';
   apiInit(API, sessionId, COOKIE_NAME).then((data) => {
     sessionId = data.session_id;
     myName = data.name;
+    // Extract emoji from name (first character before space)
+    const emoji = myName.split(' ')[0];
+    userEmojiEl.textContent = emoji;
     renderMessages(chatLog, data.messages || [], lastIdRef);
     setTimeout(pollLoop, pollInterval);
     inputEl.focus();

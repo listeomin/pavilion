@@ -32,10 +32,26 @@ export class WheelScroll {
   attachListener(inputElement) {
     inputElement.addEventListener('wheel', (e) => this.handleWheel(e), { passive: false });
     
+    // Block keyboard navigation when preview is visible
+    inputElement.addEventListener('keydown', (e) => {
+      if (this.trackPreview.visible) {
+        if (['ArrowUp', 'ArrowDown', 'Backspace', 'Tab'].includes(e.key)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }
+    });
+    
     // Show preview on hover, hide on mouseout
     inputElement.addEventListener('mouseover', (e) => {
       if (e.target.classList.contains('cmd-suggestion')) {
-        this.showPreview(e.target);
+        this.showPreview(e.target, e);
+      }
+    });
+    
+    inputElement.addEventListener('mousemove', (e) => {
+      if (e.target.classList.contains('cmd-suggestion')) {
+        this.showPreview(e.target, e);
       }
     });
     
@@ -207,7 +223,7 @@ export class WheelScroll {
   /**
    * Show preview for current state
    */
-  showPreview(target) {
+  showPreview(target, mouseEvent) {
     const text = this.inlineInput.getPlainText();
     const colonIndex = text.indexOf(':');
     if (colonIndex === -1) return;
@@ -216,12 +232,40 @@ export class WheelScroll {
     const dashIndex = fullQuery.indexOf(' – ');
     
     if (dashIndex !== -1) {
-      // Has track - show track preview
-      const artistPart = fullQuery.substring(0, dashIndex);
-      const trackPart = fullQuery.substring(dashIndex + 3);
+      // Has track - check if mouse is over track part
+      const spanText = target.textContent;
+      const dashTextIndex = spanText.indexOf(' – ');
       
-      if (trackPart && this.trackMatches.length > 0) {
-        this.trackPreview.show(this.trackMatches, this.currentTrackIndex, target);
+      if (dashTextIndex === -1) return;
+      
+      // Get mouse position in text
+      const range = document.caretRangeFromPoint(mouseEvent.clientX, mouseEvent.clientY);
+      if (!range) return;
+      
+      let offset = 0;
+      try {
+        offset = range.startOffset;
+      } catch (e) {
+        return;
+      }
+      
+      // Only show preview if mouse is over track part (after " – ")
+      if (offset > dashTextIndex + 3) {
+        const artistPart = fullQuery.substring(0, dashIndex);
+        const trackPart = fullQuery.substring(dashIndex + 3);
+        
+        // Rebuild track matches if artist changed
+        if (this.currentArtist !== artistPart || this.trackMatches.length === 0) {
+          this.buildTrackMatches(artistPart, trackPart);
+          this.currentArtist = artistPart;
+        }
+        
+        if (trackPart && this.trackMatches.length > 0) {
+          this.trackPreview.show(this.trackMatches, this.currentTrackIndex, target);
+        }
+      } else {
+        // Mouse over artist - hide preview
+        this.trackPreview.hide();
       }
     }
   }
