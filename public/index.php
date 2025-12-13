@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="css/inline-input.css?v=3">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
+<link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 </head>
 <body>
