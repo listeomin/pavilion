@@ -21,7 +21,13 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Беседка</h1>
+  <div id="header-container">
+    <div id="user-header">
+      <span id="user-emoji"></span>
+      <span id="user-label-header">– это вы!</span>
+    </div>
+    <h1>Беседка</h1>
+  </div>
   <div id="chat-log" aria-live="polite"></div>
   <div id="format-menu">
     <button data-format="bold" title="Bold">B</button>

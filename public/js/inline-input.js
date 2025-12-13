@@ -495,6 +495,11 @@ export class InlineInput {
           }
         }
       }
+      
+      // Trigger update callback after autocomplete
+      if (this.updateCallback) {
+        this.updateCallback();
+      }
     }
     
     // Arrow Down: step back
@@ -588,9 +593,13 @@ export class InlineInput {
     
     const text = this.getPlainText();
     
+    console.log('DEBUG isCommandReady:', { text, commandMode: this.commandMode });
+    
     // Check if /music: has complete artist – track
     if (text.startsWith('/music:')) {
       const fullQuery = text.substring(8).trim();
+      
+      console.log('DEBUG fullQuery:', fullQuery);
       
       // Look for dash with space before (" –" or " – ")
       let dashIndex = fullQuery.indexOf(' – ');
@@ -603,16 +612,25 @@ export class InlineInput {
         dashLength = 2; // " –"
       }
       
+      console.log('DEBUG dash:', { hasDash, dashIndex, dashLength });
+      
       if (hasDash) {
         const artistPart = fullQuery.substring(0, dashIndex);
         const trackPart = fullQuery.substring(dashIndex + dashLength).trim();
         
+        console.log('DEBUG parts:', { artistPart, trackPart });
+        
         if (artistPart && trackPart) {
           // Check if both artist and track are found
           const artistMatch = this.searchMusic(artistPart);
+          console.log('DEBUG artistMatch:', artistMatch);
+          
           if (artistMatch && artistMatch.artist.toLowerCase() === artistPart.toLowerCase()) {
             const trackMatch = this.searchTrack(artistMatch.artist, trackPart);
+            console.log('DEBUG trackMatch:', trackMatch);
+            
             if (trackMatch && trackMatch.toLowerCase() === trackPart.toLowerCase()) {
+              console.log('DEBUG COMMAND READY = TRUE');
               return true; // Complete match!
             }
           }
@@ -620,6 +638,7 @@ export class InlineInput {
       }
     }
     
+    console.log('DEBUG COMMAND READY = FALSE');
     return false;
   }
 }

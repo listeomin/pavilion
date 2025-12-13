@@ -55,8 +55,8 @@ export class TrackPreview {
       html += `<div class="track-preview-item distance-${track.distance}">${this.escapeHtml(track.text)}</div>`;
     });
     
-    // Current track
-    html += `<div class="track-preview-item current">${this.escapeHtml(tracks[currentIndex])}</div>`;
+    // Current track - hidden with CSS
+    html += `<div class="track-preview-item current hidden">${this.escapeHtml(tracks[currentIndex])}</div>`;
     
     // Tracks after current
     afterTracks.forEach(track => {
