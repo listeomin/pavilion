@@ -32,6 +32,7 @@
   color: rgba(0, 0, 0, 0.8);
   opacity: 0;
   animation: fadeIn 0.3s ease-in forwards;
+  overflow: visible;
 }
 
 @keyframes fadeIn {

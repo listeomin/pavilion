@@ -1,4 +1,5 @@
 // public/js/inline-input.js
+import { getAudioUrl } from './audio-mapping.js?v=1';
 
 export class InlineInput {
   constructor(inputElement, editor, updateCallback = null) {
@@ -571,13 +572,17 @@ export class InlineInput {
     if (musicMatch) {
       const trackInfo = musicMatch[1].trim();
       const parts = trackInfo.split(' – ');
+      const artist = parts[0] || trackInfo;
+      const track = parts[1] || '';
+      const audioUrl = getAudioUrl(artist, track);
       
       return {
         text: trackInfo,
         metadata: {
           type: 'music',
-          artist: parts[0] || trackInfo,
-          track: parts[1] || ''
+          artist,
+          track,
+          audioUrl
         }
       };
     }
