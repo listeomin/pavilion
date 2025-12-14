@@ -11,7 +11,7 @@
   position: relative;
   padding-left: 32px;
   overflow: hidden;
-  width: 360px;
+  width: 320px;
   height: 60px;
   box-sizing: border-box;
 }
@@ -75,15 +75,17 @@
   font-size: 13px;
   color: var(--color-cumulonimbus-light);
   white-space: nowrap;
+  margin: -4px 0px 0px 0px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .audio-track {
   font-family: 'Ubuntu Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-cumulonimbus-dark);
   white-space: nowrap;
+  margin: -5px 0px 0px 0px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
