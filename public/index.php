@@ -47,6 +47,7 @@
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
+<div class="cursor"></div>
 <script type="module" src="js/main.js?v=5"></script>
 </body>
 </html>

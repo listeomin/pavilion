@@ -8,8 +8,10 @@ import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
+import { initCursor } from './cursor.js';
 
 (function () {
+  initCursor(); // ← тут
   const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
