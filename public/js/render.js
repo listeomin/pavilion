@@ -40,7 +40,7 @@ export function renderMessages(chatLog, messages, lastIdRef) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-export function updateSendButton(sendBtn, editor, inlineInput) {
+export async function updateSendButton(sendBtn, editor, inlineInput) {
   const inCommandMode = inlineInput && inlineInput.commandMode;
   const plainText = inlineInput ? inlineInput.getPlainText() : '';
   const editorText = editor.getText().trim();
@@ -53,19 +53,30 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     const afterColon = hasColon ? plainText.substring(colonIndex + 1).trim() : '';
     const hasCommandQuery = hasColon && afterColon.length > 0;
     
+    // Check if command is ready (artist + track matched)
+    const isReady = await inlineInput.isCommandReady();
+    
     console.log('DEBUG updateSendButton:', {
       inCommandMode,
       plainText,
       hasColon,
       afterColon,
       trimmedLength: afterColon.length,
-      hasCommandQuery
+      hasCommandQuery,
+      isReady
     });
     
     if (hasCommandQuery) {
       sendBtn.classList.add('visible');
     } else {
       sendBtn.classList.remove('visible');
+    }
+    
+    // Add purple color if command is complete
+    if (isReady) {
+      sendBtn.classList.add('command-ready');
+    } else {
+      sendBtn.classList.remove('command-ready');
     }
   } else {
     // Not in command mode: show button if there's any text AND it doesn't start with /
@@ -74,13 +85,5 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     } else {
       sendBtn.classList.remove('visible');
     }
-  }
-  
-  // Add purple color if command is complete
-  const commandReady = inlineInput && inlineInput.isCommandReady();
-  if (commandReady) {
-    sendBtn.classList.add('command-ready');
-  } else {
-    sendBtn.classList.remove('command-ready');
   }
 }

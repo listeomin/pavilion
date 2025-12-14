@@ -30,10 +30,10 @@ import * as NightShift from './nightshift.js?v=1';
     updateSendButton(sendBtn, editor, inlineInput);
   });
   
-  const wheelScroll = new WheelScroll(inlineInput, () => {
-    updateSendButton(sendBtn, editor, inlineInput);
-  });
-  wheelScroll.attachListener(inputEl);
+//  const wheelScroll = new WheelScroll(inlineInput, () => {
+//    updateSendButton(sendBtn, editor, inlineInput);
+//  });
+//  wheelScroll.attachListener(inputEl);
 
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
@@ -47,7 +47,7 @@ import * as NightShift from './nightshift.js?v=1';
 
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const content = inlineInput.getContent();
+    const content = await inlineInput.getContent();
     if (!content.text) return;
 
     const msg = await apiSend(API, sessionId, content.text, content.metadata);
