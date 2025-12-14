@@ -34,7 +34,7 @@ html.nightshift-on::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 180, 80, 0.2);
+  background: rgba(255, 197, 80, 0.1);
   pointer-events: none;
   z-index: 9999;
   transition: opacity 3s ease;
