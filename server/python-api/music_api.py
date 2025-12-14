@@ -96,7 +96,6 @@ def search_track():
         logger.error(f"Error searching track: {e}")
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/api/music/get-stream', methods=['GET'])
 def get_stream():
     """
@@ -137,10 +136,21 @@ def get_stream():
                 video_id = results[0].get('videoId')
         
         if video_id:
-            # Get streaming URL
-            # Note: YouTube URLs are typically in format https://www.youtube.com/watch?v={videoId}
-            # For actual streaming, you might need yt-dlp or similar
-            stream_url = f"https://www.youtube.com/watch?v={video_id}"
+            # Extract direct audio URL using yt-dlp
+            import yt_dlp
+            
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'quiet': True,
+                'no_warnings': True,
+                'extract_flat': False,
+            }
+            
+            youtube_url = f"https://www.youtube.com/watch?v={video_id}"
+            
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(youtube_url, download=False)
+                stream_url = info.get('url')
             
             logger.info(f"Stream for '{artist}' - '{track}' -> {video_id}")
             return jsonify({
