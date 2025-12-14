@@ -3,3 +3,6 @@ chat/chat.sqlite
 .DS_Store
 FETCH_HEAD
 server/php-error.log
+venv/
+__pycache__/
+*.pyc

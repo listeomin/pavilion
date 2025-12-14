@@ -3,6 +3,7 @@ import { getAudioUrl } from './audio-mapping.js?v=1';
 
 export class InlineInput {
   constructor(inputElement, editor, updateCallback = null) {
+    this.debounceTimer = null;
     this.input = inputElement;
     this.editor = editor;
     this.updateCallback = updateCallback;
