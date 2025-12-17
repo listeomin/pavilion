@@ -16,6 +16,10 @@ $sessionRepo = new SessionRepository();
 $msgRepo = new MessageRepository();
 $githubService = new GitHubService();
 
+error_log('REQUEST: ' . print_r($_REQUEST, true));
+error_log('COOKIE: ' . print_r($_COOKIE, true));
+error_log('HEADERS: ' . json_encode(getallheaders()));
+
 function json($data) {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;

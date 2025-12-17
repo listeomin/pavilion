@@ -11,8 +11,8 @@ body {
   margin: 0 auto;
   width: 100%;
   max-width: 720px;
-  height: 100vh;
-  padding: 120px 16px 160px;
+  height: 90vh;
+  padding: 5vh 0 0vh 24px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -22,7 +22,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 0 0 48px 0;
+  margin: 0 0 16px 0;
 }
 
 h1 {
@@ -81,7 +81,7 @@ em {
   font-style: italic;
 }
 
-.cursor {
+/*.cursor {
   position: fixed;
   top: 0;
   left: 0;
@@ -93,4 +93,4 @@ em {
   transform: translate(-50%, -50%);
   transition: transform 0.15s ease;
   z-index: 9999;
-}
+} */
