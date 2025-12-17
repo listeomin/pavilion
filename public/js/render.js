@@ -53,20 +53,20 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     const afterColon = hasColon ? plainText.substring(colonIndex + 1).trim() : '';
     const hasCommandQuery = hasColon && afterColon.length > 0;
     
-    console.log('DEBUG updateSendButton:', {
-      inCommandMode,
-      plainText,
-      hasColon,
-      afterColon,
-      trimmedLength: afterColon.length,
-      hasCommandQuery
-    });
-    
     if (hasCommandQuery) {
       sendBtn.classList.add('visible');
     } else {
       sendBtn.classList.remove('visible');
     }
+    
+    // Add purple color if command is complete
+    inlineInput.isCommandReady().then(ready => {
+      if (ready) {
+        sendBtn.classList.add('command-ready');
+      } else {
+        sendBtn.classList.remove('command-ready');
+      }
+    });
   } else {
     // Not in command mode: show button if there's any text AND it doesn't start with /
     if (editorText.length > 0 && !editorText.startsWith('/')) {
@@ -74,13 +74,8 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     } else {
       sendBtn.classList.remove('visible');
     }
-  }
-  
-  // Add purple color if command is complete
-  const commandReady = inlineInput && inlineInput.isCommandReady();
-  if (commandReady) {
-    sendBtn.classList.add('command-ready');
-  } else {
+    
+    // Remove purple color when not in command mode
     sendBtn.classList.remove('command-ready');
   }
 }
