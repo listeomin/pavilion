@@ -187,6 +187,71 @@ export function renderMessages(chatLog, messages, lastIdRef) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
+export function updateMessage(chatLog, updatedMessage) {
+  // Find message in DOM by data-message-id
+  const messageEl = chatLog.querySelector(`[data-message-id="${updatedMessage.id}"]`);
+  if (!messageEl) {
+    console.warn('Message not found in DOM:', updatedMessage.id);
+    return;
+  }
+
+  // Get or create text span
+  let textSpan = messageEl.querySelector('span:not(.meta)');
+  if (!textSpan) {
+    textSpan = document.createElement('span');
+    messageEl.appendChild(textSpan);
+  }
+
+  let content = '';
+  const m = updatedMessage;
+
+  // Add quotes if present
+  if (m.metadata && m.metadata.quotes) {
+    m.metadata.quotes.forEach(quote => {
+      content += renderQuote(quote);
+    });
+  }
+
+  // Check metadata type
+  if (m.metadata && m.metadata.type === 'music') {
+    content = renderMusicPlayer(m.metadata);
+  } else if (m.metadata && m.metadata.type === 'images') {
+    content = escapeHtml(m.text);
+    m.metadata.images.forEach(img => {
+      const placeholder = `__IMAGE_TAG_${img.id}__`;
+      const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;" loading="lazy" />`;
+      content = content.replace(placeholder, imgTag);
+    });
+    content = parseMarkdown(content);
+  } else if (m.metadata && m.metadata.type === 'pinterest') {
+    content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+      if (url === m.metadata.url) {
+        return renderPinterestPreview(m.metadata);
+      }
+      return url;
+    });
+    content = linkifyImages(parseMarkdown(escapeHtml(content)));
+  } else if (m.metadata && m.metadata.type === 'link') {
+    let replacedUrl = false;
+    content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+      if (!replacedUrl && url === m.metadata.url) {
+        replacedUrl = true;
+        return '__LINK_PREVIEW__';
+      }
+      return url;
+    });
+    content = linkifyImages(parseMarkdown(escapeHtml(content)));
+    content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
+  } else {
+    content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
+    if (m.metadata && m.metadata.type === 'github') {
+      content += renderGitHubPreview(m.metadata);
+    }
+  }
+
+  textSpan.innerHTML = ' ' + content + '<span style="color: #87867F; font-family: \'Ubuntu Mono\', monospace; margin-left: 4px; font-style: italic; font-weight: 300; font-size: calc(1em - 1px);">ред.</span>';
+}
+
 export function updateSendButton(sendBtn, editor, inlineInput) {
   const inCommandMode = inlineInput && inlineInput.commandMode;
   const plainText = inlineInput ? inlineInput.getPlainText() : '';

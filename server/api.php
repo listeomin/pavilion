@@ -160,5 +160,50 @@ if ($action === 'delete_image') {
     json($result);
 }
 
+if ($action === 'update_message') {
+    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    $session_id = $input['session_id'] ?? null;
+    $message_id = $input['message_id'] ?? null;
+    $text = trim($input['text'] ?? '');
+    $clientMetadata = $input['metadata'] ?? null;
+
+    if (!$session_id || !$message_id) {
+        http_response_code(400);
+        json(['error' => 'session_id and message_id required']);
+    }
+
+    if ($text === '' && !$clientMetadata) {
+        http_response_code(400);
+        json(['error' => 'text or metadata required']);
+    }
+
+    $session = $sessionRepo->get($session_id);
+    if (!$session) {
+        http_response_code(403);
+        json(['error' => 'invalid session']);
+    }
+
+    // Priority: client metadata (music) > Pinterest > GitHub > generic link preview
+    $metadata = $clientMetadata;
+    if (!$metadata) {
+        $metadata = $pinterestService->enrichMessage($text);
+    }
+    if (!$metadata) {
+        $metadata = $githubService->enrichMessage($text);
+    }
+    if (!$metadata) {
+        $metadata = $linkPreviewService->enrichMessage($text);
+    }
+
+    $message = $msgRepo->update($message_id, $session['name'], $text, $metadata);
+    
+    if (!$message) {
+        http_response_code(403);
+        json(['error' => 'message not found or unauthorized']);
+    }
+    
+    json($message);
+}
+
 http_response_code(400);
 json(['error' => 'unknown action']);

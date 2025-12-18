@@ -1,13 +1,51 @@
 // public/js/hotkeys.js
-export function setupHotkeys(inputEl, editor, onSubmit) {
+export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, getCurrentAuthor = null) {
   inputEl.addEventListener('keydown', (e) => {
     const isMod = e.metaKey || e.ctrlKey;
+
+    // Arrow Down: Get last message (empty field) or clear field (non-empty field)
+    if (e.key === 'ArrowDown' && messageHistory && getCurrentAuthor) {
+      const isEmpty = inputEl.textContent.trim() === '';
+      e.preventDefault();
+      
+      if (isEmpty) {
+        // Empty field: restore last message
+        const msg = messageHistory.getLastForAuthor(getCurrentAuthor());
+        if (msg) {
+          restoreMessage(inputEl, editor, msg);
+        }
+      } else {
+        // Non-empty field: clear it
+        inputEl.innerHTML = '';
+        editor.clear();
+        messageHistory.reset();
+        messageHistory.clearEditing();
+      }
+      return;
+    }
+
+    // Arrow Up: Navigate message history backward
+    if (e.key === 'ArrowUp' && messageHistory && getCurrentAuthor) {
+      const isEmpty = inputEl.textContent.trim() === '';
+      if (isEmpty) {
+        e.preventDefault();
+        const msg = messageHistory.getPrevious(getCurrentAuthor());
+        if (msg) {
+          restoreMessage(inputEl, editor, msg);
+        }
+        return;
+      }
+    }
 
     // Ctrl+U: Clear line (like terminal)
     if (e.ctrlKey && e.key === 'u') {
       e.preventDefault();
       inputEl.innerHTML = '';
       editor.clear();
+      if (messageHistory) {
+        messageHistory.reset();
+        messageHistory.clearEditing();
+      }
       return;
     }
 
@@ -80,6 +118,24 @@ export function setupHotkeys(inputEl, editor, onSubmit) {
       }
     }
   });
+}
+
+function restoreMessage(inputEl, editor, msg) {
+  // Restore text to input
+  inputEl.textContent = msg.text;
+  editor.markdownText = msg.text;
+  editor.saveToHistory();
+  
+  // Move cursor to end
+  const sel = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(inputEl);
+  range.collapse(false);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  
+  // Trigger input event
+  inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function applyFormatViaHotkey(format, editor, inputEl) {

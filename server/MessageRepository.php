@@ -60,6 +60,39 @@ class MessageRepository {
         return $this->decodeMetadata($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    public function update(int $id, string $author, string $text, ?array $metadata = null): ?array {
+        // Check if message exists and belongs to this author
+        $stmt = $this->db->prepare('SELECT id, author FROM messages WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$existing || $existing['author'] !== $author) {
+            return null; // Not found or unauthorized
+        }
+        
+        $metadataJson = $metadata ? json_encode($metadata, JSON_UNESCAPED_UNICODE) : null;
+        
+        $stmt = $this->db->prepare('UPDATE messages SET text = :text, metadata = :metadata WHERE id = :id');
+        $stmt->execute([
+            ':id' => $id,
+            ':text' => $text,
+            ':metadata' => $metadataJson
+        ]);
+        
+        // Fetch and return updated message
+        $stmt = $this->db->prepare('SELECT id, session_id, author, text, metadata, created_at FROM messages WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row && !empty($row['metadata'])) {
+            $row['metadata'] = json_decode($row['metadata'], true);
+        } elseif ($row) {
+            unset($row['metadata']);
+        }
+        
+        return $row ?: null;
+    }
+
     private function decodeMetadata(array $rows): array {
         foreach ($rows as &$row) {
             if (!empty($row['metadata'])) {

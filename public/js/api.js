@@ -73,3 +73,15 @@ export async function apiDeleteImage(API, id) {
   if (!res.ok) return { success: false, error: 'Delete failed' };
   return await res.json();
 }
+
+export async function apiUpdateMessage(API, sessionId, messageId, text, metadata = null) {
+  const payload = { session_id: sessionId, message_id: messageId, text: text };
+  if (metadata) payload.metadata = metadata;
+  const res = await fetch(API + '?action=update_message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}

@@ -1,16 +1,17 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiPoll, apiChangeName } from './api.js?v=5';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=7';
+import { getCookie, apiInit, apiSend, apiPoll, apiChangeName, apiUpdateMessage } from './api.js?v=6';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=8';
 import { Editor } from './editor.js?v=6';
 import { FormatMenu } from './format.js?v=5';
-import { setupHotkeys } from './hotkeys.js?v=5';
+import { setupHotkeys } from './hotkeys.js?v=6';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { ContextMenu } from './contextMenu.js?v=1';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
+import { MessageHistory } from './message-history.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -32,6 +33,7 @@ import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
   const inlineInput = new InlineInput(inputEl, editor, () => {
     updateSendButton(sendBtn, editor, inlineInput);
   });
+  const messageHistory = new MessageHistory();
   
   const wheelScroll = new WheelScroll(inlineInput, () => {
     updateSendButton(sendBtn, editor, inlineInput);
@@ -46,7 +48,7 @@ import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
-  });
+  }, messageHistory, () => myName);
 
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -103,12 +105,34 @@ import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
     console.log('Sending text:', text);
     
     try {
-      const result = await apiSend(API, sessionId, text, metadata);
+      let result;
+      const wasEditing = messageHistory.isEditing();
+      
+      // Check if we're editing an existing message
+      if (wasEditing) {
+        const messageId = messageHistory.getEditingMessageId();
+        console.log('Updating message:', messageId);
+        result = await apiUpdateMessage(API, sessionId, messageId, text, metadata);
+        messageHistory.clearEditing();
+      } else {
+        result = await apiSend(API, sessionId, text, metadata);
+        
+        if (result) {
+          // Add new message to history
+          messageHistory.addMessage(text, myName, metadata, result.id);
+        }
+      }
       
       if (result) {
         // Success - remove sending message
         removeSystemMessage(sendingMsg);
-        // Message will appear via polling
+        
+        // If we updated a message, update it in DOM
+        if (wasEditing) {
+          console.log('Updating message in DOM:', result);
+          updateMessage(chatLog, result);
+        }
+        // New messages will appear via polling
       } else {
         // Failed - show error
         removeSystemMessage(sendingMsg);

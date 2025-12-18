@@ -4,13 +4,14 @@ export function renderLinkPreview(metadata) {
     return '';
   }
 
-  const { title, url } = metadata;
+  const { domain, title, url } = metadata;
+  const displayText = domain && title ? `${domain} | ${title}` : (title || url);
 
   return `<a href="${escapeHtml(url)}" target="_blank" style="
     color: #5A57D9;
     text-decoration: none;
     font-family: Georgia, serif;
-  " title="${escapeHtml(url)}">${escapeHtml(title)}</a>`;
+  " title="${escapeHtml(url)}">${escapeHtml(displayText)}</a>`;
 }
 
 function escapeHtml(s) {
