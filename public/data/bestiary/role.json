@@ -1,0 +1,39 @@
+{
+  "categories": [
+    {
+      "id": "not_specified",
+      "name": "Не указывать",
+      "animals": ["all"]
+    },
+    {
+      "id": "wanderer",
+      "name": "Романтик-странник",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "singer",
+      "name": "Певец глубин",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "guardian",
+      "name": "Страж океана",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "hunter",
+      "name": "Охотник",
+      "animals": ["all"]
+    },
+    {
+      "id": "healer",
+      "name": "Целитель",
+      "animals": ["all"]
+    },
+    {
+      "id": "scout",
+      "name": "Разведчик",
+      "animals": ["all"]
+    }
+  ]
+}

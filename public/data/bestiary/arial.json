@@ -1,0 +1,39 @@
+{
+  "categories": [
+    {
+      "id": "not_specified",
+      "name": "Не указывать",
+      "animals": ["all"]
+    },
+    {
+      "id": "estuariy",
+      "name": "Эстуарий",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "pelagial",
+      "name": "Пелагиаль",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "abyssal",
+      "name": "Абиссаль",
+      "animals": ["🐳"]
+    },
+    {
+      "id": "forest",
+      "name": "Лес",
+      "animals": ["all"]
+    },
+    {
+      "id": "savanna",
+      "name": "Саванна",
+      "animals": ["all"]
+    },
+    {
+      "id": "mountains",
+      "name": "Горы",
+      "animals": ["all"]
+    }
+  ]
+}
