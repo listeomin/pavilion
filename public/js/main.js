@@ -1,7 +1,7 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiSend, apiPoll, apiChangeName } from './api.js?v=5';
-import { renderMessages, updateSendButton } from './render.js?v=5';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=5';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
@@ -94,6 +94,26 @@ import * as NightShift from './nightshift.js?v=1';
     renderMessages(chatLog, data.messages || [], lastIdRef);
     setTimeout(pollLoop, pollInterval);
     inputEl.focus();
+    
+    // TEST: Show system message with spinner
+    window.testSystemMessage = () => {
+      const msg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
+      setTimeout(() => {
+        removeSystemMessage(msg);
+      }, 3000);
+    };
+    
+    // TEST: Show system message with action button
+    window.testSystemError = () => {
+      renderSystemMessage(chatLog, 'у нас проблемы.', {
+        actionButton: {
+          text: '[переотправить]',
+          onClick: () => {
+            console.log('Retry clicked');
+          }
+        }
+      });
+    };
   });
   
   NightShift.init();

@@ -5,6 +5,67 @@ import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=1';
 
+let spinnerInterval = null;
+
+export function renderSystemMessage(chatLog, message, options = {}) {
+  const { spinner = false, actionButton = null } = options;
+  
+  const div = document.createElement('div');
+  div.className = 'system-msg';
+  
+  const meta = document.createElement('span');
+  meta.className = 'system-meta';
+  meta.textContent = '🛳️ капитанская рубка:';
+  
+  const text = document.createElement('span');
+  text.className = 'system-text';
+  
+  if (spinner) {
+    const frames = ['/', '—', '\\', '|'];
+    let frameIndex = 0;
+    const messageText = message + ' ';
+    const spinnerSpan = document.createElement('span');
+    spinnerSpan.className = 'system-spinner';
+    spinnerSpan.textContent = frames[0];
+    
+    text.appendChild(document.createTextNode(messageText));
+    text.appendChild(spinnerSpan);
+    
+    spinnerInterval = setInterval(() => {
+      frameIndex = (frameIndex + 1) % frames.length;
+      spinnerSpan.textContent = frames[frameIndex];
+    }, 150);
+  } else {
+    text.appendChild(document.createTextNode(' ' + message));
+  }
+  
+  if (actionButton) {
+    const btn = document.createElement('button');
+    btn.className = 'system-action-btn';
+    btn.textContent = actionButton.text;
+    btn.onclick = actionButton.onClick;
+    text.appendChild(document.createTextNode(' '));
+    text.appendChild(btn);
+  }
+  
+  div.appendChild(meta);
+  div.appendChild(text);
+  chatLog.appendChild(div);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  
+  return div;
+}
+
+export function removeSystemMessage(element) {
+  if (spinnerInterval) {
+    clearInterval(spinnerInterval);
+    spinnerInterval = null;
+  }
+  if (element && element.parentNode) {
+    element.parentNode.removeChild(element);
+  }
+}
+
 export function renderMessages(chatLog, messages, lastIdRef) {
   if (!messages || !messages.length) return;
   const frag = document.createDocumentFragment();

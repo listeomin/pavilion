@@ -9,6 +9,33 @@ export class Editor {
     this.historyIndex = 0;
     this.maxHistory = maxHistory;
     this.paused = false;
+    
+    // Handle paste to preserve line breaks
+    this.inputEl.addEventListener('paste', (e) => this.handlePaste(e));
+  }
+
+  handlePaste(e) {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    
+    // Insert text at cursor position
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+    
+    // Move cursor to end of inserted text
+    range.setStartAfter(textNode);
+    range.setEndAfter(textNode);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    
+    // Trigger input event to update markdown
+    this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   getPlainText() {
