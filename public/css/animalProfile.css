@@ -177,6 +177,7 @@
 
 .animal-profile-input-wrapper.error {
   border-color: var(--color-fig);
+  border-width: 2px;
 }
 
 .animal-profile-emoji-icon {
