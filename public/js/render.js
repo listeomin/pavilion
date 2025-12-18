@@ -9,11 +9,27 @@ export function renderMessages(chatLog, messages, lastIdRef) {
   if (!messages || !messages.length) return;
   const frag = document.createDocumentFragment();
   messages.forEach(m => {
+    // Check if we should merge with previous message
+    // Look in both fragment (current batch) and chatLog (existing messages)
+    const lastInFrag = frag.lastElementChild;
+    const lastInLog = chatLog.lastElementChild;
+    const lastMsg = lastInFrag || lastInLog;
+    const shouldMerge = lastMsg && 
+                       lastMsg.classList.contains('msg') && 
+                       lastMsg.dataset.author === m.author;
+    
     const div = document.createElement('div');
     div.className = 'msg';
-    const meta = document.createElement('span');
-    meta.className = 'meta';
-    meta.textContent = m.author + ':';
+    div.dataset.author = m.author;
+    
+    // Only add meta if not merging
+    if (!shouldMerge) {
+      const meta = document.createElement('span');
+      meta.className = 'meta';
+      meta.textContent = m.author + ':';
+      div.appendChild(meta);
+    }
+    
     const text = document.createElement('span');
     
     let content = '';
@@ -65,7 +81,6 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     }
     
     text.innerHTML = ' ' + content;
-    div.appendChild(meta);
     div.appendChild(text);
     frag.appendChild(div);
     lastIdRef.value = Math.max(lastIdRef.value, Number(m.id));

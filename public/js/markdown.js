@@ -18,6 +18,9 @@ export function parseMarkdown(text) {
     return `__URL_${idx}__`;
   });
 
+  // Convert line breaks to paragraph breaks with reduced spacing
+  processed = processed.replace(/\n/g, '<span class="paragraph-break"></span>');
+
   processed = processed.replace(/`([^`]+)`/g, '<code>$1</code>');
   processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   processed = processed.replace(/\*([^*]+)\*/g, '<em>$1</em>');

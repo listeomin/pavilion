@@ -53,3 +53,8 @@
 .msg-text {
   display: inline;
 }
+
+.paragraph-break {
+  display: block;
+  margin: 4px 0;
+}
