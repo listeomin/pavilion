@@ -26,10 +26,32 @@ export function renderMessages(chatLog, messages, lastIdRef) {
       content = renderMusicPlayer(m.metadata);
     } else if (m.metadata && m.metadata.type === 'pinterest') {
       console.log('Rendering pinterest preview');
-      content = renderPinterestPreview(m.metadata);
+      // Replace URL with preview in place
+      content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+        if (url === m.metadata.url) {
+          return renderPinterestPreview(m.metadata);
+        }
+        return url;
+      });
+      // Apply markdown to the result
+      content = linkifyImages(parseMarkdown(escapeHtml(content)));
     } else if (m.metadata && m.metadata.type === 'link') {
       console.log('Rendering link preview');
-      content = renderLinkPreview(m.metadata);
+      // Replace URL with preview in place
+      let replacedUrl = false;
+      content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+        if (!replacedUrl && url === m.metadata.url) {
+          replacedUrl = true;
+          return '__LINK_PREVIEW__';
+        }
+        return url;
+      });
+      
+      // Apply markdown to text parts
+      content = linkifyImages(parseMarkdown(escapeHtml(content)));
+      
+      // Replace placeholder with actual preview
+      content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
     } else {
       console.log('Rendering regular markdown');
       // Regular text with markdown

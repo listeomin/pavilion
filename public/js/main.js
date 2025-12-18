@@ -50,10 +50,8 @@ import * as NightShift from './nightshift.js?v=1';
     const content = await inlineInput.getContent();
     if (!content.text) return;
 
-    const msg = await apiSend(API, sessionId, content.text, content.metadata);
-    if (msg) {
-      renderMessages(chatLog, [msg], lastIdRef);
-    }
+    await apiSend(API, sessionId, content.text, content.metadata);
+    // Don't render here - let polling pick it up to avoid duplicates
 
     editor.clear();
     updateSendButton(sendBtn, editor, inlineInput);
