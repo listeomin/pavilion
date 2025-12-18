@@ -1,6 +1,8 @@
 <?php
 // server/ImageUploadService.php
 
+require_once __DIR__ . '/config.php';
+
 class ImageUploadService {
     private $uploadDir;
     private $allowedMimeTypes = [
@@ -57,10 +59,12 @@ class ImageUploadService {
             return ['success' => false, 'error' => 'Failed to save file'];
         }
 
+        $basePath = get_base_path();
+        
         return [
             'success' => true,
             'id' => $uuid,
-            'url' => '/assets/images/' . $filename
+            'url' => $basePath . '/assets/images/' . $filename
         ];
     }
 

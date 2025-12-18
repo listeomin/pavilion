@@ -5,6 +5,7 @@ ini_set('log_errors', 1);
 ini_set('error_log', __DIR__.'/php-error.log');
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/SessionRepository.php';
 require_once __DIR__ . '/MessageRepository.php';
 require_once __DIR__ . '/GitHubService.php';

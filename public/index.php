@@ -1,11 +1,23 @@
 <?php
 // index.php
+
+// Auto-detect BASE_PATH from request URI
+function get_base_path() {
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($uri, '/pavilion/') === 0) {
+        return '/pavilion';
+    }
+    return '';
+}
+
+$basePath = get_base_path();
 ?>
 <!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<base href="<?php echo htmlspecialchars($basePath); ?>/">
 <title>Hhrrr Chat</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

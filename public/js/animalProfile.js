@@ -1,4 +1,5 @@
 // public/js/animalProfile.js
+import { CONFIG } from './config.js?v=5';
 import { AnimalData } from './animalData.js?v=6';
 
 export class AnimalProfile {
@@ -30,7 +31,7 @@ export class AnimalProfile {
       <div id="animal-profile-modal">
         <div class="animal-profile-left">
           <div class="animal-profile-info-icon">
-            <img src="./assets/Info.svg" alt="Info">
+            <img src="${CONFIG.BASE_PATH}/assets/Info.svg" alt="Info">
           </div>
           <div class="animal-profile-large-emoji" id="large-emoji">🐳</div>
           <div class="animal-profile-grid" id="animal-grid"></div>
@@ -51,7 +52,7 @@ export class AnimalProfile {
                 minlength="2"
               >
               <div class="animal-profile-icon-btn" id="refresh-kind">
-                <img src="./assets/refresh.svg" alt="Refresh">
+                <img src="${CONFIG.BASE_PATH}/assets/refresh.svg" alt="Refresh">
               </div>
             </div>
             <div class="animal-profile-tooltip" id="kind-tooltip">Имя вашего зверя</div>
@@ -62,7 +63,7 @@ export class AnimalProfile {
             <div class="animal-profile-input-wrapper">
               <select class="animal-profile-select" id="arial-select"></select>
               <div class="animal-profile-icon-btn">
-                <img src="./assets/chevrone.svg" alt="Dropdown">
+                <img src="${CONFIG.BASE_PATH}/assets/chevrone.svg" alt="Dropdown">
               </div>
             </div>
             <div class="animal-profile-tooltip">Где обитает зверь</div>
@@ -73,7 +74,7 @@ export class AnimalProfile {
             <div class="animal-profile-input-wrapper">
               <select class="animal-profile-select" id="role-select"></select>
               <div class="animal-profile-icon-btn">
-                <img src="./assets/chevrone.svg" alt="Dropdown">
+                <img src="${CONFIG.BASE_PATH}/assets/chevrone.svg" alt="Dropdown">
               </div>
             </div>
             <div class="animal-profile-tooltip">Роль в сообществе</div>
@@ -84,7 +85,7 @@ export class AnimalProfile {
             <div class="animal-profile-input-wrapper">
               <select class="animal-profile-select" id="lifecycle-select"></select>
               <div class="animal-profile-icon-btn">
-                <img src="./assets/chevrone.svg" alt="Dropdown">
+                <img src="${CONFIG.BASE_PATH}/assets/chevrone.svg" alt="Dropdown">
               </div>
             </div>
             <div class="animal-profile-tooltip">Стадия жизни</div>
@@ -313,7 +314,7 @@ export class AnimalProfile {
 
   async fetchProfile(emoji) {
     try {
-      const res = await fetch(`./api/animal_profile.php?action=get&session_id=${this.sessionId}&emoji=${encodeURIComponent(emoji)}`);
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/animal_profile.php?action=get&session_id=${this.sessionId}&emoji=${encodeURIComponent(emoji)}`);
       if (!res.ok) return null;
       const data = await res.json();
       return data.profile || null;
@@ -336,7 +337,7 @@ export class AnimalProfile {
     
     try {
       console.log('[AnimalProfile] Sending save request...');
-      const url = './api/animal_profile.php?action=save';
+      const url = `${CONFIG.BASE_PATH}/api/animal_profile.php?action=save`;
       console.log('[AnimalProfile] Request URL:', url);
       
       const res = await fetch(url, {

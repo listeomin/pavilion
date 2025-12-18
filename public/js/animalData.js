@@ -1,4 +1,6 @@
 // public/js/animalData.js
+import { CONFIG } from './config.js?v=5';
+
 export class AnimalData {
   constructor() {
     this.kind = null;
@@ -9,10 +11,10 @@ export class AnimalData {
 
   async loadAll() {
     const [kind, arial, role, lifecycle] = await Promise.all([
-      fetch('./data/bestiary/kind.json').then(r => r.json()),
-      fetch('./data/bestiary/arial.json').then(r => r.json()),
-      fetch('./data/bestiary/role.json').then(r => r.json()),
-      fetch('./data/bestiary/lifecycle.json').then(r => r.json())
+      fetch(`${CONFIG.BASE_PATH}/data/bestiary/kind.json`).then(r => r.json()),
+      fetch(`${CONFIG.BASE_PATH}/data/bestiary/arial.json`).then(r => r.json()),
+      fetch(`${CONFIG.BASE_PATH}/data/bestiary/role.json`).then(r => r.json()),
+      fetch(`${CONFIG.BASE_PATH}/data/bestiary/lifecycle.json`).then(r => r.json())
     ]);
 
     this.kind = kind;

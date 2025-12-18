@@ -1,4 +1,5 @@
 // public/js/inline-input.js
+import { CONFIG } from './config.js?v=5';
 import { getAudioUrl } from './audio-mapping.js?v=1';
 
 export class InlineInput {
@@ -20,7 +21,7 @@ export class InlineInput {
 
   async loadData() {
     try {
-      const commandsRes = await fetch('data/commands-test.json');
+      const commandsRes = await fetch(`${CONFIG.BASE_PATH}/data/commands-test.json`);
       
       if (!commandsRes.ok) {
         console.error('Response status:', commandsRes.status);
