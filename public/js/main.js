@@ -37,7 +37,7 @@ import * as NightShift from './nightshift.js?v=1';
 
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
-    editor.renderLiveMarkdown();
+    // editor.renderLiveMarkdown(); // TEMPORARILY DISABLED
     updateSendButton(sendBtn, editor, inlineInput);
   });
 

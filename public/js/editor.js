@@ -179,7 +179,23 @@ export class Editor {
     const preCaretRange = range.cloneRange();
     preCaretRange.selectNodeContents(this.inputEl);
     preCaretRange.setEnd(range.endContainer, range.endOffset);
-    return preCaretRange.toString().length;
+    
+    // Count characters including paragraph-breaks as single \n
+    let length = 0;
+    const walk = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        length += node.length;
+      } else if (node.classList && node.classList.contains('paragraph-break')) {
+        length += 1; // counts as single \n
+      } else if (node.childNodes) {
+        for (let child of node.childNodes) {
+          walk(child);
+        }
+      }
+    };
+    
+    walk(preCaretRange.cloneContents());
+    return length;
   }
 
   restoreCursorPosition(pos) {
@@ -199,7 +215,29 @@ export class Editor {
           foundStart = true;
         }
         charCount = nextCharCount;
-      } else {
+      } else if (node.classList && node.classList.contains('paragraph-break')) {
+        // paragraph-break represents a single \n character
+        const nextCharCount = charCount + 1;
+        if (pos <= nextCharCount) {
+          // Position cursor after the paragraph-break
+          const parent = node.parentNode;
+          const nextSibling = node.nextSibling;
+          if (nextSibling) {
+            if (nextSibling.nodeType === Node.TEXT_NODE) {
+              range.setStart(nextSibling, 0);
+              range.setEnd(nextSibling, 0);
+            } else {
+              range.setStartAfter(node);
+              range.setEndAfter(node);
+            }
+          } else {
+            range.setStartAfter(node);
+            range.setEndAfter(node);
+          }
+          foundStart = true;
+        }
+        charCount = nextCharCount;
+      } else if (node.childNodes) {
         for (let i = node.childNodes.length - 1; i >= 0; i--) {
           nodeStack.push(node.childNodes[i]);
         }
@@ -231,11 +269,18 @@ export class Editor {
   syncMarkdownText() {
     if (this.paused) return;
     
-    // Get text content but preserve image tags
+    console.log('syncMarkdownText called');
+    console.log('inputEl.childNodes:', this.inputEl.childNodes);
+    
+    // Get text content but preserve image tags and br elements
     let text = '';
     const processNode = (node) => {
+      console.log('Processing node:', node, 'nodeName:', node.nodeName, 'nodeType:', node.nodeType);
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent;
+      } else if (node.nodeName === 'BR') {
+        console.log('Found BR, adding newline');
+        text += '\n';
       } else if (node.classList && node.classList.contains('image-tag')) {
         // Preserve image tag as placeholder
         text += `__IMAGE_TAG_${node.dataset.id}__`;
@@ -245,6 +290,7 @@ export class Editor {
     };
     
     this.inputEl.childNodes.forEach(processNode);
+    console.log('Final text:', text);
     this.markdownText = text;
     this.saveToHistory();
   }
