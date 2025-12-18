@@ -45,3 +45,31 @@ export async function apiChangeName(API, sessionId) {
   if (!res.ok) return null;
   return await res.json();
 }
+
+export async function apiUploadImage(API, file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  const res = await fetch(API + '?action=upload_image', {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!res.ok) {
+    const error = await res.json();
+    return { success: false, error: error.error || 'Upload failed' };
+  }
+  
+  return await res.json();
+}
+
+export async function apiDeleteImage(API, id) {
+  const res = await fetch(API + '?action=delete_image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id })
+  });
+  
+  if (!res.ok) return { success: false, error: 'Delete failed' };
+  return await res.json();
+}

@@ -1,5 +1,7 @@
 // public/js/editor.js
 import { escapeHtml, parseMarkdown } from './markdown.js?v=4';
+import { apiUploadImage, apiDeleteImage } from './api.js?v=5';
+import { CONFIG } from './config.js?v=5';
 
 export class Editor {
   constructor(inputEl, maxHistory = 50) {
@@ -10,32 +12,160 @@ export class Editor {
     this.maxHistory = maxHistory;
     this.paused = false;
     
-    // Handle paste to preserve line breaks
+    // Handle paste to preserve line breaks and images
     this.inputEl.addEventListener('paste', (e) => this.handlePaste(e));
+    
+    // Handle backspace to delete image tags
+    this.inputEl.addEventListener('keydown', (e) => this.handleKeydown(e));
   }
 
-  handlePaste(e) {
+  async handlePaste(e) {
     e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
     
-    // Insert text at cursor position
+    // Check for images first
+    const items = e.clipboardData.items;
+    let hasImage = false;
+    
+    for (let item of items) {
+      if (item.type.startsWith('image/')) {
+        hasImage = true;
+        const file = item.getAsFile();
+        await this.insertImageTag(file);
+      }
+    }
+    
+    // If no image, handle as text
+    if (!hasImage) {
+      const text = e.clipboardData.getData('text/plain');
+      
+      // Insert text at cursor position
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      
+      // Move cursor to end of inserted text
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      
+      // Trigger input event to update markdown
+      this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  async insertImageTag(file) {
+    const id = this.generateUUID();
+    
+    console.log('Inserting image tag, file:', file);
+    
+    // Create tag (black color initially)
+    const tag = document.createElement('span');
+    tag.className = 'image-tag';
+    tag.contentEditable = 'false';
+    tag.dataset.id = id;
+    tag.dataset.loaded = 'false';
+    tag.textContent = '[картинка]';
+    
+    // Insert at cursor
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     
     const range = sel.getRangeAt(0);
     range.deleteContents();
+    range.insertNode(tag);
     
-    const textNode = document.createTextNode(text);
-    range.insertNode(textNode);
-    
-    // Move cursor to end of inserted text
-    range.setStartAfter(textNode);
-    range.setEndAfter(textNode);
+    // Move cursor after tag
+    range.setStartAfter(tag);
+    range.setEndAfter(tag);
     sel.removeAllRanges();
     sel.addRange(range);
     
-    // Trigger input event to update markdown
+    // Upload in background
+    console.log('Starting upload...');
+    const result = await apiUploadImage(CONFIG.API_PATH, file);
+    console.log('Upload result:', result);
+    
+    if (result.success) {
+      console.log('Upload successful, setting loaded=true');
+      tag.dataset.loaded = 'true';
+      tag.dataset.url = result.url;
+      tag.setAttribute('data-loaded', 'true');
+      // Force style recalculation with direct color value
+      tag.style.color = '#5A57D9'; // iris color
+      console.log('Tag color set to:', tag.style.color);
+      console.log('Tag element:', tag);
+    } else {
+      console.error('Upload failed:', result.error);
+      // Tag stays black (not loaded)
+    }
+    
     this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  async handleKeydown(e) {
+    if (e.key === 'Backspace') {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      
+      const range = sel.getRangeAt(0);
+      
+      // Check if cursor is collapsed (not selecting text)
+      if (range.collapsed) {
+        const container = range.startContainer;
+        const offset = range.startOffset;
+        
+        // Check if previous sibling is image-tag
+        if (container.nodeType === Node.TEXT_NODE && offset === 0) {
+          const parent = container.parentNode;
+          const prev = container.previousSibling;
+          
+          if (prev && prev.classList && prev.classList.contains('image-tag')) {
+            e.preventDefault();
+            
+            // Delete from server if uploaded
+            if (prev.dataset.loaded === 'true') {
+              await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+            }
+            
+            prev.remove();
+            this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+          }
+        }
+        
+        // Check if cursor is right after image-tag
+        if (container.nodeType === Node.ELEMENT_NODE) {
+          const prev = offset > 0 ? container.childNodes[offset - 1] : null;
+          
+          if (prev && prev.classList && prev.classList.contains('image-tag')) {
+            e.preventDefault();
+            
+            // Delete from server if uploaded
+            if (prev.dataset.loaded === 'true') {
+              await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+            }
+            
+            prev.remove();
+            this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   getPlainText() {
@@ -85,6 +215,10 @@ export class Editor {
   renderLiveMarkdown() {
     if (this.paused) return;
     
+    // Don't render if we have image tags - they should stay as-is
+    const hasTags = this.inputEl.querySelector('.image-tag');
+    if (hasTags) return;
+    
     const cursorPos = this.saveCursorPosition();
     const rendered = parseMarkdown(escapeHtml(this.markdownText));
 
@@ -97,7 +231,21 @@ export class Editor {
   syncMarkdownText() {
     if (this.paused) return;
     
-    this.markdownText = this.getPlainText();
+    // Get text content but preserve image tags
+    let text = '';
+    const processNode = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent;
+      } else if (node.classList && node.classList.contains('image-tag')) {
+        // Preserve image tag as placeholder
+        text += `__IMAGE_TAG_${node.dataset.id}__`;
+      } else if (node.childNodes) {
+        node.childNodes.forEach(processNode);
+      }
+    };
+    
+    this.inputEl.childNodes.forEach(processNode);
+    this.markdownText = text;
     this.saveToHistory();
   }
 

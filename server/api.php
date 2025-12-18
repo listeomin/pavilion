@@ -10,6 +10,7 @@ require_once __DIR__ . '/MessageRepository.php';
 require_once __DIR__ . '/GitHubService.php';
 require_once __DIR__ . '/PinterestService.php';
 require_once __DIR__ . '/LinkPreviewService.php';
+require_once __DIR__ . '/ImageUploadService.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -19,6 +20,7 @@ $msgRepo = new MessageRepository();
 $githubService = new GitHubService();
 $pinterestService = new PinterestService();
 $linkPreviewService = new LinkPreviewService();
+$imageService = new ImageUploadService();
 
 function json($data) {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -117,6 +119,39 @@ if ($action === 'change_name') {
     }
 
     json($session);
+}
+
+if ($action === 'upload_image') {
+    if (!isset($_FILES['image'])) {
+        http_response_code(400);
+        json(['success' => false, 'error' => 'No image provided']);
+    }
+
+    $result = $imageService->upload($_FILES['image']);
+    
+    if (!$result['success']) {
+        http_response_code(400);
+    }
+    
+    json($result);
+}
+
+if ($action === 'delete_image') {
+    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    $id = $input['id'] ?? null;
+
+    if (!$id) {
+        http_response_code(400);
+        json(['success' => false, 'error' => 'ID required']);
+    }
+
+    $result = $imageService->delete($id);
+    
+    if (!$result['success']) {
+        http_response_code(400);
+    }
+    
+    json($result);
 }
 
 http_response_code(400);

@@ -60,6 +60,16 @@ form {
   border-radius: 3px;
 }
 
+.image-tag {
+  color: rgba(0, 0, 0, 0.8);
+  cursor: default;
+  user-select: none;
+}
+
+.image-tag[data-loaded="true"] {
+  color: var(--color-iris);
+}
+
 button {
   display: block;
   padding: 0;
