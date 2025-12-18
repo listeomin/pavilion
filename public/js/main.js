@@ -8,6 +8,7 @@ import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
+import { AnimalProfile } from './animalProfile.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -137,6 +138,8 @@ import * as NightShift from './nightshift.js?v=1';
     }
   }
 
+  let animalProfile = null;
+
   userEmojiEl.addEventListener('click', async () => {
     userEmojiEl.classList.add('user-emoji-fade');
     
@@ -151,7 +154,7 @@ import * as NightShift from './nightshift.js?v=1';
     }, 250);
   });
 
-  apiInit(API, sessionId, COOKIE_NAME).then((data) => {
+  apiInit(API, sessionId, COOKIE_NAME).then(async (data) => {
     sessionId = data.session_id;
     myName = data.name;
     // Extract emoji from name (first character before space)
@@ -160,6 +163,22 @@ import * as NightShift from './nightshift.js?v=1';
     renderMessages(chatLog, data.messages || [], lastIdRef);
     setTimeout(pollLoop, pollInterval);
     inputEl.focus();
+    
+    // Initialize animal profile
+    animalProfile = new AnimalProfile(sessionId, emoji, (newEmoji, newKind) => {
+      // Update display when profile is saved
+      myName = newEmoji + ' ' + newKind;
+      userEmojiEl.textContent = newEmoji;
+    });
+    await animalProfile.init();
+    
+    // Animal profile button
+    const profileBtn = document.getElementById('animal-profile-btn');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', () => {
+        animalProfile.open();
+      });
+    }
     
     // TEST: Show system message with spinner
     window.testSystemMessage = () => {

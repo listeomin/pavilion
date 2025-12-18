@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/track-preview.css?v=1">
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
+<link rel="stylesheet" href="css/animalProfile.css?v=1">
 </head>
 <body>
 <div class="wrap">
@@ -44,6 +45,9 @@
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>
 </div>
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
+  <img src="assets/paw.svg" alt="Animal Profile">
+</button>
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
