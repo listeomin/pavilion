@@ -70,7 +70,7 @@ form {
   color: var(--color-iris);
 }
 
-button {
+#sendBtn {
   display: block;
   padding: 0;
   margin: 12px 0 0 0;
@@ -85,15 +85,15 @@ button {
   pointer-events: none;
 }
 
-button.visible {
+#sendBtn.visible {
   opacity: 1;
   pointer-events: all;
 }
 
-button.command-ready {
+#sendBtn.command-ready {
   color: var(--color-iris);
 }
 
-button:hover {
+#sendBtn:hover {
   color: rgba(0, 0, 0, 0.8);
 }

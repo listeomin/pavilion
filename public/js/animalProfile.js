@@ -1,5 +1,5 @@
 // public/js/animalProfile.js
-import { AnimalData } from './animalData.js?v=2';
+import { AnimalData } from './animalData.js?v=6';
 
 export class AnimalProfile {
   constructor(sessionId, currentEmoji, onSave) {
@@ -129,17 +129,14 @@ export class AnimalProfile {
   validateKind() {
     const input = document.getElementById('kind-input');
     const wrapper = document.getElementById('kind-wrapper');
-    const submitBtn = document.getElementById('submit-profile');
     
     const value = input.value.trim();
     const isValid = value.length >= 2;
     
     if (isValid) {
       wrapper.classList.remove('error');
-      submitBtn.disabled = false;
     } else {
       wrapper.classList.add('error');
-      submitBtn.disabled = true;
     }
     
     return isValid;
@@ -170,15 +167,17 @@ export class AnimalProfile {
       });
     });
     
-    // Render pagination
+    // Render pagination with wrappers
     pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => 
-      `<div class="animal-profile-page-dot ${i === this.currentPage ? 'active' : ''}" data-page="${i}"></div>`
+      `<div class="animal-profile-page-dot-wrapper ${i === this.currentPage ? 'active' : ''}" data-page="${i}">
+        <div class="animal-profile-page-dot"></div>
+      </div>`
     ).join('');
     
     // Attach pagination handlers
-    pagination.querySelectorAll('.animal-profile-page-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
-        this.currentPage = parseInt(dot.dataset.page);
+    pagination.querySelectorAll('.animal-profile-page-dot-wrapper').forEach(wrapper => {
+      wrapper.addEventListener('click', () => {
+        this.currentPage = parseInt(wrapper.dataset.page);
         this.renderAnimalGrid();
       });
     });
@@ -302,6 +301,14 @@ export class AnimalProfile {
   }
 
   async open() {
+    // Find page with current emoji
+    const animals = this.data.getAllAnimals();
+    const emojiIndex = animals.findIndex(a => a.emoji === this.selectedEmoji);
+    
+    if (emojiIndex !== -1) {
+      this.currentPage = Math.floor(emojiIndex / this.itemsPerPage);
+    }
+    
     // Load current profile
     await this.loadProfile(this.selectedEmoji);
     

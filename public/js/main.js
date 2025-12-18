@@ -8,7 +8,7 @@ import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
-import { AnimalProfile } from './animalProfile.js?v=2';
+import { AnimalProfile } from './animalProfile.js?v=8';
 
 (function () {
   const API = CONFIG.API_PATH;

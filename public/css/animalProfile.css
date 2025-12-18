@@ -22,9 +22,8 @@
 #animal-profile-modal {
   display: flex;
   width: 764px;
-  height: 490px;
   background: #7673F6;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 8px 16px rgba(20, 20, 19, 0.16);
 }
@@ -33,10 +32,9 @@
 .animal-profile-left {
   width: 404px;
   background: var(--color-cloud-light);
-  padding: 24px;
+  padding: 48px 48px 24px 48px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
 
 .animal-profile-info-icon {
@@ -44,7 +42,7 @@
   height: 24px;
   opacity: 0.6;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 
 .animal-profile-info-icon img {
@@ -55,16 +53,24 @@
 
 .animal-profile-large-emoji {
   font-size: 120px;
+  line-height: 1;
   text-align: center;
   user-select: none;
+  cursor: default;
+  margin-bottom: 48px;
+  margin-top: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .animal-profile-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-  min-height: 216px;
+  column-gap: 8px;
+  row-gap: 8px;
+  margin-bottom: 4px;
+  min-height: 288px;
 }
 
 .animal-profile-grid-item {
@@ -78,6 +84,13 @@
   border-radius: 4px;
   transition: background 0.2s ease;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.animal-profile-grid-item:active {
+  transform: none;
 }
 
 .animal-profile-grid-item:hover {
@@ -91,19 +104,28 @@
 .animal-profile-pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
+}
+
+.animal-profile-page-dot-wrapper {
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .animal-profile-page-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-nimbus-medium);
-  cursor: pointer;
+  background: var(--color-cloud-dark);
   transition: background 0.2s ease;
+  opacity: 1;
+  pointer-events: none;
 }
 
-.animal-profile-page-dot.active {
+.animal-profile-page-dot-wrapper.active .animal-profile-page-dot {
   background: var(--color-iris);
 }
 
@@ -113,7 +135,8 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
+  justify-content: center;
 }
 
 .animal-profile-title {
@@ -144,8 +167,10 @@
   background: var(--color-iris);
   border: 1px solid rgba(0, 0, 0, 0);
   border-radius: 4px;
-  padding: 10px;
+  padding: 12px 10px;
   transition: border-color 0.2s ease;
+  height: 48px;
+  box-sizing: border-box;
 }
 
 .animal-profile-input-wrapper.error {
@@ -155,6 +180,9 @@
 .animal-profile-emoji-icon {
   font-size: 24px;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .animal-profile-input {
@@ -225,13 +253,20 @@
   color: var(--color-cumulonimbus-medium);
   border: none;
   border-radius: 4px;
-  padding: 11px;
+  padding: 12px;
   font-family: 'Ubuntu Sans', sans-serif;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s ease;
-  margin-top: auto;
+  margin-top: 0;
+  height: 48px;
+  box-sizing: border-box;
+  opacity: 0.9;
+}
+
+.animal-profile-submit:hover {
+  opacity: 1;
 }
 
 .animal-profile-submit:disabled {
