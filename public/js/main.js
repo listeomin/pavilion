@@ -146,10 +146,26 @@ import { AnimalProfile } from './animalProfile.js?v=8';
     setTimeout(async () => {
       const data = await apiChangeName(API, sessionId);
       if (data && data.name) {
-        myName = data.name;
-        const emoji = myName.split(' ')[0];
+        const emoji = data.name.split(' ')[0];
+        
+        // Check if this animal has a saved profile
+        let finalName = data.name;
+        if (animalProfile) {
+          const savedProfile = await animalProfile.fetchProfile(emoji);
+          if (savedProfile && savedProfile.kind) {
+            // Use saved custom name
+            finalName = emoji + ' ' + savedProfile.kind;
+          }
+        }
+        
+        myName = finalName;
         userEmojiEl.textContent = emoji;
         userEmojiEl.classList.remove('user-emoji-fade');
+        
+        // Update animal profile with new emoji
+        if (animalProfile) {
+          animalProfile.updateCurrentEmoji(emoji);
+        }
       }
     }, 250);
   });

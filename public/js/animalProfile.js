@@ -190,8 +190,9 @@ export class AnimalProfile {
     // Switch to new emoji
     this.selectedEmoji = emoji;
     
-    // Update large emoji
+    // Update large emoji and kind emoji
     document.getElementById('large-emoji').textContent = emoji;
+    document.getElementById('kind-emoji').textContent = emoji;
     
     // Update grid selection
     this.renderAnimalGrid();
@@ -213,18 +214,23 @@ export class AnimalProfile {
   }
 
   async loadProfile(emoji) {
-    // Update emoji icon only for kind field
-    document.getElementById('kind-emoji').textContent = emoji;
+    const kindInput = document.getElementById('kind-input');
+    
+    // Update placeholder with random name for this emoji
+    const randomPlaceholder = this.data.getRandomName(emoji);
+    if (randomPlaceholder) {
+      kindInput.placeholder = randomPlaceholder;
+    }
     
     // Populate dropdowns
     this.populateSelect('arial-select', this.data.getArials(emoji));
     this.populateSelect('role-select', this.data.getRoles(emoji));
     this.populateSelect('lifecycle-select', this.data.getLifecycles(emoji));
     
-    // Check if we have saved profile
+    // Check if we have saved profile in memory
     if (this.profiles[emoji]) {
       const profile = this.profiles[emoji];
-      document.getElementById('kind-input').value = profile.kind || '';
+      kindInput.value = profile.kind || '';
       document.getElementById('arial-select').value = profile.arial || 'not_specified';
       document.getElementById('role-select').value = profile.role || 'not_specified';
       document.getElementById('lifecycle-select').value = profile.lifecycle || 'not_specified';
@@ -232,15 +238,24 @@ export class AnimalProfile {
       // Try to load from server
       const serverProfile = await this.fetchProfile(emoji);
       
-      if (serverProfile) {
-        document.getElementById('kind-input').value = serverProfile.kind || '';
+      if (serverProfile && serverProfile.kind) {
+        // Load from server and save to memory
+        kindInput.value = serverProfile.kind;
         document.getElementById('arial-select').value = serverProfile.arial || 'not_specified';
         document.getElementById('role-select').value = serverProfile.role || 'not_specified';
         document.getElementById('lifecycle-select').value = serverProfile.lifecycle || 'not_specified';
+        
+        this.profiles[emoji] = {
+          emoji: emoji,
+          kind: serverProfile.kind,
+          arial: serverProfile.arial || 'not_specified',
+          role: serverProfile.role || 'not_specified',
+          lifecycle: serverProfile.lifecycle || 'not_specified'
+        };
       } else {
         // Set defaults
         const randomName = this.data.getRandomName(emoji);
-        document.getElementById('kind-input').value = randomName || '';
+        kindInput.value = randomName || '';
         document.getElementById('arial-select').value = 'not_specified';
         document.getElementById('role-select').value = 'not_specified';
         document.getElementById('lifecycle-select').value = 'not_specified';
@@ -301,6 +316,13 @@ export class AnimalProfile {
   }
 
   async open() {
+    // Set selected emoji to current emoji
+    this.selectedEmoji = this.currentEmoji;
+    
+    // Update large emoji and kind emoji
+    document.getElementById('large-emoji').textContent = this.selectedEmoji;
+    document.getElementById('kind-emoji').textContent = this.selectedEmoji;
+    
     // Find page with current emoji
     const animals = this.data.getAllAnimals();
     const emojiIndex = animals.findIndex(a => a.emoji === this.selectedEmoji);
@@ -321,5 +343,9 @@ export class AnimalProfile {
 
   close() {
     this.overlay.classList.remove('active');
+  }
+
+  updateCurrentEmoji(newEmoji) {
+    this.currentEmoji = newEmoji;
   }
 }

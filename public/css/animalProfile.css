@@ -221,6 +221,10 @@
   color: var(--color-cloud-light);
 }
 
+.animal-profile-select option[value="not_specified"] {
+  color: var(--color-cloud-light);
+}
+
 .animal-profile-icon-btn {
   width: 24px;
   height: 24px;
@@ -246,6 +250,15 @@
 #refresh-kind {
   pointer-events: all;
   cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.3s ease;
+}
+
+#refresh-kind:hover {
+  transform: rotate(180deg);
+}
+
+#refresh-kind:active {
+  opacity: 0.6;
 }
 
 .animal-profile-submit {
