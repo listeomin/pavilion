@@ -3,8 +3,16 @@ ini_set('display_errors', 1); error_reporting(E_ALL);
 // api/animal_profile.php
 header('Content-Type: application/json');
 
+// Use the centralized DB connection that already knows the correct path
+try {
+    require_once __DIR__ . '/../../server/db.php';
+} catch (Exception $e) {
+    echo json_encode(['error' => 'Failed to load db.php: ' . $e->getMessage()]);
+    exit;
+}
+
 $action = $_GET['action'] ?? '';
-$db_path = __DIR__ . './../data/animal.sqlite';
+$db_path = __DIR__ . '/../data/animal.sqlite';
 
 // Initialize database if not exists
 function initDB($db_path) {
@@ -66,13 +74,20 @@ switch ($action) {
         break;
         
     case 'save':
-        $input = json_decode(file_get_contents('php://input'), true);
+        $raw_input = file_get_contents('php://input');
+        error_log('[animal_profile] Raw input: ' . $raw_input);
+        
+        $input = json_decode($raw_input, true);
+        error_log('[animal_profile] Decoded input: ' . json_encode($input));
+        
         $session_id = $input['session_id'] ?? '';
         $emoji = $input['emoji'] ?? '';
         $kind = $input['kind'] ?? '';
         $arial = $input['arial'] ?? '';
         $role = $input['role'] ?? '';
         $lifecycle = $input['lifecycle'] ?? '';
+        
+        error_log('[animal_profile] Parsed: session_id=' . $session_id . ', emoji=' . $emoji . ', kind=' . $kind);
         
         if (!$session_id || !$emoji || !$kind) {
             echo json_encode(['error' => 'Missing required fields']);
@@ -118,7 +133,36 @@ switch ($action) {
         $stmt->bindValue(':lifecycle', $lifecycle, SQLITE3_TEXT);
         
         if ($stmt->execute()) {
-            echo json_encode(['success' => true]);
+            // Update session name in chat.sqlite using centralized DB connection
+            try {
+                $chat_db = get_db(); // Use the centralized connection from server/db.php
+                $new_name = $emoji . ' ' . $kind;
+                
+                $update_stmt = $chat_db->prepare('UPDATE sessions SET name = :name WHERE id = :session_id');
+                $update_stmt->execute([':name' => $new_name, ':session_id' => $session_id]);
+                
+                $rowCount = $update_stmt->rowCount();
+                
+                // Verify the update by reading back
+                $verify_stmt = $chat_db->prepare('SELECT name FROM sessions WHERE id = :session_id');
+                $verify_stmt->execute([':session_id' => $session_id]);
+                $current_name = $verify_stmt->fetchColumn();
+                
+                error_log('[animal_profile] Updated session ' . $session_id . ' to name: ' . $new_name . ' (rows affected: ' . $rowCount . ', verified: ' . $current_name . ')');
+                
+                echo json_encode([
+                    'success' => true,
+                    'debug' => [
+                        'session_id' => $session_id,
+                        'new_name' => $new_name,
+                        'rows_affected' => $rowCount,
+                        'verified_name' => $current_name
+                    ]
+                ]);
+            } catch (Exception $e) {
+                error_log('[animal_profile] ERROR updating session name: ' . $e->getMessage());
+                echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            }
         } else {
             echo json_encode(['error' => 'Failed to save profile']);
         }

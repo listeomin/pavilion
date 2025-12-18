@@ -90,7 +90,7 @@ export class AnimalProfile {
             <div class="animal-profile-tooltip">Стадия жизни</div>
           </div>
 
-          <button class="animal-profile-submit" id="submit-profile">Сохранить зверя</button>
+          <button class="animal-profile-submit" id="submit-profile">Сохранить</button>
         </div>
       </div>
     `;
@@ -100,6 +100,8 @@ export class AnimalProfile {
   }
 
   attachEventListeners() {
+    console.log('[AnimalProfile] attachEventListeners() called');
+    
     // Close on overlay click
     this.overlay.addEventListener('click', (e) => {
       if (e.target === this.overlay) {
@@ -108,20 +110,38 @@ export class AnimalProfile {
     });
 
     // Refresh kind button
-    document.getElementById('refresh-kind').addEventListener('click', () => {
+    const refreshBtn = document.getElementById('refresh-kind');
+    console.log('[AnimalProfile] refreshBtn:', refreshBtn);
+    refreshBtn.addEventListener('click', () => {
+      refreshBtn.classList.add('spinning');
+      
       const randomName = this.data.getRandomName(this.selectedEmoji);
       if (randomName) {
         document.getElementById('kind-input').value = randomName;
         this.validateKind();
       }
+      
+      setTimeout(() => {
+        refreshBtn.classList.remove('spinning');
+      }, 600);
     });
 
     // Kind input validation
     const kindInput = document.getElementById('kind-input');
+    console.log('[AnimalProfile] kindInput:', kindInput);
     kindInput.addEventListener('input', () => this.validateKind());
 
     // Submit button
-    document.getElementById('submit-profile').addEventListener('click', () => this.save());
+    const submitBtn = document.getElementById('submit-profile');
+    console.log('[AnimalProfile] submitBtn:', submitBtn);
+    if (submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        console.log('[AnimalProfile] Submit button clicked!');
+        this.save();
+      });
+    } else {
+      console.error('[AnimalProfile] Submit button not found!');
+    }
 
     // Animal grid pagination will be attached in renderAnimalGrid
   }
@@ -262,6 +282,11 @@ export class AnimalProfile {
       }
     }
     
+    // Update opacity for all selects after values are set
+    this.updateSelectOpacity('arial-select');
+    this.updateSelectOpacity('role-select');
+    this.updateSelectOpacity('lifecycle-select');
+    
     this.validateKind();
   }
 
@@ -270,6 +295,20 @@ export class AnimalProfile {
     select.innerHTML = categories.map(cat => 
       `<option value="${cat.id}">${cat.name}</option>`
     ).join('');
+    
+    // Add change listener to update opacity
+    select.addEventListener('change', () => this.updateSelectOpacity(selectId));
+  }
+  
+  updateSelectOpacity(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    if (select.value === 'not_specified') {
+      select.style.opacity = '0.6';
+    } else {
+      select.style.opacity = '1';
+    }
   }
 
   async fetchProfile(emoji) {
@@ -284,14 +323,23 @@ export class AnimalProfile {
   }
 
   async save() {
-    if (!this.validateKind()) return;
+    console.log('[AnimalProfile] save() called');
+    if (!this.validateKind()) {
+      console.log('[AnimalProfile] Validation failed');
+      return;
+    }
     
     this.saveCurrentProfile();
     
     const profile = this.profiles[this.selectedEmoji];
+    console.log('[AnimalProfile] Saving profile:', profile);
     
     try {
-      const res = await fetch('./api/animal_profile.php?action=save', {
+      console.log('[AnimalProfile] Sending save request...');
+      const url = './api/animal_profile.php?action=save';
+      console.log('[AnimalProfile] Request URL:', url);
+      
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -304,14 +352,33 @@ export class AnimalProfile {
         })
       });
       
+      const responseText = await res.text();
+      
       if (res.ok) {
-        if (this.onSave) {
-          this.onSave(this.selectedEmoji, profile.kind);
+        let result;
+        try {
+          result = JSON.parse(responseText);
+        } catch (e) {
+          console.error('[AnimalProfile] Failed to parse JSON:', e);
+          console.error('[AnimalProfile] Full response:', responseText);
+          throw e;
         }
+        
+        // Use the profile data we just saved
+        const newName = this.selectedEmoji + ' ' + profile.kind;
+        
+        // Update via callback
+        if (this.onSave) {
+          this.onSave(newName);
+        }
+        
+        // Update current emoji to selected
+        this.currentEmoji = this.selectedEmoji;
+        
         this.close();
       }
     } catch (e) {
-      console.error('Failed to save profile:', e);
+      console.error('[AnimalProfile] Exception during save:', e);
     }
   }
 

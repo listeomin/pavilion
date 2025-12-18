@@ -95,14 +95,10 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     
     let content = '';
     
-    console.log('Message:', m.text, 'Metadata:', m.metadata);
-    
     // Check metadata type
     if (m.metadata && m.metadata.type === 'music') {
-      console.log('Rendering music player');
       content = renderMusicPlayer(m.metadata);
     } else if (m.metadata && m.metadata.type === 'images') {
-      console.log('Rendering images');
       // Start with escaped text
       content = escapeHtml(m.text);
       
@@ -116,7 +112,6 @@ export function renderMessages(chatLog, messages, lastIdRef) {
       // Apply markdown to the rest (without linkifyImages to avoid double processing)
       content = parseMarkdown(content);
     } else if (m.metadata && m.metadata.type === 'pinterest') {
-      console.log('Rendering pinterest preview');
       // Replace URL with preview in place
       content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
         if (url === m.metadata.url) {
@@ -127,7 +122,6 @@ export function renderMessages(chatLog, messages, lastIdRef) {
       // Apply markdown to the result
       content = linkifyImages(parseMarkdown(escapeHtml(content)));
     } else if (m.metadata && m.metadata.type === 'link') {
-      console.log('Rendering link preview');
       // Replace URL with preview in place
       let replacedUrl = false;
       content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
@@ -144,13 +138,11 @@ export function renderMessages(chatLog, messages, lastIdRef) {
       // Replace placeholder with actual preview
       content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
     } else {
-      console.log('Rendering regular markdown');
       // Regular text with markdown
       content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
       
       // Add GitHub preview if metadata exists
       if (m.metadata && m.metadata.type === 'github') {
-        console.log('Adding GitHub preview');
         content += renderGitHubPreview(m.metadata);
       }
     }

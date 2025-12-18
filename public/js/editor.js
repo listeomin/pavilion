@@ -269,17 +269,12 @@ export class Editor {
   syncMarkdownText() {
     if (this.paused) return;
     
-    console.log('syncMarkdownText called');
-    console.log('inputEl.childNodes:', this.inputEl.childNodes);
-    
     // Get text content but preserve image tags and br elements
     let text = '';
     const processNode = (node) => {
-      console.log('Processing node:', node, 'nodeName:', node.nodeName, 'nodeType:', node.nodeType);
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent;
       } else if (node.nodeName === 'BR') {
-        console.log('Found BR, adding newline');
         text += '\n';
       } else if (node.classList && node.classList.contains('image-tag')) {
         // Preserve image tag as placeholder
@@ -290,7 +285,6 @@ export class Editor {
     };
     
     this.inputEl.childNodes.forEach(processNode);
-    console.log('Final text:', text);
     this.markdownText = text;
     this.saveToHistory();
   }

@@ -1,14 +1,15 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiSend, apiPoll, apiChangeName } from './api.js?v=5';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=5';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=6';
 import { Editor } from './editor.js?v=5';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
-import { AnimalProfile } from './animalProfile.js?v=8';
+import { AnimalProfile } from './animalProfile.js?v=18';
+import { ContextMenu } from './contextMenu.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -102,7 +103,6 @@ import { AnimalProfile } from './animalProfile.js?v=8';
             text: '[переотправить]',
             onClick: async () => {
               // Retry logic would go here
-              console.log('Retry clicked');
             }
           }
         });
@@ -114,7 +114,6 @@ import { AnimalProfile } from './animalProfile.js?v=8';
         actionButton: {
           text: '[переотправить]',
           onClick: async () => {
-            console.log('Retry clicked');
           }
         }
       });
@@ -181,9 +180,10 @@ import { AnimalProfile } from './animalProfile.js?v=8';
     inputEl.focus();
     
     // Initialize animal profile
-    animalProfile = new AnimalProfile(sessionId, emoji, (newEmoji, newKind) => {
+    animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
       // Update display when profile is saved
-      myName = newEmoji + ' ' + newKind;
+      myName = newName;
+      const newEmoji = newName.split(' ')[0];
       userEmojiEl.textContent = newEmoji;
     });
     await animalProfile.init();
@@ -210,7 +210,6 @@ import { AnimalProfile } from './animalProfile.js?v=8';
         actionButton: {
           text: '[переотправить]',
           onClick: () => {
-            console.log('Retry clicked');
           }
         }
       });
@@ -218,4 +217,7 @@ import { AnimalProfile } from './animalProfile.js?v=8';
   });
   
   NightShift.init();
+  
+  // Initialize context menu
+  new ContextMenu();
 })();

@@ -1,0 +1,71 @@
+/* public/css/contextMenu.css */
+
+.context-menu {
+  position: fixed;
+  background: #ffffff;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  min-width: 180px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.1s ease, transform 0.1s ease;
+}
+
+.context-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.context-menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333333;
+  user-select: none;
+  transition: background-color 0.1s ease;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.context-menu-item.disabled {
+  color: #999999;
+  cursor: not-allowed;
+}
+
+.context-menu-item.disabled:hover {
+  background-color: transparent;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 4px 0;
+}
+
+.context-menu-reactions {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  justify-content: center;
+}
+
+.context-menu-reaction {
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.1s ease, transform 0.1s ease;
+}
+
+.context-menu-reaction:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.15);
+}

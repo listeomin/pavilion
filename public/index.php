@@ -20,7 +20,8 @@
 <link rel="stylesheet" href="css/track-preview.css?v=1">
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
-<link rel="stylesheet" href="css/animalProfile.css?v=13">
+<link rel="stylesheet" href="css/animalProfile.css?v=17">
+<link rel="stylesheet" href="css/contextMenu.css?v=1">
 </head>
 <body>
 <div class="wrap">

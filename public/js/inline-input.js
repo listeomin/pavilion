@@ -28,8 +28,6 @@ export class InlineInput {
       }
       
       this.commands = await commandsRes.json();
-      
-      console.log('Loaded data:', this.commands.length, 'commands');
     } catch (err) {
       console.error('Failed to load command data:', err);
     }
