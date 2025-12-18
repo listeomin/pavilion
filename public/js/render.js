@@ -7,6 +7,24 @@ import { renderMusicPlayer } from './music.js?v=1';
 
 let spinnerInterval = null;
 
+function renderQuote(quote) {
+  const { text, author, messageId } = quote;
+  
+  let quoteHtml = '<div class="quote-block">';
+  quoteHtml += `<div class="quote-text"><em>${escapeHtml(text)}</em></div>`;
+  
+  if (author) {
+    if (messageId) {
+      quoteHtml += `<div class="quote-author" data-target-message="${messageId}">${escapeHtml(author)}</div>`;
+    } else {
+      quoteHtml += `<div class="quote-author">${escapeHtml(author)}</div>`;
+    }
+  }
+  
+  quoteHtml += '</div>';
+  return quoteHtml;
+}
+
 export function renderSystemMessage(chatLog, message, options = {}) {
   const { spinner = false, actionButton = null } = options;
   
@@ -68,6 +86,7 @@ export function removeSystemMessage(element) {
 
 export function renderMessages(chatLog, messages, lastIdRef) {
   if (!messages || !messages.length) return;
+  console.log('Rendering messages:', messages);
   const frag = document.createDocumentFragment();
   messages.forEach(m => {
     // Check if we should merge with previous message
@@ -82,18 +101,30 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     const div = document.createElement('div');
     div.className = 'msg';
     div.dataset.author = m.author;
+    div.dataset.messageId = m.id;
     
     // Only add meta if not merging
     if (!shouldMerge) {
       const meta = document.createElement('span');
-      meta.className = 'meta';
+      meta.className = 'meta meta-clickable';
       meta.textContent = m.author + ':';
+      meta.style.cursor = 'pointer';
       div.appendChild(meta);
     }
     
     const text = document.createElement('span');
     
     let content = '';
+    
+    // Add quotes if present
+    if (m.metadata && m.metadata.quotes) {
+      console.log('Found quotes in message:', m.metadata.quotes);
+      m.metadata.quotes.forEach(quote => {
+        const quoteHtml = renderQuote(quote);
+        console.log('Rendered quote HTML:', quoteHtml);
+        content += quoteHtml;
+      });
+    }
     
     // Check metadata type
     if (m.metadata && m.metadata.type === 'music') {
@@ -139,7 +170,7 @@ export function renderMessages(chatLog, messages, lastIdRef) {
       content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
     } else {
       // Regular text with markdown
-      content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
+      content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
       
       // Add GitHub preview if metadata exists
       if (m.metadata && m.metadata.type === 'github') {

@@ -1,7 +1,8 @@
 // public/js/contextMenu.js
 
 export class ContextMenu {
-  constructor() {
+  constructor(editor) {
+    this.editor = editor;
     this.menu = null;
     this.selectedText = '';
     this.init();
@@ -18,7 +19,7 @@ export class ContextMenu {
     this.menu.className = 'context-menu';
     this.menu.innerHTML = `
       <div class="context-menu-item" data-action="copy">Скопировать</div>
-      <div class="context-menu-item disabled" data-action="quote">Цитировать</div>
+      <div class="context-menu-item" data-action="quote">Цитировать</div>
       <div class="context-menu-item disabled" data-action="branch">Создать ветку</div>
       <div class="context-menu-divider"></div>
       <div class="context-menu-reactions">
@@ -103,7 +104,9 @@ export class ContextMenu {
         break;
       
       case 'quote':
-        // TODO: implement quote
+        if (this.editor) {
+          this.editor.insertQuoteTag({ text: this.selectedText });
+        }
         break;
       
       case 'branch':

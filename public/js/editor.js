@@ -120,40 +120,58 @@ export class Editor {
         const container = range.startContainer;
         const offset = range.startOffset;
         
-        // Check if previous sibling is image-tag
+        // Check if previous sibling is image-tag or quote-tag
         if (container.nodeType === Node.TEXT_NODE && offset === 0) {
           const parent = container.parentNode;
           const prev = container.previousSibling;
           
-          if (prev && prev.classList && prev.classList.contains('image-tag')) {
-            e.preventDefault();
-            
-            // Delete from server if uploaded
-            if (prev.dataset.loaded === 'true') {
-              await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+          if (prev && prev.classList) {
+            if (prev.classList.contains('image-tag')) {
+              e.preventDefault();
+              
+              // Delete from server if uploaded
+              if (prev.dataset.loaded === 'true') {
+                await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+              }
+              
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
             }
             
-            prev.remove();
-            this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            return;
+            if (prev.classList.contains('quote-tag')) {
+              e.preventDefault();
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
+            }
           }
         }
         
-        // Check if cursor is right after image-tag
+        // Check if cursor is right after image-tag or quote-tag
         if (container.nodeType === Node.ELEMENT_NODE) {
           const prev = offset > 0 ? container.childNodes[offset - 1] : null;
           
-          if (prev && prev.classList && prev.classList.contains('image-tag')) {
-            e.preventDefault();
-            
-            // Delete from server if uploaded
-            if (prev.dataset.loaded === 'true') {
-              await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+          if (prev && prev.classList) {
+            if (prev.classList.contains('image-tag')) {
+              e.preventDefault();
+              
+              // Delete from server if uploaded
+              if (prev.dataset.loaded === 'true') {
+                await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
+              }
+              
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
             }
             
-            prev.remove();
-            this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            return;
+            if (prev.classList.contains('quote-tag')) {
+              e.preventDefault();
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
+            }
           }
         }
       }
@@ -166,6 +184,37 @@ export class Editor {
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  }
+
+  insertQuoteTag(options = {}) {
+    const { messageId = null, author = null, text = '' } = options;
+    
+    // Create quote tag
+    const tag = document.createElement('span');
+    tag.className = 'quote-tag';
+    tag.contentEditable = 'false';
+    tag.textContent = '[цитирую]';
+    
+    // Store data in attributes
+    if (messageId) tag.dataset.messageId = messageId;
+    if (author) tag.dataset.author = author;
+    if (text) tag.dataset.text = text;
+    
+    // Always insert at the start of inputEl
+    this.inputEl.insertBefore(tag, this.inputEl.firstChild);
+    const space = document.createTextNode(' ');
+    this.inputEl.insertBefore(space, tag.nextSibling);
+    
+    // Set cursor after the tag
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.setStart(space, 1);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    
+    this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    this.inputEl.focus();
   }
 
   getPlainText() {
@@ -279,6 +328,9 @@ export class Editor {
       } else if (node.classList && node.classList.contains('image-tag')) {
         // Preserve image tag as placeholder
         text += `__IMAGE_TAG_${node.dataset.id}__`;
+      } else if (node.classList && node.classList.contains('quote-tag')) {
+        // Preserve quote tag as placeholder
+        text += '__QUOTE_TAG__';
       } else if (node.childNodes) {
         node.childNodes.forEach(processNode);
       }

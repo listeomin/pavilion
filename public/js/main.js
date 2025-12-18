@@ -1,8 +1,8 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiSend, apiPoll, apiChangeName } from './api.js?v=5';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=6';
-import { Editor } from './editor.js?v=5';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage } from './render.js?v=7';
+import { Editor } from './editor.js?v=6';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=5';
 import { InlineInput } from './inline-input.js?v=28';
@@ -10,6 +10,7 @@ import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { ContextMenu } from './contextMenu.js?v=1';
+import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -50,6 +51,10 @@ import { ContextMenu } from './contextMenu.js?v=1';
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    // Extract quotes first
+    const quotes = extractQuoteData(inputEl);
+    console.log('Extracted quotes:', quotes);
+    
     // Collect image tags
     const imageTags = inputEl.querySelectorAll('.image-tag[data-loaded="true"]');
     const images = Array.from(imageTags).map(tag => ({
@@ -57,7 +62,7 @@ import { ContextMenu } from './contextMenu.js?v=1';
       url: tag.dataset.url
     }));
     
-    // Get text content with image placeholders
+    // Get text content with image placeholders and quote placeholders
     let text = '';
     const processNode = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
@@ -67,6 +72,8 @@ import { ContextMenu } from './contextMenu.js?v=1';
           text += `__IMAGE_TAG_${node.dataset.id}__`;
         }
         // Skip unloaded tags
+      } else if (node.classList && node.classList.contains('quote-tag')) {
+        // Skip quote tags in text, they're in metadata
       } else if (node.childNodes) {
         node.childNodes.forEach(processNode);
       }
@@ -74,19 +81,26 @@ import { ContextMenu } from './contextMenu.js?v=1';
     inputEl.childNodes.forEach(processNode);
     
     text = text.trim();
-    if (!text && images.length === 0) return;
+    if (!text && images.length === 0 && !quotes) return;
     
     // Show sending message
     const sendingMsg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
     
     // Prepare metadata
     let metadata = null;
-    if (images.length > 0) {
-      metadata = {
-        type: 'images',
-        images: images
-      };
+    if (images.length > 0 || quotes) {
+      metadata = {};
+      if (images.length > 0) {
+        metadata.type = 'images';
+        metadata.images = images;
+      }
+      if (quotes) {
+        metadata.quotes = quotes;
+      }
     }
+    
+    console.log('Sending metadata:', metadata);
+    console.log('Sending text:', text);
     
     try {
       const result = await apiSend(API, sessionId, text, metadata);
@@ -219,5 +233,8 @@ import { ContextMenu } from './contextMenu.js?v=1';
   NightShift.init();
   
   // Initialize context menu
-  new ContextMenu();
+  new ContextMenu(editor);
+  
+  // Initialize quote handlers
+  initQuoteHandlers(editor);
 })();

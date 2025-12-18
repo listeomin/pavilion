@@ -100,3 +100,34 @@
 .system-action-btn:hover {
   opacity: 0.7;
 }
+
+.quote-block {
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+  padding-left: 12px;
+  margin: 6px 0;
+  display: block;
+  font-style: italic;
+}
+
+.quote-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 2px;
+}
+
+.quote-author {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 2px;
+  font-style: normal;
+}
+
+.quote-author[data-target-message] {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.quote-author[data-target-message]:hover {
+  color: rgba(0, 0, 0, 0.8);
+}

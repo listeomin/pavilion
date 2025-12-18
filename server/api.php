@@ -70,9 +70,15 @@ if ($action === 'send') {
     $text = trim($input['text'] ?? '');
     $clientMetadata = $input['metadata'] ?? null;
 
-    if (!$session_id || $text === '') {
+    if (!$session_id) {
         http_response_code(400);
-        json(['error' => 'session_id and text required']);
+        json(['error' => 'session_id required']);
+    }
+    
+    // Allow empty text if there's metadata (quotes or images)
+    if ($text === '' && !$clientMetadata) {
+        http_response_code(400);
+        json(['error' => 'text or metadata required']);
     }
 
     $session = $sessionRepo->get($session_id);

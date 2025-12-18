@@ -70,6 +70,12 @@ form {
   color: var(--color-iris);
 }
 
+.quote-tag {
+  color: var(--color-iris);
+  cursor: default;
+  user-select: none;
+}
+
 #sendBtn {
   display: block;
   padding: 0;
