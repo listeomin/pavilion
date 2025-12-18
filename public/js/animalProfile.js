@@ -1,5 +1,5 @@
 // public/js/animalProfile.js
-import { AnimalData } from './animalData.js?v=1';
+import { AnimalData } from './animalData.js?v=2';
 
 export class AnimalProfile {
   constructor(sessionId, currentEmoji, onSave) {
@@ -29,11 +29,9 @@ export class AnimalProfile {
     this.overlay.innerHTML = `
       <div id="animal-profile-modal">
         <div class="animal-profile-left">
-          <svg class="animal-profile-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="16" x2="12" y2="12"/>
-            <line x1="12" y1="8" x2="12.01" y2="8"/>
-          </svg>
+          <div class="animal-profile-info-icon">
+            <img src="/assets/Info.svg" alt="Info">
+          </div>
           <div class="animal-profile-large-emoji" id="large-emoji">🐳</div>
           <div class="animal-profile-grid" id="animal-grid"></div>
           <div class="animal-profile-pagination" id="pagination"></div>
@@ -52,14 +50,9 @@ export class AnimalProfile {
                 placeholder="52-герцовый великан"
                 minlength="2"
               >
-              <svg class="animal-profile-icon-btn" id="refresh-kind" viewBox="0 0 24 24">
-                <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-              </svg>
-              <svg class="animal-profile-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
+              <div class="animal-profile-icon-btn" id="refresh-kind">
+                <img src="/assets/refresh.svg" alt="Refresh">
+              </div>
             </div>
             <div class="animal-profile-tooltip" id="kind-tooltip">Имя вашего зверя</div>
           </div>
@@ -67,16 +60,10 @@ export class AnimalProfile {
           <div class="animal-profile-field">
             <div class="animal-profile-label">Ареал обитания</div>
             <div class="animal-profile-input-wrapper">
-              <span class="animal-profile-emoji-icon" id="arial-emoji">🐳</span>
               <select class="animal-profile-select" id="arial-select"></select>
-              <svg class="animal-profile-icon-btn" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-              <svg class="animal-profile-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
+              <div class="animal-profile-icon-btn">
+                <img src="/assets/chevrone.svg" alt="Dropdown">
+              </div>
             </div>
             <div class="animal-profile-tooltip">Где обитает зверь</div>
           </div>
@@ -84,16 +71,10 @@ export class AnimalProfile {
           <div class="animal-profile-field">
             <div class="animal-profile-label">Роль в стае</div>
             <div class="animal-profile-input-wrapper">
-              <span class="animal-profile-emoji-icon" id="role-emoji">🐳</span>
               <select class="animal-profile-select" id="role-select"></select>
-              <svg class="animal-profile-icon-btn" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-              <svg class="animal-profile-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
+              <div class="animal-profile-icon-btn">
+                <img src="/assets/chevrone.svg" alt="Dropdown">
+              </div>
             </div>
             <div class="animal-profile-tooltip">Роль в сообществе</div>
           </div>
@@ -101,16 +82,10 @@ export class AnimalProfile {
           <div class="animal-profile-field">
             <div class="animal-profile-label">Жизненный цикл</div>
             <div class="animal-profile-input-wrapper">
-              <span class="animal-profile-emoji-icon" id="lifecycle-emoji">🐳</span>
               <select class="animal-profile-select" id="lifecycle-select"></select>
-              <svg class="animal-profile-icon-btn" viewBox="0 0 24 24">
-                <path d="M7 10l5 5 5-5z"/>
-              </svg>
-              <svg class="animal-profile-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="16" x2="12" y2="12"/>
-                <line x1="12" y1="8" x2="12.01" y2="8"/>
-              </svg>
+              <div class="animal-profile-icon-btn">
+                <img src="/assets/chevrone.svg" alt="Dropdown">
+              </div>
             </div>
             <div class="animal-profile-tooltip">Стадия жизни</div>
           </div>
@@ -239,11 +214,8 @@ export class AnimalProfile {
   }
 
   async loadProfile(emoji) {
-    // Update emoji icons
+    // Update emoji icon only for kind field
     document.getElementById('kind-emoji').textContent = emoji;
-    document.getElementById('arial-emoji').textContent = emoji;
-    document.getElementById('role-emoji').textContent = emoji;
-    document.getElementById('lifecycle-emoji').textContent = emoji;
     
     // Populate dropdowns
     this.populateSelect('arial-select', this.data.getArials(emoji));

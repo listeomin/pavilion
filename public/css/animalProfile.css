@@ -5,13 +5,13 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(13, 12, 74, 0.6);
   display: none;
   justify-content: center;
   align-items: center;
   z-index: 1000;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease;
 }
 
 #animal-profile-overlay.active {
@@ -21,9 +21,9 @@
 
 #animal-profile-modal {
   display: flex;
-  width: 680px;
-  max-height: 90vh;
-  background: var(--color-iris);
+  width: 764px;
+  height: 490px;
+  background: #7673F6;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 16px rgba(20, 20, 19, 0.16);
@@ -31,7 +31,7 @@
 
 /* Left Panel */
 .animal-profile-left {
-  width: 312px;
+  width: 404px;
   background: var(--color-cloud-light);
   padding: 24px;
   display: flex;
@@ -42,28 +42,33 @@
 .animal-profile-info-icon {
   width: 24px;
   height: 24px;
-  color: var(--color-iris);
   opacity: 0.6;
   cursor: pointer;
   margin-bottom: 8px;
 }
 
+.animal-profile-info-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .animal-profile-large-emoji {
   font-size: 120px;
   text-align: center;
-  margin: 16px 0;
   user-select: none;
 }
 
 .animal-profile-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  gap: 16px;
   margin-bottom: 16px;
+  min-height: 216px;
 }
 
 .animal-profile-grid-item {
-  font-size: 32px;
+  font-size: 28px;
   width: 48px;
   height: 48px;
   display: flex;
@@ -80,7 +85,7 @@
 }
 
 .animal-profile-grid-item.active {
-  background: var(--color-wisteria);
+  opacity: 0.5;
 }
 
 .animal-profile-pagination {
@@ -104,7 +109,7 @@
 
 /* Right Panel */
 .animal-profile-right {
-  flex: 1;
+  width: 360px;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -112,7 +117,7 @@
 }
 
 .animal-profile-title {
-  font-family: Georgia, serif;
+  font-family: 'Ubuntu Sans', sans-serif;
   font-size: 24px;
   color: var(--color-cloud-light);
   margin-bottom: 8px;
@@ -195,16 +200,24 @@
   cursor: pointer;
   transition: opacity 0.2s ease;
   flex-shrink: 0;
+  background: transparent;
+  pointer-events: none;
 }
 
 .animal-profile-icon-btn:hover {
   opacity: 1;
 }
 
-.animal-profile-icon-btn svg {
+.animal-profile-icon-btn img {
   width: 100%;
   height: 100%;
-  fill: var(--color-cloud-light);
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+#refresh-kind {
+  pointer-events: all;
+  cursor: pointer;
 }
 
 .animal-profile-submit {
@@ -228,15 +241,17 @@
 
 /* Tooltip */
 .animal-profile-tooltip {
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--color-cumulonimbus-dark);
-  color: var(--color-cloud-light);
+  color: var(--color-cloud-dark);
   padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: 16px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
@@ -257,23 +272,25 @@
   width: 40px;
   height: 40px;
   border: none;
-  background: none;
+  border-radius: 20px;
+  background: var(--color-iris);
   padding: 0;
   cursor: pointer;
-  opacity: 1;
+  opacity: 0.7;
   transition: opacity 0.3s ease;
   z-index: 1000;
   pointer-events: all !important;
 }
 
 .animal-profile-trigger:hover {
-  opacity: 0.7;
+  opacity: 1;
 }
 
 .animal-profile-trigger img {
-  width: 100%;
-  height: 100%;
+  width: 65%;
+  height: 65%;
   display: block;
+  margin: 0 auto;
 }
 
 /* NightShift button adjustment */

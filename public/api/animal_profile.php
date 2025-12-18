@@ -83,8 +83,19 @@ switch ($action) {
             exit;
         }
         
-        // Check for profanity (placeholder - will be implemented with dictionary)
-        // TODO: Load badwords.txt and check
+        // Check for profanity
+        $dirty_words_file = __DIR__ . '/../data/dirty.txt';
+        if (file_exists($dirty_words_file)) {
+            $dirty_words = array_map('trim', file($dirty_words_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+            $kind_lower = mb_strtolower($kind);
+            
+            foreach ($dirty_words as $word) {
+                if (mb_stripos($kind_lower, mb_strtolower($word)) !== false) {
+                    echo json_encode(['error' => 'Profanity detected']);
+                    exit;
+                }
+            }
+        }
         
         $stmt = $db->prepare('
             INSERT INTO animal_profiles (session_id, emoji, kind, arial, role, lifecycle, updated_at)
