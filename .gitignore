@@ -3,3 +3,8 @@ chat/chat.sqlite
 .DS_Store
 FETCH_HEAD
 server/php-error.log
+server/python-api/venv/
+public/assets/images/*
+!public/assets/images/.gitkeep
+public/assets/music/*
+!public/assets/music/.gitkeep
