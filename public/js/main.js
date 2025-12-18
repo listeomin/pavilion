@@ -47,11 +47,77 @@ import * as NightShift from './nightshift.js?v=1';
 
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const content = await inlineInput.getContent();
-    if (!content.text) return;
-
-    await apiSend(API, sessionId, content.text, content.metadata);
-    // Don't render here - let polling pick it up to avoid duplicates
+    
+    // Collect image tags
+    const imageTags = inputEl.querySelectorAll('.image-tag[data-loaded="true"]');
+    const images = Array.from(imageTags).map(tag => ({
+      id: tag.dataset.id,
+      url: tag.dataset.url
+    }));
+    
+    // Get text content with image placeholders
+    let text = '';
+    const processNode = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent;
+      } else if (node.classList && node.classList.contains('image-tag')) {
+        if (node.dataset.loaded === 'true') {
+          text += `__IMAGE_TAG_${node.dataset.id}__`;
+        }
+        // Skip unloaded tags
+      } else if (node.childNodes) {
+        node.childNodes.forEach(processNode);
+      }
+    };
+    inputEl.childNodes.forEach(processNode);
+    
+    text = text.trim();
+    if (!text && images.length === 0) return;
+    
+    // Show sending message
+    const sendingMsg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
+    
+    // Prepare metadata
+    let metadata = null;
+    if (images.length > 0) {
+      metadata = {
+        type: 'images',
+        images: images
+      };
+    }
+    
+    try {
+      const result = await apiSend(API, sessionId, text, metadata);
+      
+      if (result) {
+        // Success - remove sending message
+        removeSystemMessage(sendingMsg);
+        // Message will appear via polling
+      } else {
+        // Failed - show error
+        removeSystemMessage(sendingMsg);
+        renderSystemMessage(chatLog, 'у нас проблемы.', {
+          actionButton: {
+            text: '[переотправить]',
+            onClick: async () => {
+              // Retry logic would go here
+              console.log('Retry clicked');
+            }
+          }
+        });
+      }
+    } catch (error) {
+      // Network error
+      removeSystemMessage(sendingMsg);
+      renderSystemMessage(chatLog, 'у нас проблемы.', {
+        actionButton: {
+          text: '[переотправить]',
+          onClick: async () => {
+            console.log('Retry clicked');
+          }
+        }
+      });
+    }
 
     editor.clear();
     updateSendButton(sendBtn, editor, inlineInput);

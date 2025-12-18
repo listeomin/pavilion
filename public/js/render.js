@@ -101,6 +101,20 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     if (m.metadata && m.metadata.type === 'music') {
       console.log('Rendering music player');
       content = renderMusicPlayer(m.metadata);
+    } else if (m.metadata && m.metadata.type === 'images') {
+      console.log('Rendering images');
+      // Start with escaped text
+      content = escapeHtml(m.text);
+      
+      // Replace image placeholders with actual images
+      m.metadata.images.forEach(img => {
+        const placeholder = `__IMAGE_TAG_${img.id}__`;
+        const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;" loading="lazy" />`;
+        content = content.replace(placeholder, imgTag);
+      });
+      
+      // Apply markdown to the rest (without linkifyImages to avoid double processing)
+      content = parseMarkdown(content);
     } else if (m.metadata && m.metadata.type === 'pinterest') {
       console.log('Rendering pinterest preview');
       // Replace URL with preview in place
