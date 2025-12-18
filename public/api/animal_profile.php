@@ -94,8 +94,9 @@ switch ($action) {
             exit;
         }
         
-        // Validate kind length
-        if (mb_strlen($kind) < 2) {
+        // Validate kind length (UTF-8 safe)
+        $kind_length = function_exists('mb_strlen') ? mb_strlen($kind) : strlen($kind);
+        if ($kind_length < 2) {
             echo json_encode(['error' => 'Kind must be at least 2 characters']);
             exit;
         }
@@ -104,10 +105,12 @@ switch ($action) {
         $dirty_words_file = __DIR__ . '/../data/dirty.txt';
         if (file_exists($dirty_words_file)) {
             $dirty_words = array_map('trim', file($dirty_words_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
-            $kind_lower = mb_strtolower($kind);
+            $kind_lower = function_exists('mb_strtolower') ? mb_strtolower($kind) : strtolower($kind);
             
             foreach ($dirty_words as $word) {
-                if (mb_stripos($kind_lower, mb_strtolower($word)) !== false) {
+                $word_lower = function_exists('mb_strtolower') ? mb_strtolower($word) : strtolower($word);
+                $pos = function_exists('mb_stripos') ? mb_stripos($kind_lower, $word_lower) : stripos($kind_lower, $word_lower);
+                if ($pos !== false) {
                     echo json_encode(['error' => 'Profanity detected']);
                     exit;
                 }

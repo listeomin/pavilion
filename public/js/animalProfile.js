@@ -101,8 +101,6 @@ export class AnimalProfile {
   }
 
   attachEventListeners() {
-    console.log('[AnimalProfile] attachEventListeners() called');
-    
     // Close on overlay click
     this.overlay.addEventListener('click', (e) => {
       if (e.target === this.overlay) {
@@ -112,7 +110,6 @@ export class AnimalProfile {
 
     // Refresh kind button
     const refreshBtn = document.getElementById('refresh-kind');
-    console.log('[AnimalProfile] refreshBtn:', refreshBtn);
     refreshBtn.addEventListener('click', () => {
       refreshBtn.classList.add('spinning');
       
@@ -129,19 +126,14 @@ export class AnimalProfile {
 
     // Kind input validation
     const kindInput = document.getElementById('kind-input');
-    console.log('[AnimalProfile] kindInput:', kindInput);
     kindInput.addEventListener('input', () => this.validateKind());
 
     // Submit button
     const submitBtn = document.getElementById('submit-profile');
-    console.log('[AnimalProfile] submitBtn:', submitBtn);
     if (submitBtn) {
       submitBtn.addEventListener('click', () => {
-        console.log('[AnimalProfile] Submit button clicked!');
         this.save();
       });
-    } else {
-      console.error('[AnimalProfile] Submit button not found!');
     }
 
     // Animal grid pagination will be attached in renderAnimalGrid
@@ -324,21 +316,16 @@ export class AnimalProfile {
   }
 
   async save() {
-    console.log('[AnimalProfile] save() called');
     if (!this.validateKind()) {
-      console.log('[AnimalProfile] Validation failed');
       return;
     }
     
     this.saveCurrentProfile();
     
     const profile = this.profiles[this.selectedEmoji];
-    console.log('[AnimalProfile] Saving profile:', profile);
     
     try {
-      console.log('[AnimalProfile] Sending save request...');
       const url = `${CONFIG.BASE_PATH}/api/animal_profile.php?action=save`;
-      console.log('[AnimalProfile] Request URL:', url);
       
       const res = await fetch(url, {
         method: 'POST',
@@ -379,7 +366,7 @@ export class AnimalProfile {
         this.close();
       }
     } catch (e) {
-      console.error('[AnimalProfile] Exception during save:', e);
+      // Silent fail
     }
   }
 
