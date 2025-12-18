@@ -9,10 +9,10 @@ export class AnimalData {
 
   async loadAll() {
     const [kind, arial, role, lifecycle] = await Promise.all([
-      fetch('/data/bestiary/kind.json').then(r => r.json()),
-      fetch('/data/bestiary/arial.json').then(r => r.json()),
-      fetch('/data/bestiary/role.json').then(r => r.json()),
-      fetch('/data/bestiary/lifecycle.json').then(r => r.json())
+      fetch('./data/bestiary/kind.json').then(r => r.json()),
+      fetch('./data/bestiary/arial.json').then(r => r.json()),
+      fetch('./data/bestiary/role.json').then(r => r.json()),
+      fetch('./data/bestiary/lifecycle.json').then(r => r.json())
     ]);
 
     this.kind = kind;

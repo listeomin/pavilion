@@ -1,9 +1,10 @@
 <?php
+ini_set('display_errors', 1); error_reporting(E_ALL);
 // api/animal_profile.php
 header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? '';
-$db_path = __DIR__ . '/../data/animal.sqlite';
+$db_path = __DIR__ . './../data/animal.sqlite';
 
 // Initialize database if not exists
 function initDB($db_path) {
@@ -29,6 +30,7 @@ function initDB($db_path) {
 }
 
 initDB($db_path);
+error_log('DB path: ' . $db_path . ' | Exists: ' . file_exists($db_path));
 $db = new SQLite3($db_path);
 
 switch ($action) {
