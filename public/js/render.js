@@ -1,6 +1,8 @@
 // public/js/render.js
 import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=4';
 import { renderGitHubPreview } from './github.js?v=5';
+import { renderPinterestPreview } from './pinterest.js?v=1';
+import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=1';
 
 export function renderMessages(chatLog, messages, lastIdRef) {
@@ -16,16 +18,26 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     
     let content = '';
     
+    console.log('Message:', m.text, 'Metadata:', m.metadata);
+    
     // Check metadata type
     if (m.metadata && m.metadata.type === 'music') {
-      // Music player instead of text
+      console.log('Rendering music player');
       content = renderMusicPlayer(m.metadata);
+    } else if (m.metadata && m.metadata.type === 'pinterest') {
+      console.log('Rendering pinterest preview');
+      content = renderPinterestPreview(m.metadata);
+    } else if (m.metadata && m.metadata.type === 'link') {
+      console.log('Rendering link preview');
+      content = renderLinkPreview(m.metadata);
     } else {
+      console.log('Rendering regular markdown');
       // Regular text with markdown
       content = linkifyImages(parseMarkdown(escapeHtml(m.text)));
       
       // Add GitHub preview if metadata exists
-      if (m.metadata) {
+      if (m.metadata && m.metadata.type === 'github') {
+        console.log('Adding GitHub preview');
         content += renderGitHubPreview(m.metadata);
       }
     }

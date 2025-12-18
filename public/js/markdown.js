@@ -22,7 +22,12 @@ export function parseMarkdown(text) {
   processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   processed = processed.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   processed = processed.replace(/\b_([^_]+)_\b/g, '<em>$1</em>');
-  processed = processed.replace(/__URL_(\d+)__/g, (_, idx) => urlPlaceholders[parseInt(idx)]);
+  
+  // Convert URLs to clickable links
+  processed = processed.replace(/__URL_(\d+)__/g, (_, idx) => {
+    const url = urlPlaceholders[parseInt(idx)];
+    return `<a href="${url}" target="_blank" style="color: #000; text-decoration: none;">${url}</a>`;
+  });
 
   return processed;
 }
