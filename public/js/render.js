@@ -130,8 +130,11 @@ export function renderMessages(chatLog, messages, lastIdRef) {
     if (m.metadata && m.metadata.type === 'music') {
       content = renderMusicPlayer(m.metadata);
     } else if (m.metadata && m.metadata.type === 'images') {
+      // Remove any HTML tags from text first
+      const cleanText = m.text.replace(/<[^>]*>/g, '');
+      
       // Start with escaped text
-      content = escapeHtml(m.text);
+      content = escapeHtml(cleanText);
       
       // Replace image placeholders with actual images
       m.metadata.images.forEach(img => {
@@ -216,7 +219,10 @@ export function updateMessage(chatLog, updatedMessage) {
   if (m.metadata && m.metadata.type === 'music') {
     content = renderMusicPlayer(m.metadata);
   } else if (m.metadata && m.metadata.type === 'images') {
-    content = escapeHtml(m.text);
+    // Remove any HTML tags from text first
+    const cleanText = m.text.replace(/<[^>]*>/g, '');
+    
+    content = escapeHtml(cleanText);
     m.metadata.images.forEach(img => {
       const placeholder = `__IMAGE_TAG_${img.id}__`;
       const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;" loading="lazy" />`;
