@@ -4,7 +4,7 @@
 class BroadcastService {
     private string $wsUrl;
     
-    public function __construct(string $wsUrl = 'http://localhost:3002') {
+    public function __construct(string $wsUrl = 'http://localhost:3001') {
         $this->wsUrl = $wsUrl;
     }
     
