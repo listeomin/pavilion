@@ -3,7 +3,7 @@ import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiPoll } from './api.js?v=6';
 import { WebSocketClient } from './websocket-client.js';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=10';
-import { Editor } from './editor.js?v=9';
+import { Editor } from './editor.js?v=10';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=6';
 import { InlineInput } from './inline-input.js?v=28';

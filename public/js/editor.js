@@ -77,17 +77,23 @@ export class Editor {
       const imageUrlPattern = /\.(jpg|jpeg|png|gif|webp)/i;
       const trimmedText = text.trim();
       if (imageUrlPattern.test(trimmedText)) {
-        console.log('[Paste] Text is image URL, fetching:', trimmedText);
-        try {
-          const response = await fetch(text);
-          const blob = await response.blob();
-          const file = new File([blob], 'pasted-image.png', { type: blob.type });
-          await this.insertImageTag(file);
-          console.log('[Paste] Image URL uploaded, stopping');
-          return; // Stop here, don't paste URL as text
-        } catch (err) {
-          console.error('[Paste] Failed to fetch image URL:', err);
-          // Fall through to text handling
+        // Skip upload if URL is already on our server
+        if (trimmedText.includes('hhrrr.ru/musceler/')) {
+          console.log('[Paste] Image already on server, inserting as text');
+          // Fall through to text insertion
+        } else {
+          console.log('[Paste] Text is image URL, fetching:', trimmedText);
+          try {
+            const response = await fetch(text);
+            const blob = await response.blob();
+            const file = new File([blob], 'pasted-image.png', { type: blob.type });
+            await this.insertImageTag(file);
+            console.log('[Paste] Image URL uploaded, stopping');
+            return; // Stop here, don't paste URL as text
+          } catch (err) {
+            console.error('[Paste] Failed to fetch image URL:', err);
+            // Fall through to text handling
+          }
         }
       }
       
