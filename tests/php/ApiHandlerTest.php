@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../server/GitHubService.php';
 require_once __DIR__ . '/../../server/PinterestService.php';
 require_once __DIR__ . '/../../server/LinkPreviewService.php';
 require_once __DIR__ . '/../../server/ImageUploadService.php';
+require_once __DIR__ . '/../../server/BroadcastService.php';
 
 class ApiHandlerTest extends TestCase {
     private PDO $db;
@@ -64,13 +65,18 @@ class ApiHandlerTest extends TestCase {
         
         $mockImage = $this->createMock(ImageUploadService::class);
         
+        $mockBroadcast = $this->createMock(BroadcastService::class);
+        $mockBroadcast->method('messageNew')->willReturn(true);
+        $mockBroadcast->method('messageUpdated')->willReturn(true);
+        
         $this->handler = new ApiHandler(
             $this->sessionRepo,
             $this->msgRepo,
             $mockGithub,
             $mockPinterest,
             $mockLink,
-            $mockImage
+            $mockImage,
+            $mockBroadcast
         );
     }
 

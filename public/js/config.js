@@ -34,8 +34,15 @@ function detectBasePath() {
 
 const BASE_PATH = detectBasePath();
 
+// Auto-detect WebSocket URL
+const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_HOST = window.location.hostname === 'localhost' 
+  ? 'localhost:3001' 
+  : window.location.host;
+const WS_PATH = BASE_PATH + '/ws';
+
 export const CONFIG = {
   BASE_PATH: BASE_PATH,
   API_PATH: BASE_PATH + '/server/api.php',
-  WS_URL: 'ws://localhost:3001'
+  WS_URL: `${WS_PROTOCOL}//${WS_HOST}${WS_PATH}`
 };

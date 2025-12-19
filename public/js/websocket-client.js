@@ -51,15 +51,21 @@ export class WebSocketClient {
       this.isConnected = false;
       this.emit('disconnected', { code: event.code, reason: event.reason });
       
-      // Auto-reconnect
+      // Auto-reconnect with exponential backoff
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++;
         const delay = this.reconnectDelay * this.reconnectAttempts;
         console.log(`[WS] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})`);
         setTimeout(() => this.connect(), delay);
       } else {
-        console.error('[WS] Max reconnect attempts reached');
+        // After max attempts, keep trying every 30 seconds indefinitely
+        console.error('[WS] Max reconnect attempts reached, will retry every 30s');
         this.emit('max_reconnect_attempts');
+        setTimeout(() => {
+          this.reconnectAttempts = 0; // Reset counter for new cycle
+          console.log('[WS] Retrying connection...');
+          this.connect();
+        }, 30000);
       }
     };
   }

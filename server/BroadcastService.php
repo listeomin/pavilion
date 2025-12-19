@@ -21,7 +21,7 @@ class BroadcastService {
                     'method' => 'POST',
                     'header' => 'Content-Type: application/json',
                     'content' => $payload,
-                    'timeout' => 1 // 1 sec timeout
+                    'timeout' => 0.1 // 100ms timeout - fast fail if WS down
                 ]
             ]);
             

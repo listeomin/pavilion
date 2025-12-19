@@ -1,6 +1,6 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage } from './api.js?v=6';
+import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiPoll } from './api.js?v=6';
 import { WebSocketClient } from './websocket-client.js';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=8';
 import { Editor } from './editor.js?v=6';
@@ -21,6 +21,8 @@ import { MessageHistory } from './message-history.js?v=1';
   let myName = '';
   const lastIdRef = { value: 0 };
   let wsClient = null;
+  let isFallbackMode = false;
+  let pollIntervalId = null;
 
   const chatLog = document.getElementById('chat-log');
   const inputEl = document.getElementById('text');
@@ -168,6 +170,13 @@ import { MessageHistory } from './message-history.js?v=1';
     
     wsClient.on('auth_ok', (data) => {
       console.log('[Main] WS authenticated:', data.name);
+      // Stop polling if it was running
+      if (pollIntervalId) {
+        clearInterval(pollIntervalId);
+        pollIntervalId = null;
+        isFallbackMode = false;
+        console.log('[Main] Stopped polling, WS connected');
+      }
     });
     
     wsClient.on('message_new', (message) => {
@@ -185,11 +194,33 @@ import { MessageHistory } from './message-history.js?v=1';
     });
     
     wsClient.on('max_reconnect_attempts', () => {
-      console.error('[Main] WS max reconnect attempts reached');
-      renderSystemMessage(chatLog, 'Соединение потеряно. Перезагрузите страницу.');
+      console.error('[Main] WS max reconnect attempts reached, falling back to polling');
+      isFallbackMode = true;
+      startPolling();
     });
     
     wsClient.connect();
+  }
+  
+  function startPolling() {
+    if (pollIntervalId) return; // Already polling
+    
+    console.log('[Main] Starting HTTP polling (fallback mode)');
+    
+    const pollLoop = async () => {
+      try {
+        const data = await apiPoll(API, lastIdRef.value);
+        if (data && data.messages && data.messages.length) {
+          renderMessages(chatLog, data.messages, lastIdRef);
+        }
+      } catch (e) {
+        console.error('[Polling] Error:', e);
+      }
+    };
+    
+    // Poll immediately, then every 3 seconds
+    pollLoop();
+    pollIntervalId = setInterval(pollLoop, 3000);
   }
 
   let animalProfile = null;
