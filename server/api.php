@@ -12,16 +12,12 @@ require_once __DIR__ . '/GitHubService.php';
 require_once __DIR__ . '/PinterestService.php';
 require_once __DIR__ . '/LinkPreviewService.php';
 require_once __DIR__ . '/ImageUploadService.php';
+require_once __DIR__ . '/ApiHandler.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 $action = $_GET['action'] ?? $_POST['action'] ?? null;
-$sessionRepo = new SessionRepository();
-$msgRepo = new MessageRepository();
-$githubService = new GitHubService();
-$pinterestService = new PinterestService();
-$linkPreviewService = new LinkPreviewService();
-$imageService = new ImageUploadService();
+$handler = new ApiHandler();
 
 function json($data) {
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -33,178 +29,65 @@ if (!$action) {
     json(['error' => 'action required']);
 }
 
-if ($action === 'init') {
-    $cookieId = $_POST['session_id'] ?? $_COOKIE['chat_session_id'] ?? null;
-    $session = null;
-    $isNew = false;
-
-    if ($cookieId) {
-        $session = $sessionRepo->get($cookieId);
+try {
+    if ($action === 'init') {
+        $result = $handler->init($_POST, $_COOKIE);
+        if (isset($result['set_cookie'])) {
+            $cookie = $result['set_cookie'];
+            setcookie($cookie['name'], $cookie['value'], [
+                'expires' => $cookie['expires'],
+                'path' => $cookie['path'],
+                'httponly' => $cookie['httponly'],
+                'samesite' => $cookie['samesite']
+            ]);
+            unset($result['set_cookie']);
+        }
+        json($result);
     }
 
-    if ($session) {
-        $messages = $msgRepo->getAll();
-        $isNew = false;
-    } else {
-        $session = $sessionRepo->create();
-        $messages = $msgRepo->getLastPage(50);
-        $isNew = true;
-        setcookie('chat_session_id', $session['id'], [
-            'expires' => time() + 60*60*24*30,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
+    if ($action === 'send') {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $result = $handler->send($input);
+        json($result);
     }
 
-    json([
-        'session_id' => $session['id'],
-        'name' => $session['name'],
-        'is_new' => $isNew,
-        'messages' => $messages
-    ]);
+    if ($action === 'poll') {
+        $result = $handler->poll($_GET);
+        json($result);
+    }
+
+    if ($action === 'change_name') {
+        $result = $handler->changeName($_POST);
+        json($result);
+    }
+
+    if ($action === 'upload_image') {
+        $result = $handler->uploadImage($_FILES);
+        json($result);
+    }
+
+    if ($action === 'delete_image') {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $result = $handler->deleteImage($input);
+        json($result);
+    }
+
+    if ($action === 'update_message') {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $result = $handler->updateMessage($input);
+        json($result);
+    }
+
+    http_response_code(400);
+    json(['error' => 'unknown action']);
+
+} catch (InvalidArgumentException $e) {
+    http_response_code(400);
+    json(['error' => $e->getMessage()]);
+} catch (RuntimeException $e) {
+    http_response_code(403);
+    json(['error' => $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    json(['error' => 'internal server error']);
 }
-
-if ($action === 'send') {
-    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-    $session_id = $input['session_id'] ?? null;
-    $text = trim($input['text'] ?? '');
-    $clientMetadata = $input['metadata'] ?? null;
-
-    if (!$session_id) {
-        http_response_code(400);
-        json(['error' => 'session_id required']);
-    }
-    
-    // Allow empty text if there's metadata (quotes or images)
-    if ($text === '' && !$clientMetadata) {
-        http_response_code(400);
-        json(['error' => 'text or metadata required']);
-    }
-
-    $session = $sessionRepo->get($session_id);
-    if (!$session) {
-        http_response_code(403);
-        json(['error' => 'invalid session']);
-    }
-
-    // Priority: client metadata (music) > Pinterest > GitHub > generic link preview
-    $metadata = $clientMetadata;
-    if (!$metadata) {
-        $metadata = $pinterestService->enrichMessage($text);
-    }
-    if (!$metadata) {
-        $metadata = $githubService->enrichMessage($text);
-    }
-    if (!$metadata) {
-        $metadata = $linkPreviewService->enrichMessage($text);
-    }
-
-    $message = $msgRepo->add($session_id, $session['name'], $text, $metadata);
-    json($message);
-}
-
-if ($action === 'poll') {
-    $after = isset($_GET['after_id']) && $_GET['after_id'] !== '' ? intval($_GET['after_id']) : null;
-    $messages = $msgRepo->getSinceId($after);
-    json(['messages' => $messages]);
-}
-
-if ($action === 'change_name') {
-    $input = $_POST;
-    $session_id = $input['session_id'] ?? null;
-
-    if (!$session_id) {
-        http_response_code(400);
-        json(['error' => 'session_id required']);
-    }
-
-    $session = $sessionRepo->changeName($session_id);
-    if (!$session) {
-        http_response_code(403);
-        json(['error' => 'invalid session']);
-    }
-
-    json($session);
-}
-
-if ($action === 'upload_image') {
-    if (!isset($_FILES['image'])) {
-        http_response_code(400);
-        json(['success' => false, 'error' => 'No image provided']);
-    }
-
-    $result = $imageService->upload($_FILES['image']);
-    
-    if (!$result['success']) {
-        http_response_code(400);
-    }
-    
-    json($result);
-}
-
-if ($action === 'delete_image') {
-    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-    $id = $input['id'] ?? null;
-
-    if (!$id) {
-        http_response_code(400);
-        json(['success' => false, 'error' => 'ID required']);
-    }
-
-    $result = $imageService->delete($id);
-    
-    if (!$result['success']) {
-        http_response_code(400);
-    }
-    
-    json($result);
-}
-
-if ($action === 'update_message') {
-    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
-    $session_id = $input['session_id'] ?? null;
-    $message_id = $input['message_id'] ?? null;
-    $text = trim($input['text'] ?? '');
-    $clientMetadata = $input['metadata'] ?? null;
-
-    if (!$session_id || !$message_id) {
-        http_response_code(400);
-        json(['error' => 'session_id and message_id required']);
-    }
-
-    if ($text === '' && !$clientMetadata) {
-        http_response_code(400);
-        json(['error' => 'text or metadata required']);
-    }
-
-    $session = $sessionRepo->get($session_id);
-    if (!$session) {
-        http_response_code(403);
-        json(['error' => 'invalid session']);
-    }
-
-    // Priority: client metadata (music) > Pinterest > GitHub > generic link preview
-    $metadata = $clientMetadata;
-    if (!$metadata) {
-        $metadata = $pinterestService->enrichMessage($text);
-    }
-    if (!$metadata) {
-        $metadata = $githubService->enrichMessage($text);
-    }
-    if (!$metadata) {
-        $metadata = $linkPreviewService->enrichMessage($text);
-    }
-
-    $message = $msgRepo->update($message_id, $session['name'], $text, $metadata);
-    
-    if (!$message) {
-        http_response_code(403);
-        json(['error' => 'message not found or unauthorized']);
-    }
-    
-    json($message);
-}
-
-http_response_code(400);
-json(['error' => 'unknown action']);

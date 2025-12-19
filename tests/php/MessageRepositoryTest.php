@@ -38,7 +38,6 @@ class MessageRepositoryTest extends TestCase {
         $this->repo = new MessageRepository();
         $reflection = new ReflectionClass($this->repo);
         $property = $reflection->getProperty('db');
-        $property->setAccessible(true);
         $property->setValue($this->repo, $this->db);
     }
 

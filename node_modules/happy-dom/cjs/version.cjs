@@ -1,0 +1,1 @@
+module.exports = { default: { version: '12.10.3' } };

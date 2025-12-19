@@ -4,9 +4,11 @@ require_once __DIR__ . '/db.php';
 
 class SessionRepository {
     private PDO $db;
+    private string $namesFile;
 
-    public function __construct() {
-        $this->db = get_db();
+    public function __construct(?PDO $db = null, ?string $namesFile = null) {
+        $this->db = $db ?? get_db();
+        $this->namesFile = $namesFile ?? __DIR__ . '/user_names.json';
     }
 
     public function get(string $id): ?array {
@@ -21,8 +23,7 @@ class SessionRepository {
         if (!$session) return null;
 
         // load available names from JSON
-        $namesFile = __DIR__ . '/user_names.json';
-        $allNames = json_decode(file_get_contents($namesFile), true);
+        $allNames = json_decode(file_get_contents($this->namesFile), true);
 
         // get already taken names
         $stmt = $this->db->query("SELECT name FROM sessions");
@@ -52,8 +53,7 @@ class SessionRepository {
         $now = (new DateTime())->format(DateTime::ATOM);
 
         // load available names from JSON
-        $namesFile = __DIR__ . '/user_names.json';
-        $allNames = json_decode(file_get_contents($namesFile), true);
+        $allNames = json_decode(file_get_contents($this->namesFile), true);
 
         // get already taken names
         $stmt = $this->db->query("SELECT name FROM sessions");
