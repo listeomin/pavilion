@@ -34,7 +34,31 @@ export class Editor {
       }
     }
     
-    // If no image, handle as text
+    // If no direct image, check HTML for <img> tags
+    if (!hasImage) {
+      const html = e.clipboardData.getData('text/html');
+      if (html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const img = doc.querySelector('img');
+        
+        if (img && img.src) {
+          // Found image in HTML - fetch and upload it
+          try {
+            const response = await fetch(img.src);
+            const blob = await response.blob();
+            const file = new File([blob], 'pasted-image.png', { type: blob.type });
+            await this.insertImageTag(file);
+            hasImage = true;
+          } catch (err) {
+            console.error('Failed to fetch image from HTML:', err);
+            // Fall through to text handling
+          }
+        }
+      }
+    }
+    
+    // If still no image, handle as plain text only
     if (!hasImage) {
       const text = e.clipboardData.getData('text/plain');
       
