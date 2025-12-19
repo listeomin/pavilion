@@ -8,6 +8,7 @@ class ApiHandler {
     private PinterestService $pinterestService;
     private LinkPreviewService $linkPreviewService;
     private ImageUploadService $imageService;
+    private BroadcastService $broadcastService;
 
     public function __construct(
         ?SessionRepository $sessionRepo = null,
@@ -15,7 +16,8 @@ class ApiHandler {
         ?GitHubService $githubService = null,
         ?PinterestService $pinterestService = null,
         ?LinkPreviewService $linkPreviewService = null,
-        ?ImageUploadService $imageService = null
+        ?ImageUploadService $imageService = null,
+        ?BroadcastService $broadcastService = null
     ) {
         $this->sessionRepo = $sessionRepo ?? new SessionRepository();
         $this->msgRepo = $msgRepo ?? new MessageRepository();
@@ -23,6 +25,7 @@ class ApiHandler {
         $this->pinterestService = $pinterestService ?? new PinterestService();
         $this->linkPreviewService = $linkPreviewService ?? new LinkPreviewService();
         $this->imageService = $imageService ?? new ImageUploadService();
+        $this->broadcastService = $broadcastService ?? new BroadcastService();
     }
 
     public function init(array $input, array $cookies = []): array {
@@ -89,7 +92,9 @@ class ApiHandler {
             $metadata = $this->linkPreviewService->enrichMessage($text);
         }
 
-        return $this->msgRepo->add($session_id, $session['name'], $text, $metadata);
+        $message = $this->msgRepo->add($session_id, $session['name'], $text, $metadata);
+        $this->broadcastService->messageNew($message);
+        return $message;
     }
 
     public function poll(array $query): array {
@@ -180,6 +185,7 @@ class ApiHandler {
             throw new RuntimeException('message not found or unauthorized');
         }
         
+        $this->broadcastService->messageUpdated($message);
         return $message;
     }
 }

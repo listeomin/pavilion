@@ -1,6 +1,7 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiPoll, apiChangeName, apiUpdateMessage } from './api.js?v=6';
+import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage } from './api.js?v=6';
+import { WebSocketClient } from './websocket-client.js';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=8';
 import { Editor } from './editor.js?v=6';
 import { FormatMenu } from './format.js?v=5';
@@ -19,7 +20,7 @@ import { MessageHistory } from './message-history.js?v=1';
   let sessionId = getCookie(COOKIE_NAME) || null;
   let myName = '';
   const lastIdRef = { value: 0 };
-  const pollInterval = 3000;
+  let wsClient = null;
 
   const chatLog = document.getElementById('chat-log');
   const inputEl = document.getElementById('text');
@@ -162,17 +163,33 @@ import { MessageHistory } from './message-history.js?v=1';
     inputEl.focus();
   });
 
-  async function pollLoop() {
-    try {
-      const data = await apiPoll(API, lastIdRef.value);
-      if (data && data.messages && data.messages.length) {
-        renderMessages(chatLog, data.messages, lastIdRef);
-      }
-    } catch (e) {
-      // silent
-    } finally {
-      setTimeout(pollLoop, pollInterval);
-    }
+  function setupWebSocket() {
+    wsClient = new WebSocketClient(CONFIG.WS_URL, sessionId);
+    
+    wsClient.on('auth_ok', (data) => {
+      console.log('[Main] WS authenticated:', data.name);
+    });
+    
+    wsClient.on('message_new', (message) => {
+      console.log('[Main] New message via WS:', message);
+      renderMessages(chatLog, [message], lastIdRef);
+    });
+    
+    wsClient.on('message_updated', (message) => {
+      console.log('[Main] Message updated via WS:', message);
+      updateMessage(chatLog, message);
+    });
+    
+    wsClient.on('disconnected', () => {
+      console.warn('[Main] WS disconnected');
+    });
+    
+    wsClient.on('max_reconnect_attempts', () => {
+      console.error('[Main] WS max reconnect attempts reached');
+      renderSystemMessage(chatLog, 'Соединение потеряно. Перезагрузите страницу.');
+    });
+    
+    wsClient.connect();
   }
 
   let animalProfile = null;
@@ -214,7 +231,7 @@ import { MessageHistory } from './message-history.js?v=1';
     const emoji = myName.split(' ')[0];
     userEmojiEl.textContent = emoji;
     renderMessages(chatLog, data.messages || [], lastIdRef);
-    setTimeout(pollLoop, pollInterval);
+    setupWebSocket();
     inputEl.focus();
     
     // Initialize animal profile

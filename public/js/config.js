@@ -36,5 +36,6 @@ const BASE_PATH = detectBasePath();
 
 export const CONFIG = {
   BASE_PATH: BASE_PATH,
-  API_PATH: BASE_PATH + '/server/api.php'
+  API_PATH: BASE_PATH + '/server/api.php',
+  WS_URL: 'ws://localhost:3001'
 };
