@@ -1,5 +1,5 @@
 // public/js/render.js
-import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=4';
+import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=5';
 import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';

@@ -21,13 +21,17 @@ export class Editor {
 
   async handlePaste(e) {
     e.preventDefault();
+    console.log('[Paste] Event triggered');
     
     // Check for images first
     const items = e.clipboardData.items;
     let hasImage = false;
     
+    console.log('[Paste] Items:', items.length);
     for (let item of items) {
+      console.log('[Paste] Item type:', item.type);
       if (item.type.startsWith('image/')) {
+        console.log('[Paste] Found direct image');
         hasImage = true;
         const file = item.getAsFile();
         await this.insertImageTag(file);
@@ -37,23 +41,29 @@ export class Editor {
     // If no direct image, check HTML for <img> tags
     if (!hasImage) {
       const html = e.clipboardData.getData('text/html');
+      console.log('[Paste] HTML:', html ? html.substring(0, 200) : 'none');
+      
       if (html) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const img = doc.querySelector('img');
         
         if (img && img.src) {
-          // Found image in HTML - fetch and upload it
+          console.log('[Paste] Found img in HTML, src:', img.src);
+          // Found image in HTML - fetch and upload it (ignore text)
           try {
             const response = await fetch(img.src);
             const blob = await response.blob();
             const file = new File([blob], 'pasted-image.png', { type: blob.type });
             await this.insertImageTag(file);
-            hasImage = true;
+            console.log('[Paste] Image uploaded, stopping');
+            return; // Stop here, don't paste text
           } catch (err) {
-            console.error('Failed to fetch image from HTML:', err);
+            console.error('[Paste] Failed to fetch image from HTML:', err);
             // Fall through to text handling
           }
+        } else {
+          console.log('[Paste] No img found in HTML');
         }
       }
     }
@@ -61,6 +71,25 @@ export class Editor {
     // If still no image, handle as plain text only
     if (!hasImage) {
       const text = e.clipboardData.getData('text/plain');
+      console.log('[Paste] Inserting plain text:', text.substring(0, 100));
+      
+      // Check if text is an image URL
+      const imageUrlPattern = /\.(jpg|jpeg|png|gif|webp)/i;
+      const trimmedText = text.trim();
+      if (imageUrlPattern.test(trimmedText)) {
+        console.log('[Paste] Text is image URL, fetching:', trimmedText);
+        try {
+          const response = await fetch(text);
+          const blob = await response.blob();
+          const file = new File([blob], 'pasted-image.png', { type: blob.type });
+          await this.insertImageTag(file);
+          console.log('[Paste] Image URL uploaded, stopping');
+          return; // Stop here, don't paste URL as text
+        } catch (err) {
+          console.error('[Paste] Failed to fetch image URL:', err);
+          // Fall through to text handling
+        }
+      }
       
       // Insert text at cursor position
       const sel = window.getSelection();

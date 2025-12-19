@@ -36,8 +36,10 @@ export function parseMarkdown(text) {
 }
 
 export function linkifyImages(text) {
-  const imageRegex = /(https?:\/\/[^\s<>"]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^\s<>"]*)?)/gi;
-  return text.replace(imageRegex, (url) => {
+  // Match image URLs that are already inside <a> tags from parseMarkdown
+  const linkWithImageRegex = /<a href="(https?:\/\/[^"]+\.(?:png|jpg|jpeg|gif|webp)(?:\?[^"]*)?)"[^>]*>.*?<\/a>/gi;
+  
+  return text.replace(linkWithImageRegex, (match, url) => {
     const fixedUrl = url.replace(/^http:\/\/hhrrr\.ru/, 'https://hhrrr.ru');
     const escapedUrl = fixedUrl.replace(/"/g, '&quot;');
     return `<img src="${escapedUrl}" 
