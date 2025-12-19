@@ -1,196 +1,96 @@
 const WebSocket = require('ws');
-const express = require('express');
-const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const http = require('http');
+const url = require('url');
 
-// Config
-const WS_PORT = 3001;
-const HTTP_PORT = 3002;
-const DB_PATH = path.join(__dirname, '../chat.sqlite');
+const PORT = 3001;
+const clients = new Map(); // sessionId -> WebSocket
 
-// Init
-const app = express();
-app.use(cors());
-app.use(express.json());
+const server = http.createServer();
+const wss = new WebSocket.Server({ server });
 
-const db = new sqlite3.Database(DB_PATH, sqlite3.OPEN_READONLY, (err) => {
-  if (err) {
-    console.error('[DB] Connection error:', err.message);
-    process.exit(1);
+wss.on('connection', (ws, req) => {
+  const params = url.parse(req.url, true).query;
+  const sessionId = params.session_id;
+
+  if (!sessionId) {
+    console.error('[WS] Connection rejected: no session_id');
+    ws.close(1008, 'session_id required');
+    return;
   }
-  console.log(`[DB] Connected to ${DB_PATH}`);
+
+  clients.set(sessionId, ws);
+  console.log(`[WS] Client connected: ${sessionId} (total: ${clients.size})`);
+
+  ws.on('message', (data) => {
+    try {
+      const message = JSON.parse(data);
+      console.log(`[WS] Message from ${sessionId}:`, message.type);
+      
+      // Echo back для подтверждения
+      ws.send(JSON.stringify({ type: 'ack', ...message }));
+    } catch (e) {
+      console.error('[WS] Parse error:', e.message);
+    }
+  });
+
+  ws.on('close', () => {
+    clients.delete(sessionId);
+    console.log(`[WS] Client disconnected: ${sessionId} (total: ${clients.size})`);
+  });
+
+  ws.on('error', (err) => {
+    console.error(`[WS] Error for ${sessionId}:`, err.message);
+  });
 });
 
-const wss = new WebSocket.Server({ port: WS_PORT });
-
-// Heartbeat interval
-const HEARTBEAT_INTERVAL = 30000;
-
-// Store connections: Map<WebSocket, { sessionId, rooms, isAlive }>
-const connections = new Map();
-
-// Validate session
-function validateSession(sessionId) {
-  return new Promise((resolve, reject) => {
-    db.get('SELECT id, name FROM sessions WHERE id = ?', [sessionId], (err, row) => {
-      if (err) {
-        console.error('[DB] Validation error:', err.message);
-        reject(err);
-      } else {
-        resolve(row || null);
-      }
-    });
-  });
-}
-
-// Broadcast to room
-function broadcast(roomId, event, data) {
-  const message = JSON.stringify({ event, data });
+// Broadcast функция
+function broadcast(message) {
+  const payload = JSON.stringify(message);
   let sent = 0;
-  
-  connections.forEach((meta, ws) => {
-    if (ws.readyState === WebSocket.OPEN && meta.rooms.includes(roomId)) {
-      ws.send(message);
+
+  clients.forEach((ws, sessionId) => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(payload);
       sent++;
     }
   });
-  
-  console.log(`[Broadcast] ${event} to room:${roomId} → ${sent} clients`);
+
+  console.log(`[WS] Broadcasted to ${sent}/${clients.size} clients`);
+  return sent;
 }
 
-// WebSocket connection
-wss.on('connection', async (ws, req) => {
-  console.log('[WS] New connection');
-  
-  // Extract session_id from query string
-  const url = new URL(req.url, `ws://localhost:${WS_PORT}`);
-  const sessionId = url.searchParams.get('session_id');
-  
-  if (!sessionId) {
-    console.log('[WS] Rejected: missing session_id');
-    ws.close(4001, 'Missing session_id');
-    return;
-  }
-  
-  // Validate session
-  let session;
-  try {
-    session = await validateSession(sessionId);
-  } catch (err) {
-    console.log('[WS] DB error during validation');
-    ws.close(4000, 'Internal error');
-    return;
-  }
-  
-  if (!session) {
-    console.log('[WS] Rejected: invalid session_id');
-    ws.close(4002, 'Invalid session');
-    return;
-  }
-  
-  // Store connection metadata
-  connections.set(ws, {
-    sessionId: session.id,
-    name: session.name,
-    rooms: ['public'], // currently only public room
-    isAlive: true
-  });
-  
-  console.log(`[WS] Authenticated: ${session.name} (${session.id.substring(0, 8)}...)`);
-  
-  // Send auth confirmation
-  ws.send(JSON.stringify({
-    event: 'auth_ok',
-    data: { sessionId: session.id, name: session.name }
-  }));
-  
-  // Heartbeat
-  ws.on('pong', () => {
-    const meta = connections.get(ws);
-    if (meta) meta.isAlive = true;
-  });
-  
-  // Handle messages (future: subscribe to rooms, etc.)
-  ws.on('message', (msg) => {
-    try {
-      const data = JSON.parse(msg);
-      console.log('[WS] Message from client:', data);
-      
-      // Handle different message types here
-      if (data.type === 'ping') {
-        ws.send(JSON.stringify({ event: 'pong' }));
+// HTTP endpoint для PHP (broadcast trigger)
+server.on('request', (req, res) => {
+  if (req.method === 'POST' && req.url === '/broadcast') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      try {
+        const message = JSON.parse(body);
+        const sent = broadcast(message);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, sent }));
+      } catch (e) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: e.message }));
       }
-    } catch (err) {
-      console.error('[WS] Invalid message:', err.message);
-    }
-  });
-  
-  // Handle disconnect
-  ws.on('close', () => {
-    const meta = connections.get(ws);
-    if (meta) {
-      console.log(`[WS] Disconnected: ${meta.name}`);
-      connections.delete(ws);
-    }
-  });
-  
-  ws.on('error', (err) => {
-    console.error('[WS] Error:', err.message);
-  });
-});
-
-// Heartbeat check
-setInterval(() => {
-  connections.forEach((meta, ws) => {
-    if (!meta.isAlive) {
-      console.log(`[Heartbeat] Terminating dead connection: ${meta.name}`);
-      ws.terminate();
-      connections.delete(ws);
-      return;
-    }
-    
-    meta.isAlive = false;
-    ws.ping();
-  });
-}, HEARTBEAT_INTERVAL);
-
-// HTTP API for api.php to trigger broadcasts
-app.post('/broadcast', (req, res) => {
-  const { event, data, room = 'public' } = req.body;
-  
-  if (!event || !data) {
-    return res.status(400).json({ error: 'Missing event or data' });
+    });
+  } else {
+    res.writeHead(404);
+    res.end();
   }
-  
-  console.log(`[HTTP] Broadcast request: ${event} to room:${room}`);
-  broadcast(room, event, data);
-  
-  res.json({ ok: true, clients: connections.size });
 });
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    connections: connections.size,
-    uptime: process.uptime()
+server.listen(PORT, () => {
+  console.log(`[WS] Server listening on port ${PORT}`);
+});
+
+process.on('SIGTERM', () => {
+  console.log('[WS] SIGTERM received, closing...');
+  wss.close(() => {
+    server.close(() => {
+      console.log('[WS] Server closed');
+      process.exit(0);
+    });
   });
 });
-
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('[Shutdown] Closing database...');
-  db.close((err) => {
-    if (err) console.error(err.message);
-    process.exit(0);
-  });
-});
-
-// Start servers
-app.listen(HTTP_PORT, () => {
-  console.log(`[HTTP] Listening on port ${HTTP_PORT}`);
-});
-
-console.log(`[WS] Listening on port ${WS_PORT}`);
-console.log('[Ready] WebSocket server started');
