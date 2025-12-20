@@ -97,12 +97,6 @@ class ApiHandler {
         return $message;
     }
 
-    public function poll(array $query): array {
-        $after = isset($query['after_id']) && $query['after_id'] !== '' ? intval($query['after_id']) : null;
-        $messages = $this->msgRepo->getSinceId($after);
-        return ['messages' => $messages];
-    }
-
     public function changeName(array $input): array {
         $session_id = $input['session_id'] ?? null;
 

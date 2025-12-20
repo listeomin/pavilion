@@ -4,7 +4,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   apiInit,
   apiSend,
-  apiPoll,
   apiChangeName,
   apiUpdateMessage,
   setCookie,
@@ -67,46 +66,16 @@ describe('api.js', () => {
     });
   });
 
-  describe('apiPoll', () => {
-    it('forms URL with after_id parameter', async () => {
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ messages: [] })
-      });
 
-      await apiPoll(API, 42);
-
-      expect(fetch).toHaveBeenCalledWith(
-        API + '?action=poll&after_id=42',
-        expect.objectContaining({ cache: 'no-store' })
-      );
-    });
-
-    it('returns data with messages', async () => {
-      const mockMessages = [
-        { id: 43, text: 'New message 1' },
-        { id: 44, text: 'New message 2' }
-      ];
-
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ messages: mockMessages })
-      });
-
-      const result = await apiPoll(API, 42);
-
-      expect(result.messages).toHaveLength(2);
-      expect(result.messages[0].id).toBe(43);
-    });
-  });
 
   describe('apiSend', () => {
     it('sends JSON with text and metadata', async () => {
       const metadata = { type: 'test', value: 123 };
+      const mockResponse = { id: 1, text: 'Hello', metadata };
 
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ id: 1, text: 'Hello', metadata })
+        json: async () => mockResponse
       });
 
       await apiSend(API, 'session123', 'Hello', metadata);
@@ -147,10 +116,11 @@ describe('api.js', () => {
   describe('apiUpdateMessage', () => {
     it('sends messageId, text, metadata', async () => {
       const metadata = { type: 'edited' };
+      const mockResponse = { id: 10, text: 'Updated', metadata };
 
       fetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ id: 10, text: 'Updated', metadata })
+        json: async () => mockResponse
       });
 
       await apiUpdateMessage(API, 'session123', 10, 'Updated', metadata);

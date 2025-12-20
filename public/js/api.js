@@ -31,13 +31,6 @@ export async function apiSend(API, sessionId, text, metadata = null) {
   return await res.json();
 }
 
-export async function apiPoll(API, lastId) {
-  const url = API + '?action=poll&after_id=' + encodeURIComponent(lastId);
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) return null;
-  return await res.json();
-}
-
 export async function apiChangeName(API, sessionId) {
   const form = new FormData();
   form.append('session_id', sessionId);

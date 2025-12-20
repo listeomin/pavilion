@@ -176,27 +176,6 @@ class ApiHandlerTest extends TestCase {
         ]);
     }
 
-    // poll action
-    
-    public function test_poll_returns_empty_array_without_new_messages(): void {
-        $result = $this->handler->poll(['after_id' => '999']);
-        
-        $this->assertEquals(['messages' => []], $result);
-    }
-
-    public function test_poll_returns_messages_after_id(): void {
-        $session = $this->sessionRepo->create();
-        $msg1 = $this->msgRepo->add($session['id'], $session['name'], 'Message 1');
-        $msg2 = $this->msgRepo->add($session['id'], $session['name'], 'Message 2');
-        $msg3 = $this->msgRepo->add($session['id'], $session['name'], 'Message 3');
-        
-        $result = $this->handler->poll(['after_id' => (string)$msg1['id']]);
-        
-        $this->assertCount(2, $result['messages']);
-        $this->assertEquals('Message 2', $result['messages'][0]['text']);
-        $this->assertEquals('Message 3', $result['messages'][1]['text']);
-    }
-
     // update_message action
     
     public function test_update_message_requires_session_id_and_message_id(): void {

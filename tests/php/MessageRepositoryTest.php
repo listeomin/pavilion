@@ -104,40 +104,6 @@ class MessageRepositoryTest extends TestCase {
         $this->assertEquals('Message 10', $result[4]['text']);
     }
 
-    public function test_getSinceId_with_null_returns_all_messages(): void {
-        $this->repo->add('session1', 'Alice', 'Message 1');
-        $this->repo->add('session2', 'Bob', 'Message 2');
-        
-        $result = $this->repo->getSinceId(null);
-        
-        $this->assertCount(2, $result);
-    }
-
-    public function test_getSinceId_returns_only_messages_after_id(): void {
-        $msg1 = $this->repo->add('session1', 'Alice', 'Message 1');
-        $msg2 = $this->repo->add('session2', 'Bob', 'Message 2');
-        $msg3 = $this->repo->add('session1', 'Alice', 'Message 3');
-        $msg4 = $this->repo->add('session2', 'Bob', 'Message 4');
-        
-        $result = $this->repo->getSinceId($msg2['id']);
-        
-        $this->assertCount(2, $result);
-        $this->assertEquals('Message 3', $result[0]['text']);
-        $this->assertEquals('Message 4', $result[1]['text']);
-    }
-
-    public function test_getSinceId_sorts_by_id_asc(): void {
-        $msg1 = $this->repo->add('session1', 'Alice', 'First');
-        $msg2 = $this->repo->add('session2', 'Bob', 'Second');
-        $msg3 = $this->repo->add('session1', 'Alice', 'Third');
-        
-        $result = $this->repo->getSinceId(0);
-        
-        $this->assertEquals($msg1['id'], $result[0]['id']);
-        $this->assertEquals($msg2['id'], $result[1]['id']);
-        $this->assertEquals($msg3['id'], $result[2]['id']);
-    }
-
     public function test_update_updates_own_message(): void {
         $msg = $this->repo->add('session1', 'Alice', 'Original text');
         

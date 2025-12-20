@@ -52,11 +52,6 @@ try {
         json($result);
     }
 
-    if ($action === 'poll') {
-        $result = $handler->poll($_GET);
-        json($result);
-    }
-
     if ($action === 'change_name') {
         $result = $handler->changeName($_POST);
         json($result);

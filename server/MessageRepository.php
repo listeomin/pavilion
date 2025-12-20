@@ -51,15 +51,6 @@ class MessageRepository {
         return array_reverse($this->decodeMetadata($rows));
     }
 
-    public function getSinceId(?int $afterId): array {
-        if ($afterId === null) {
-            return $this->getAll();
-        }
-        $stmt = $this->db->prepare('SELECT id, session_id, author, text, metadata, created_at FROM messages WHERE id > :after ORDER BY id ASC');
-        $stmt->execute([':after' => $afterId]);
-        return $this->decodeMetadata($stmt->fetchAll(PDO::FETCH_ASSOC));
-    }
-
     public function update(int $id, string $author, string $text, ?array $metadata = null): ?array {
         // Check if message exists and belongs to this author
         $stmt = $this->db->prepare('SELECT id, author FROM messages WHERE id = :id');
