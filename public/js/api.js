@@ -78,3 +78,11 @@ export async function apiUpdateMessage(API, sessionId, messageId, text, metadata
   if (!res.ok) return null;
   return await res.json();
 }
+
+export async function apiRebase(API) {
+  const res = await fetch(API + '?action=rebase', {
+    method: 'POST'
+  });
+  if (!res.ok) return { success: false, error: 'Rebase failed' };
+  return await res.json();
+}

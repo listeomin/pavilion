@@ -40,4 +40,8 @@ class BroadcastService {
     public function messageUpdated(array $message): bool {
         return $this->emit('message_updated', $message);
     }
+    
+    public function rebase(array $messages): bool {
+        return $this->emit('rebase', ['messages' => $messages]);
+    }
 }

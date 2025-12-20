@@ -20,6 +20,12 @@ wss.on('connection', (ws, req) => {
 
   clients.set(sessionId, ws);
   console.log(`[WS] Client connected: ${sessionId} (total: ${clients.size})`);
+  
+  // Send auth confirmation
+  ws.send(JSON.stringify({ 
+    event: 'auth_ok', 
+    data: { session_id: sessionId, name: 'user' } 
+  }));
 
   ws.on('message', (data) => {
     try {

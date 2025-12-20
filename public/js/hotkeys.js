@@ -1,10 +1,36 @@
 // public/js/hotkeys.js
-export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, getCurrentAuthor = null) {
+export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, getCurrentAuthor = null, commandNavigator = null) {
   inputEl.addEventListener('keydown', (e) => {
     const isMod = e.metaKey || e.ctrlKey;
+    const text = inputEl.textContent.trim();
+
+    // Alt (without other keys): Command navigation
+    if (e.altKey && !e.shiftKey && !isMod && e.key === 'Alt' && commandNavigator) {
+      // Only works when field is empty or starts with /
+      if (text === '' || (text.startsWith('/') && !text.includes(':'))) {
+        e.preventDefault();
+        
+        const command = commandNavigator.next();
+        
+        if (command) {
+          inputEl.textContent = command;
+          editor.markdownText = command;
+          inputEl.classList.add('command-active');
+          
+          // Move cursor to end
+          const sel = window.getSelection();
+          const range = document.createRange();
+          range.selectNodeContents(inputEl);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+        return;
+      }
+    }
 
     // Arrow Down: Get last message (empty field) or clear field (non-empty field)
-    if (e.key === 'ArrowDown' && messageHistory && getCurrentAuthor) {
+    if (e.key === 'ArrowDown' && !e.altKey && messageHistory && getCurrentAuthor) {
       const isEmpty = inputEl.textContent.trim() === '';
       e.preventDefault();
       
@@ -25,7 +51,7 @@ export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, g
     }
 
     // Arrow Up: Navigate message history backward
-    if (e.key === 'ArrowUp' && messageHistory && getCurrentAuthor) {
+    if (e.key === 'ArrowUp' && !e.altKey && messageHistory && getCurrentAuthor) {
       const isEmpty = inputEl.textContent.trim() === '';
       if (isEmpty) {
         e.preventDefault();
@@ -116,6 +142,14 @@ export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, g
         e.preventDefault();
         onSubmit();
       }
+    }
+  });
+
+  // Remove command-active class when user types
+  inputEl.addEventListener('input', () => {
+    const text = inputEl.textContent.trim();
+    if (!text.startsWith('/') || text.includes(':')) {
+      inputEl.classList.remove('command-active');
     }
   });
 }

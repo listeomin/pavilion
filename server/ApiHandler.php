@@ -182,4 +182,29 @@ class ApiHandler {
         $this->broadcastService->messageUpdated($message);
         return $message;
     }
+
+    public function rebase(): array {
+        $scriptPath = __DIR__ . '/../db-reset.sh';
+        
+        if (!file_exists($scriptPath)) {
+            throw new RuntimeException('rebase script not found');
+        }
+        
+        // Execute script
+        $output = [];
+        $returnCode = 0;
+        exec("bash {$scriptPath} 2>&1", $output, $returnCode);
+        
+        if ($returnCode !== 0) {
+            throw new RuntimeException('rebase failed: ' . implode("\n", $output));
+        }
+        
+        // Get fresh messages
+        $messages = $this->msgRepo->getAll();
+        
+        // Broadcast to all clients
+        $this->broadcastService->rebase($messages);
+        
+        return ['success' => true, 'messages' => $messages];
+    }
 }

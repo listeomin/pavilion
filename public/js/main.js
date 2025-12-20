@@ -1,6 +1,6 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage } from './api.js?v=6';
+import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase } from './api.js?v=7';
 import { WebSocketClient } from './websocket-client.js';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=10';
 import { Editor } from './editor.js?v=10';
@@ -13,6 +13,7 @@ import { AnimalProfile } from './animalProfile.js?v=18';
 import { ContextMenu } from './contextMenu.js?v=1';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
+import { CommandNavigator } from './command-navigator.js?v=1';
 
 (function () {
   const API = CONFIG.API_PATH;
@@ -35,6 +36,7 @@ import { MessageHistory } from './message-history.js?v=1';
     updateSendButton(sendBtn, editor, inlineInput);
   });
   const messageHistory = new MessageHistory();
+  const commandNavigator = new CommandNavigator();
   
   const wheelScroll = new WheelScroll(inlineInput, () => {
     updateSendButton(sendBtn, editor, inlineInput);
@@ -49,7 +51,7 @@ import { MessageHistory } from './message-history.js?v=1';
 
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
-  }, messageHistory, () => myName);
+  }, messageHistory, () => myName, commandNavigator);
 
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -84,6 +86,28 @@ import { MessageHistory } from './message-history.js?v=1';
     inputEl.childNodes.forEach(processNode);
     
     text = text.trim();
+    
+    // Check for /rebase command
+    if (text === '/rebase') {
+      const sendingMsg = renderSystemMessage(chatLog, 'Сброс базы данных...', { spinner: true });
+      try {
+        const result = await apiRebase(API);
+        removeSystemMessage(sendingMsg);
+        if (result.success) {
+          // Clear input and reload
+          editor.clear();
+          updateSendButton(sendBtn, editor, inlineInput);
+          inputEl.focus();
+        } else {
+          renderSystemMessage(chatLog, 'Ошибка сброса базы', {});
+        }
+      } catch (error) {
+        removeSystemMessage(sendingMsg);
+        renderSystemMessage(chatLog, 'Ошибка сброса базы', {});
+      }
+      return;
+    }
+    
     if (!text && images.length === 0 && !quotes) return;
     
     // Show sending message
@@ -178,6 +202,14 @@ import { MessageHistory } from './message-history.js?v=1';
     wsClient.on('message_updated', (message) => {
       console.log('[Main] Message updated via WS:', message);
       updateMessage(chatLog, message);
+    });
+    
+    wsClient.on('rebase', (data) => {
+      console.log('[Main] Rebase via WS:', data);
+      // Clear chat and re-render all messages
+      chatLog.innerHTML = '';
+      lastIdRef.value = 0;
+      renderMessages(chatLog, data.messages || [], lastIdRef);
     });
     
     wsClient.on('disconnected', () => {
