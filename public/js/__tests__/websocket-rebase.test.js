@@ -19,6 +19,11 @@ describe('WebSocketClient - Rebase Event', () => {
     };
 
     global.WebSocket = vi.fn(() => mockWs);
+    // Add WebSocket constants to the constructor
+    global.WebSocket.OPEN = 1;
+    global.WebSocket.CONNECTING = 0;
+    global.WebSocket.CLOSING = 2;
+    global.WebSocket.CLOSED = 3;
 
     wsClient = new WebSocketClient(TEST_URL, TEST_SESSION);
   });

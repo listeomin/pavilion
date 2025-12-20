@@ -14,7 +14,10 @@ function get_db(): PDO {
             CREATE TABLE IF NOT EXISTS sessions (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL UNIQUE,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                telegram_id BIGINT UNIQUE,
+                telegram_username TEXT,
+                is_owner BOOLEAN DEFAULT 0
             );
         ");
         $pdo->exec("

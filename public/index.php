@@ -35,6 +35,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/telegramAuth.css?v=1">
 </head>
 <body>
 <div class="wrap">
@@ -59,6 +60,7 @@ $basePath = get_base_path();
     <button type="submit" id="sendBtn">[отправить]</button>
   </form>
 </div>
+<div id="telegram-auth-container"></div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
   <img src="assets/paw.svg" alt="Animal Profile">
 </button>

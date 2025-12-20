@@ -10,6 +10,7 @@ import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
+import { TelegramAuth } from './telegramAuth.js?v=1';
 import { ContextMenu } from './contextMenu.js?v=1';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
@@ -282,6 +283,17 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         animalProfile.open();
       });
     }
+    
+    // Initialize Telegram Auth
+    const telegramAuth = new TelegramAuth();
+    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', (authData) => {
+      console.log('[Main] Telegram authorized:', authData);
+      
+      // Show logout button in animal profile
+      if (animalProfile) {
+        animalProfile.showLogoutButton();
+      }
+    });
     
     // TEST: Show system message with spinner
     window.testSystemMessage = () => {

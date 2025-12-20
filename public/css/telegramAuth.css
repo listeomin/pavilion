@@ -1,0 +1,52 @@
+/* public/css/telegramAuth.css */
+
+/* Telegram auth button - positioned between animal profile and nightshift */
+#telegram-auth-container {
+  position: fixed;
+  top: 130px;
+  right: 36px;
+  z-index: 999;
+}
+
+/* Style the Telegram login iframe */
+#telegram-auth-container iframe {
+  border-radius: 8px;
+}
+
+/* My chat button - same position as telegram auth */
+.my-chat-button {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(42, 171, 238, 0.1);
+  color: #2AABEE;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1px solid rgba(42, 171, 238, 0.3);
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.my-chat-button:hover {
+  background: rgba(42, 171, 238, 0.2);
+  border-color: rgba(42, 171, 238, 0.5);
+}
+
+/* Logout button in animal profile */
+.animal-profile-logout {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: var(--bg-secondary, #e0e0e0);
+  color: var(--text-primary, #333);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.animal-profile-logout:hover {
+  opacity: 0.7;
+}

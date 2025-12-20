@@ -9,5 +9,7 @@ public/assets/images/*       # Загруженные пользователям
 public/assets/music/*        # Аудиофайлы
 !public/assets/music/.gitkeep
 \#ведро/                     # Polling код на удаление
+\#ester/                     # Тесты
 .dev-server.pid              # PID файл dev серверов
 logs/                        # Логи локальной разработки
+.env                         # Environment variables

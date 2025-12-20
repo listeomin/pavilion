@@ -92,6 +92,7 @@ export class AnimalProfile {
           </div>
 
           <button class="animal-profile-submit" id="submit-profile">Сохранить</button>
+          <button class="animal-profile-logout" id="logout-profile" style="display: none;">Разлогиниться</button>
         </div>
       </div>
     `;
@@ -133,6 +134,14 @@ export class AnimalProfile {
     if (submitBtn) {
       submitBtn.addEventListener('click', () => {
         this.save();
+      });
+    }
+
+    // Logout button
+    const logoutBtn = document.getElementById('logout-profile');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        this.logout();
       });
     }
 
@@ -402,5 +411,35 @@ export class AnimalProfile {
 
   updateCurrentEmoji(newEmoji) {
     this.currentEmoji = newEmoji;
+  }
+
+  async logout() {
+    try {
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/telegram_auth.php?action=logout`, {
+        method: 'POST'
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        location.reload();
+      }
+    } catch (e) {
+      console.error('[AnimalProfile] Logout failed:', e);
+    }
+  }
+
+  showLogoutButton() {
+    const logoutBtn = document.getElementById('logout-profile');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'block';
+    }
+  }
+
+  hideLogoutButton() {
+    const logoutBtn = document.getElementById('logout-profile');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'none';
+    }
   }
 }
