@@ -14,7 +14,14 @@ export async function apiInit(API, sessionId, COOKIE_NAME) {
   const form = new FormData();
   if (sessionId) form.append('session_id', sessionId);
   const res = await fetch(API + '?action=init', { method: 'POST', body: form });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ error: 'Init failed' }));
+    throw new Error(error.error || 'Init failed');
+  }
   const data = await res.json();
+  if (!data.session_id || !data.name) {
+    throw new Error('Invalid init response');
+  }
   setCookie(COOKIE_NAME, data.session_id, 30);
   return data;
 }

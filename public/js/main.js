@@ -301,6 +301,12 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         }
       });
     };
+  }).catch((error) => {
+    console.error('[Main] Init failed:', error);
+    renderSystemMessage(chatLog, 'Не удалось подключиться к серверу', {});
+    // Disable input
+    inputEl.disabled = true;
+    sendBtn.disabled = true;
   });
   
   NightShift.init();

@@ -84,11 +84,15 @@ try {
 
 } catch (InvalidArgumentException $e) {
     http_response_code(400);
+    error_log("API Error (400): " . $e->getMessage());
     json(['error' => $e->getMessage()]);
 } catch (RuntimeException $e) {
     http_response_code(403);
+    error_log("API Error (403): " . $e->getMessage());
     json(['error' => $e->getMessage()]);
 } catch (Exception $e) {
     http_response_code(500);
+    error_log("API Error (500): " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    error_log("Stack trace: " . $e->getTraceAsString());
     json(['error' => 'internal server error']);
 }
