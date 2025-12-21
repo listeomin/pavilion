@@ -1,0 +1,28 @@
+name: CI – Unit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Клонируем репозиторий
+      - uses: actions/checkout@v4
+
+      # 2️⃣ Устанавливаем Node.js 20
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3️⃣ Устанавливаем зависимости
+      - name: Install dependencies
+        run: npm install
+
+      # 4️⃣ Прогоняем все unit-тесты
+      - name: Run tests
+        run: npm test
