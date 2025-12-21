@@ -1,15 +1,40 @@
-chat/chat.sqlite              # База данных чата
-*.sqlite                     # Все SQLite базы
-.DS_Store                    # Системный файл macOS
-FETCH_HEAD                   # Git служебный файл
-server/php-error.log         # Логи PHP ошибок
-server/python-api/venv/      # Python виртуальное окружение
-public/assets/images/*       # Загруженные пользователями картинки
+# База данных чата
+chat/chat.sqlite
+
+# Все SQLite базы
+*.sqlite
+
+# Системный файл macOS
+.DS_Store
+
+# Git служебный файл
+FETCH_HEAD
+
+# Логи PHP ошибок
+server/php-error.log
+
+# Python виртуальное окружение
+server/python-api/venv/
+
+# Загруженные пользователями картинки
+public/assets/images/*
 !public/assets/images/.gitkeep
-public/assets/music/*        # Аудиофайлы
+
+# Аудиофайлы
+public/assets/music/*
 !public/assets/music/.gitkeep
-\#ведро/                     # Polling код на удаление
-\tester/                     # Тесты
-.dev-server.pid              # PID файл dev серверов
-logs/                        # Логи локальной разработки
-.env                         # Environment variables
+
+# Polling код на удаление
+#ведро/
+
+# Тесты
+tester/
+
+# PID файл dev серверов
+.dev-server.pid
+
+# Логи локальной разработки
+logs/
+
+# Environment variables
+.env
