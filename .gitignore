@@ -15,6 +15,7 @@ server/php-error.log
 
 # Python виртуальное окружение
 server/python-api/venv/
+venv/
 
 # Загруженные пользователями картинки
 public/assets/images/*
