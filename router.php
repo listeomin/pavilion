@@ -5,6 +5,15 @@
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = urldecode($uri);
 
+// Телеграм логи
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($uri, '/telegram') !== false) {
+    file_put_contents(__DIR__ . '/telegram_log.txt', date('Y-m-d H:i:s') . "\n" .
+        'URI: ' . $uri . "\n" .
+        'TOKEN: ' . substr(getenv('TELEGRAM_BOT_TOKEN'), 0, 20) . "..." . "\n" .
+        'POST: ' . print_r($_POST, true) . "\n" .
+        'GET: ' . print_r($_GET, true) . "\n\n", FILE_APPEND);
+}
+
 // Если запрос к /server/api.php - отдаём его
 if (preg_match('/^\/server\/api\.php/', $uri)) {
     require __DIR__ . '/server/api.php';

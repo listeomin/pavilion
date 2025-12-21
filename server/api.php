@@ -30,6 +30,18 @@ if (!$action) {
     json(['error' => 'action required']);
 }
 
+// Логируем Telegram auth
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && 
+    (isset($_POST['hash']) || isset($_POST['id']) || isset($_POST['auth_date']))) {
+    file_put_contents(__DIR__ . '/../telegram_log.txt', 
+        date('Y-m-d H:i:s') . "\n" .
+        "TOKEN: " . substr(getenv('TELEGRAM_BOT_TOKEN'), 0, 20) . "...\n" .
+        "POST: " . print_r($_POST, true) . "\n" .
+        "GET: " . print_r($_GET, true) . "\n" .
+        "FILES: " . print_r($_FILES, true) . "\n\n",
+        FILE_APPEND);
+}
+
 try {
     if ($action === 'init') {
         $result = $handler->init($_POST, $_COOKIE);

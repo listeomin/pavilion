@@ -52,22 +52,22 @@ export class TelegramAuth {
   renderLoginButton(containerId, botUsername) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     container.innerHTML = '';
 
-    // Создаём скрипт для Telegram Widget
     const script = document.createElement('script');
     script.async = true;
     script.src = 'https://telegram.org/js/telegram-widget.js?22';
     script.setAttribute('data-telegram-login', botUsername);
     script.setAttribute('data-size', 'medium');
-    script.setAttribute('data-auth-url', `${window.location.origin}${CONFIG.BASE_PATH}/api/telegram_auth.php`);
     script.setAttribute('data-request-access', 'write');
-
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)'); // ← Ключевой момент!
     container.appendChild(script);
 
-    // Слушаем событие авторизации
-    window.addEventListener('message', this.handleTelegramAuth.bind(this));
+    // Глобальная функция, которую вызывает Telegram Widget
+    window.onTelegramAuth = (user) => {
+      console.log('[TelegramAuth] Received auth data:', user);
+      this.handleTelegramAuth({ data: user, origin: 'https://oauth.telegram.org' });
+    };
   }
 
   /**
@@ -75,7 +75,6 @@ export class TelegramAuth {
    */
   async handleTelegramAuth(event) {
     if (event.origin !== 'https://oauth.telegram.org') return;
-
     const data = event.data;
     if (!data || !data.id) return;
 
@@ -85,9 +84,7 @@ export class TelegramAuth {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-
       const result = await res.json();
-
       if (result.success) {
         this.authData = result.data;
         
@@ -97,10 +94,11 @@ export class TelegramAuth {
           this.hideLoginButton(container.id);
           this.renderMyChatButton(container.id, result.data.telegram_username);
         }
-
         if (this.onAuthCallback) {
           this.onAuthCallback(result.data);
         }
+      } else {
+        console.error('[TelegramAuth] Server rejected auth:', result);
       }
     } catch (e) {
       console.error('[TelegramAuth] Auth failed:', e);
@@ -123,11 +121,10 @@ export class TelegramAuth {
   renderMyChatButton(containerId, username) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
     container.innerHTML = `
-      <a 
-        href="https://t.me/${username}" 
-        target="_blank" 
+      <a
+        href="https://t.me/${username}"
+        target="_blank"
         class="my-chat-button"
         title="Открыть чат в Telegram"
       >
@@ -144,9 +141,7 @@ export class TelegramAuth {
       const res = await fetch(`${CONFIG.BASE_PATH}/api/telegram_auth.php?action=logout`, {
         method: 'POST'
       });
-
       const data = await res.json();
-
       if (data.success) {
         this.authData = null;
         location.reload();

@@ -23,14 +23,12 @@ import { CommandNavigator } from './command-navigator.js?v=1';
   let myName = '';
   const lastIdRef = { value: 0 };
   let wsClient = null;
-
   const chatLog = document.getElementById('chat-log');
   const inputEl = document.getElementById('text');
   const formatMenu = document.getElementById('format-menu');
   const sendBtn = document.getElementById('sendBtn');
   const sendForm = document.getElementById('sendForm');
   const userEmojiEl = document.getElementById('user-emoji');
-
   const editor = new Editor(inputEl);
   const formatMenuController = new FormatMenu(formatMenu, inputEl, editor);
   const inlineInput = new InlineInput(inputEl, editor, () => {
@@ -38,36 +36,33 @@ import { CommandNavigator } from './command-navigator.js?v=1';
   });
   const messageHistory = new MessageHistory();
   const commandNavigator = new CommandNavigator();
-  
+ 
   const wheelScroll = new WheelScroll(inlineInput, () => {
     updateSendButton(sendBtn, editor, inlineInput);
   });
   wheelScroll.attachListener(inputEl);
-
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
     // editor.renderLiveMarkdown(); // TEMPORARILY DISABLED
     updateSendButton(sendBtn, editor, inlineInput);
   });
-
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
   }, messageHistory, () => myName, commandNavigator);
-
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+   
     // Extract quotes first
     const quotes = extractQuoteData(inputEl);
     console.log('Extracted quotes:', quotes);
-    
+   
     // Collect image tags
     const imageTags = inputEl.querySelectorAll('.image-tag[data-loaded="true"]');
     const images = Array.from(imageTags).map(tag => ({
       id: tag.dataset.id,
       url: tag.dataset.url
     }));
-    
+   
     // Get text content with image placeholders and quote placeholders
     let text = '';
     const processNode = (node) => {
@@ -85,9 +80,9 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       }
     };
     inputEl.childNodes.forEach(processNode);
-    
+   
     text = text.trim();
-    
+   
     // Check for /rebase command
     if (text === '/rebase') {
       const sendingMsg = renderSystemMessage(chatLog, 'Сброс базы данных...', { spinner: true });
@@ -108,12 +103,12 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       }
       return;
     }
-    
+   
     if (!text && images.length === 0 && !quotes) return;
-    
+   
     // Show sending message
     const sendingMsg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
-    
+   
     // Prepare metadata
     let metadata = null;
     if (images.length > 0 || quotes) {
@@ -126,14 +121,14 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         metadata.quotes = quotes;
       }
     }
-    
+   
     console.log('Sending metadata:', metadata);
     console.log('Sending text:', text);
-    
+   
     try {
       let result;
       const wasEditing = messageHistory.isEditing();
-      
+     
       // Check if we're editing an existing message
       if (wasEditing) {
         const messageId = messageHistory.getEditingMessageId();
@@ -142,17 +137,17 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         messageHistory.clearEditing();
       } else {
         result = await apiSend(API, sessionId, text, metadata);
-        
+       
         if (result) {
           // Add new message to history
           messageHistory.addMessage(text, myName, metadata, result.id);
         }
       }
-      
+     
       if (result) {
         // Success - remove sending message
         removeSystemMessage(sendingMsg);
-        
+       
         // If we updated a message, update it in DOM
         if (wasEditing) {
           console.log('Updating message in DOM:', result);
@@ -182,29 +177,27 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         }
       });
     }
-
     editor.clear();
     updateSendButton(sendBtn, editor, inlineInput);
     inputEl.focus();
   });
-
   function setupWebSocket() {
     wsClient = new WebSocketClient(CONFIG.WS_URL, sessionId);
-    
+   
     wsClient.on('auth_ok', (data) => {
       console.log('[Main] WS authenticated:', data.name);
     });
-    
+   
     wsClient.on('message_new', (message) => {
       console.log('[Main] New message via WS:', message);
       renderMessages(chatLog, [message], lastIdRef);
     });
-    
+   
     wsClient.on('message_updated', (message) => {
       console.log('[Main] Message updated via WS:', message);
       updateMessage(chatLog, message);
     });
-    
+   
     wsClient.on('rebase', (data) => {
       console.log('[Main] Rebase via WS:', data);
       // Clear chat and re-render all messages
@@ -212,29 +205,28 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       lastIdRef.value = 0;
       renderMessages(chatLog, data.messages || [], lastIdRef);
     });
-    
+   
     wsClient.on('disconnected', () => {
       console.warn('[Main] WS disconnected');
     });
-    
+   
     wsClient.on('max_reconnect_attempts', () => {
       console.error('[Main] WS max reconnect attempts reached');
       // TODO: Show connection error to user
     });
-    
+   
     wsClient.connect();
   }
-  
+ 
   let animalProfile = null;
-
   userEmojiEl.addEventListener('click', async () => {
     userEmojiEl.classList.add('user-emoji-fade');
-    
+   
     setTimeout(async () => {
       const data = await apiChangeName(API, sessionId);
       if (data && data.name) {
         const emoji = data.name.split(' ')[0];
-        
+       
         // Check if this animal has a saved profile
         let finalName = data.name;
         if (animalProfile) {
@@ -244,11 +236,11 @@ import { CommandNavigator } from './command-navigator.js?v=1';
             finalName = emoji + ' ' + savedProfile.kind;
           }
         }
-        
+       
         myName = finalName;
         userEmojiEl.textContent = emoji;
         userEmojiEl.classList.remove('user-emoji-fade');
-        
+       
         // Update animal profile with new emoji
         if (animalProfile) {
           animalProfile.updateCurrentEmoji(emoji);
@@ -256,7 +248,6 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       }
     }, 250);
   });
-
   apiInit(API, sessionId, COOKIE_NAME).then(async (data) => {
     sessionId = data.session_id;
     myName = data.name;
@@ -266,7 +257,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
     renderMessages(chatLog, data.messages || [], lastIdRef);
     setupWebSocket();
     inputEl.focus();
-    
+   
     // Initialize animal profile
     animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
       // Update display when profile is saved
@@ -275,7 +266,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       userEmojiEl.textContent = newEmoji;
     });
     await animalProfile.init();
-    
+   
     // Animal profile button
     const profileBtn = document.getElementById('animal-profile-btn');
     if (profileBtn) {
@@ -283,18 +274,32 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         animalProfile.open();
       });
     }
-    
-    // Initialize Telegram Auth
+   
+// Initialize Telegram Auth
     const telegramAuth = new TelegramAuth();
     telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', (authData) => {
       console.log('[Main] Telegram authorized:', authData);
       
-      // Show logout button in animal profile
+      const displayName = authData.first_name || authData.username || 'Telegram User';
+      
+      const container = document.getElementById('telegram-auth-container');
+      if (container) {
+        // Создаём кнопку и вешаем обработчик напрямую
+        const btn = document.createElement('button');
+        btn.className = 'my-chat-button';
+        btn.textContent = displayName + ' (выйти)';
+        btn.onclick = function() {
+          telegramAuth.logout();
+        };
+        container.innerHTML = '';
+        container.appendChild(btn);
+      }
+      
       if (animalProfile) {
         animalProfile.showLogoutButton();
       }
     });
-    
+   
     // TEST: Show system message with spinner
     window.testSystemMessage = () => {
       const msg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
@@ -302,7 +307,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         removeSystemMessage(msg);
       }, 3000);
     };
-    
+   
     // TEST: Show system message with action button
     window.testSystemError = () => {
       renderSystemMessage(chatLog, 'у нас проблемы.', {
@@ -320,12 +325,12 @@ import { CommandNavigator } from './command-navigator.js?v=1';
     inputEl.disabled = true;
     sendBtn.disabled = true;
   });
-  
+ 
   NightShift.init();
-  
+ 
   // Initialize context menu
   new ContextMenu(editor);
-  
+ 
   // Initialize quote handlers
   initQuoteHandlers(editor);
 })();
