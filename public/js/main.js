@@ -82,7 +82,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
     inputEl.childNodes.forEach(processNode);
    
     text = text.trim();
-   
+
     // Check for /rebase command
     if (text === '/rebase') {
       const sendingMsg = renderSystemMessage(chatLog, 'Сброс базы данных...', { spinner: true });
@@ -103,7 +103,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       }
       return;
     }
-   
+  
     if (!text && images.length === 0 && !quotes) return;
    
     // Show sending message
