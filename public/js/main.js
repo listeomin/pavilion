@@ -1,7 +1,7 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase } from './api.js?v=7';
-import { WebSocketClient } from './websocket-client.js';
+import { WebSocketClient } from './websocket-client.js?v=2';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=10';
 import { Editor } from './editor.js?v=10';
 import { FormatMenu } from './format.js?v=5';
@@ -90,7 +90,33 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         const result = await apiRebase(API);
         removeSystemMessage(sendingMsg);
         if (result.success) {
-          // Clear input and reload
+          // WS will handle rebase event, but we need to reinit immediately
+          // to avoid race condition with next message send
+          sessionId = null;
+          const initData = await apiInit(API, null, COOKIE_NAME);
+          sessionId = initData.session_id;
+          myName = initData.name;
+          
+          // Update emoji
+          const emoji = myName.split(' ')[0];
+          userEmojiEl.textContent = emoji;
+          
+          // Reconnect WebSocket with new session
+          if (wsClient) {
+            wsClient.reconnectWithNewSession(sessionId);
+          }
+          
+          // Update animal profile
+          if (animalProfile) {
+            animalProfile.updateCurrentEmoji(emoji);
+            await animalProfile.init();
+          }
+          
+          // Clear chat and render fresh messages
+          chatLog.innerHTML = '';
+          lastIdRef.value = 0;
+          renderMessages(chatLog, result.messages || [], lastIdRef);
+          
           editor.clear();
           updateSendButton(sendBtn, editor, inlineInput);
           inputEl.focus();
@@ -198,12 +224,38 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       updateMessage(chatLog, message);
     });
    
-    wsClient.on('rebase', (data) => {
+    wsClient.on('rebase', async (data) => {
       console.log('[Main] Rebase via WS:', data);
-      // Clear chat and re-render all messages
+      // Clear chat
       chatLog.innerHTML = '';
       lastIdRef.value = 0;
-      renderMessages(chatLog, data.messages || [], lastIdRef);
+      
+      // Reset session and reinitialize
+      sessionId = null;
+      try {
+        const initData = await apiInit(API, null, COOKIE_NAME);
+        sessionId = initData.session_id;
+        myName = initData.name;
+        
+        // Update emoji
+        const emoji = myName.split(' ')[0];
+        userEmojiEl.textContent = emoji;
+        
+        // Reconnect WebSocket with new session
+        wsClient.reconnectWithNewSession(sessionId);
+        
+        // Update animal profile
+        if (animalProfile) {
+          animalProfile.updateCurrentEmoji(emoji);
+          await animalProfile.init();
+        }
+        
+        // Render messages from rebase event
+        renderMessages(chatLog, data.messages || [], lastIdRef);
+      } catch (error) {
+        console.error('[Main] Rebase reinit failed:', error);
+        renderSystemMessage(chatLog, 'Ошибка переподключения после rebase', {});
+      }
     });
    
     wsClient.on('disconnected', () => {

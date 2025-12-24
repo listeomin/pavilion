@@ -77,6 +77,21 @@ export class WebSocketClient {
     }
   }
 
+  reconnectWithNewSession(newSessionId) {
+    this.sessionId = newSessionId;
+    this.reconnectAttempts = 0;
+    
+    if (this.ws) {
+      // Prevent auto-reconnect on close
+      const oldMaxAttempts = this.maxReconnectAttempts;
+      this.maxReconnectAttempts = 0;
+      this.ws.close();
+      this.maxReconnectAttempts = oldMaxAttempts;
+    }
+    
+    this.connect();
+  }
+
   send(data) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
