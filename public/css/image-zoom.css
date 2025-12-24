@@ -1,0 +1,63 @@
+/* Image zoom functionality */
+.zoomable-image {
+  cursor: pointer;
+  pointer-events: auto !important;
+  transition: transform 0.2s ease;
+}
+
+.zoomable-image:hover {
+  transform: scale(1.02);
+}
+
+.image-zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.image-zoom-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.image-zoom-container {
+  max-width: 90vw;
+  max-height: 90vh;
+  position: relative;
+}
+
+.image-zoom-content {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
+}
+
+.image-zoom-overlay.active .image-zoom-content {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hide zoom for small images that don't need it */
+@media (max-width: 768px) {
+  .image-zoom-overlay {
+    display: none;
+  }
+  
+  .zoomable-image {
+    cursor: default;
+  }
+}

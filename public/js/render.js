@@ -4,6 +4,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=1';
+import { makeImageZoomable } from './image-zoom.js?v=1';
 
 let spinnerInterval = null;
 
@@ -150,7 +151,7 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
       // Replace image placeholders with actual images
       m.metadata.images.forEach(img => {
         const placeholder = `__IMAGE_TAG_${img.id}__`;
-        const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;" loading="lazy" />`;
+        const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2);" loading="lazy" />`;
         content = content.replace(placeholder, imgTag);
       });
       
@@ -197,6 +198,10 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
     frag.appendChild(div);
     lastIdRef.value = Math.max(lastIdRef.value, Number(m.id));
   });
+  
+  // Make new images zoomable before adding to DOM
+  frag.querySelectorAll('img').forEach(img => makeImageZoomable(img));
+  
   chatLog.appendChild(frag);
   
   // Автоскролл к последнему сообщению - с задержкой после анимации
@@ -248,7 +253,7 @@ export function updateMessage(chatLog, updatedMessage) {
     content = escapeHtml(cleanText);
     m.metadata.images.forEach(img => {
       const placeholder = `__IMAGE_TAG_${img.id}__`;
-      const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;" loading="lazy" />`;
+      const imgTag = `<img src="${img.url}" style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2);" loading="lazy" />`;
       content = content.replace(placeholder, imgTag);
     });
     content = parseMarkdown(content);
@@ -279,6 +284,9 @@ export function updateMessage(chatLog, updatedMessage) {
   }
 
   textSpan.innerHTML = ' ' + content + '<span style="color: #87867F; font-family: \'Ubuntu Mono\', monospace; margin-left: 4px; font-style: italic; font-weight: 300; font-size: calc(1em - 1px);">ред.</span>';
+  
+  // Make any new images zoomable
+  textSpan.querySelectorAll('img').forEach(img => makeImageZoomable(img));
 }
 
 export function updateSendButton(sendBtn, editor, inlineInput, sendPawBtn = null) {

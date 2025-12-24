@@ -37,6 +37,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/image-zoom.css?v=1">
 </head>
 <body>
 <nav class="main-nav">

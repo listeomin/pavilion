@@ -43,7 +43,7 @@ export function linkifyImages(text) {
     const fixedUrl = url.replace(/^http:\/\/hhrrr\.ru/, 'https://hhrrr.ru');
     const escapedUrl = fixedUrl.replace(/"/g, '&quot;');
     return `<img src="${escapedUrl}" 
-                 style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2); pointer-events: none;"
+                 style="width: 60%; max-height: 600px; object-fit: cover; margin: 8px 0 8px 3px; display: block; box-shadow: 0 0 0 1.5px rgba(0,0,0,.2);"
                  onerror="this.outerHTML='<a href=&quot;${escapedUrl}&quot; target=&quot;_blank&quot;>${escapedUrl}</a>'"
                  loading="lazy" />`;
   });
