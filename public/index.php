@@ -68,6 +68,9 @@ $basePath = get_base_path();
       <div id="text" contenteditable="true" data-placeholder="напишите что-нибудь"></div>
     </div>
     <button type="submit" id="sendBtn">[отправить]</button>
+    <button type="submit" id="sendPawBtn" class="send-paw-btn">
+      <img src="assets/send-paw.png" alt="Отправить">
+    </button>
   </form>
 </div>
 <div id="telegram-auth-container"></div>

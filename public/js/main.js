@@ -27,24 +27,25 @@ import { CommandNavigator } from './command-navigator.js?v=1';
   const inputEl = document.getElementById('text');
   const formatMenu = document.getElementById('format-menu');
   const sendBtn = document.getElementById('sendBtn');
+  const sendPawBtn = document.getElementById('sendPawBtn');
   const sendForm = document.getElementById('sendForm');
   const userEmojiEl = document.getElementById('user-emoji');
   const editor = new Editor(inputEl);
   const formatMenuController = new FormatMenu(formatMenu, inputEl, editor);
   const inlineInput = new InlineInput(inputEl, editor, () => {
-    updateSendButton(sendBtn, editor, inlineInput);
+    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
   });
   const messageHistory = new MessageHistory();
   const commandNavigator = new CommandNavigator();
  
   const wheelScroll = new WheelScroll(inlineInput, () => {
-    updateSendButton(sendBtn, editor, inlineInput);
+    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
   });
   wheelScroll.attachListener(inputEl);
   inputEl.addEventListener('input', () => {
     editor.syncMarkdownText();
     // editor.renderLiveMarkdown(); // TEMPORARILY DISABLED
-    updateSendButton(sendBtn, editor, inlineInput);
+    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
   });
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
@@ -119,7 +120,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
           renderMessages(chatLog, result.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
           
           editor.clear();
-          updateSendButton(sendBtn, editor, inlineInput);
+          updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
           inputEl.focus();
         } else {
           renderSystemMessage(chatLog, 'Ошибка сброса базы', {});
@@ -205,7 +206,7 @@ import { CommandNavigator } from './command-navigator.js?v=1';
       });
     }
     editor.clear();
-    updateSendButton(sendBtn, editor, inlineInput);
+    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
     inputEl.focus();
   });
   function setupWebSocket() {

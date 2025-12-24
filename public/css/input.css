@@ -108,3 +108,41 @@ form {
 #sendBtn:hover {
   color: rgba(0, 0, 0, 0.8);
 }
+
+/* Кнопка-лапка */
+.send-paw-btn {
+  position: fixed;
+  bottom: -40px; /* Опускаем ниже, чтобы при ховере была на краю */
+  /* Привязка к правому краю чата (720px + 16px падинг = 736px) */
+  left: calc(50% + 360px + 16px); /* центр + половина ширины + падинг, БЕЗ отступа */
+  /* Размер 100% от файла - убираем фиксированные размеры */
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  transform: translateY(20px);
+  z-index: 1000;
+}
+
+.send-paw-btn.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.send-paw-btn:hover {
+  transform: translateY(-35px); /* уменьшаем на 5px: -40px + 5px = -35px */
+}
+
+.send-paw-btn img {
+  /* 100% оригинального размера файла */
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}

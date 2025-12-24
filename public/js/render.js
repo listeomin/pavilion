@@ -198,7 +198,11 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
     lastIdRef.value = Math.max(lastIdRef.value, Number(m.id));
   });
   chatLog.appendChild(frag);
-  chatLog.scrollTop = chatLog.scrollHeight;
+  
+  // Автоскролл к последнему сообщению - с задержкой после анимации
+  setTimeout(() => {
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }, 350); // Немного больше 0.3с анимации
   
   // Центрирование: первое сообщение по центру, потом вверх
   const allMessages = chatLog.querySelectorAll('.msg, .system-msg');
@@ -277,7 +281,7 @@ export function updateMessage(chatLog, updatedMessage) {
   textSpan.innerHTML = ' ' + content + '<span style="color: #87867F; font-family: \'Ubuntu Mono\', monospace; margin-left: 4px; font-style: italic; font-weight: 300; font-size: calc(1em - 1px);">ред.</span>';
 }
 
-export function updateSendButton(sendBtn, editor, inlineInput) {
+export function updateSendButton(sendBtn, editor, inlineInput, sendPawBtn = null) {
   const inCommandMode = inlineInput && inlineInput.commandMode;
   const plainText = inlineInput ? inlineInput.getPlainText() : '';
   const editorText = editor.getText().trim();
@@ -292,8 +296,10 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     
     if (hasCommandQuery) {
       sendBtn.classList.add('visible');
+      if (sendPawBtn) sendPawBtn.classList.add('visible');
     } else {
       sendBtn.classList.remove('visible');
+      if (sendPawBtn) sendPawBtn.classList.remove('visible');
     }
     
     // Add purple color if command is complete
@@ -308,8 +314,10 @@ export function updateSendButton(sendBtn, editor, inlineInput) {
     // Not in command mode: show button if there's any text AND it doesn't start with /
     if (editorText.length > 0 && !editorText.startsWith('/')) {
       sendBtn.classList.add('visible');
+      if (sendPawBtn) sendPawBtn.classList.add('visible');
     } else {
       sendBtn.classList.remove('visible');
+      if (sendPawBtn) sendPawBtn.classList.remove('visible');
     }
     
     // Remove purple color when not in command mode
