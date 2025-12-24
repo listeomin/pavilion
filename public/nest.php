@@ -37,6 +37,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/jp-window.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
@@ -56,6 +57,12 @@ $basePath = get_base_path();
     </div>
     <h1>Гнездо</h1>
   </div>
+  <div class="nest-description">
+    <p>Твоя стая.</p>
+    <p>Твои правила!</p>
+    <p>Только настоящий зверь может обрести здесь свой угол.</p>
+    <p>Взлетай через Telegram — оживи уголок, где только твой зверь свободен.</p>
+  </div>
 </div>
 <div id="telegram-auth-container"></div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
@@ -64,6 +71,8 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
+<img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
+<img src="assets/owl.png" id="owl-image" alt="Owl">
 <script type="module" src="js/nest.js"></script>
 </body>
 </html>

@@ -53,6 +53,9 @@ export class ImageZoom {
   open(imageSrc, originalImage) {
     if (this.isOpen) return;
 
+    // Store reference to original image
+    this.originalImage = originalImage;
+
     // Check if zoomed image would be larger than 90vh
     const img = new Image();
     img.onload = () => {
@@ -94,16 +97,88 @@ export class ImageZoom {
     document.body.style.overflow = 'hidden';
     
     this.overlay.classList.add('active');
+    
+    // If we have original image, animate from its position
+    if (this.originalImage) {
+      const originalRect = this.originalImage.getBoundingClientRect();
+      
+      // Wait for image to load and calculate final position
+      content.onload = () => {
+        const contentRect = content.getBoundingClientRect();
+        
+        // Calculate initial transform (from original position to center)
+        const scaleX = originalRect.width / contentRect.width;
+        const scaleY = originalRect.height / contentRect.height;
+        const scale = Math.min(scaleX, scaleY);
+        
+        const translateX = originalRect.left + originalRect.width/2 - (contentRect.left + contentRect.width/2);
+        const translateY = originalRect.top + originalRect.height/2 - (contentRect.top + contentRect.height/2);
+        
+        // Set initial state (at original position)
+        content.style.transition = 'none';
+        content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        content.style.opacity = '0';
+        
+        // Force reflow
+        content.offsetHeight;
+        
+        // Animate to final state
+        content.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        content.style.transform = 'translate(0, 0) scale(1)';
+        content.style.opacity = '1';
+      };
+    }
   }
 
   close() {
     if (!this.isOpen) return;
     
     this.isOpen = false;
-    this.overlay.classList.remove('active');
     
-    // Restore body scroll
-    document.body.style.overflow = '';
+    // Get current image element
+    const zoomedImage = this.overlay.querySelector('.image-zoom-content');
+    
+    // If we have the original image reference, animate back to it
+    if (this.originalImage) {
+      const originalRect = this.originalImage.getBoundingClientRect();
+      const zoomedRect = zoomedImage.getBoundingClientRect();
+      
+      // Calculate transform to go from current position back to original
+      const scaleX = originalRect.width / zoomedRect.width;
+      const scaleY = originalRect.height / zoomedRect.height;
+      const scale = Math.min(scaleX, scaleY);
+      
+      const translateX = originalRect.left + originalRect.width/2 - (zoomedRect.left + zoomedRect.width/2);
+      const translateY = originalRect.top + originalRect.height/2 - (zoomedRect.top + zoomedRect.height/2);
+      
+      // Apply transform to animate back to original position
+      zoomedImage.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      zoomedImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+      zoomedImage.style.opacity = '0';
+      
+      // Fade out overlay
+      this.overlay.style.transition = 'opacity 0.3s ease';
+      this.overlay.style.opacity = '0';
+    } else {
+      // Fallback to original behavior if no original image reference
+      this.overlay.classList.add('closing');
+    }
+    
+    // Wait for animation to complete
+    setTimeout(() => {
+      this.overlay.classList.remove('active', 'closing');
+      this.overlay.style.opacity = '';
+      
+      // Reset image styles
+      zoomedImage.style.transition = '';
+      zoomedImage.style.transform = '';
+      zoomedImage.style.opacity = '';
+      
+      // Restore body scroll
+      document.body.style.overflow = '';
+      
+      this.originalImage = null;
+    }, 300);
   }
 
   // Method to make images zoomable
