@@ -61,6 +61,16 @@ function alignUserHeader() {
     // editor.renderLiveMarkdown(); // TEMPORARILY DISABLED
     updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
   });
+  
+  // Handle blur event to restore placeholder
+  inputEl.addEventListener('blur', () => {
+    // Clean up empty content to ensure placeholder shows
+    const text = inputEl.textContent.trim();
+    if (!text) {
+      inputEl.innerHTML = '';
+      editor.markdownText = '';
+    }
+  });
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
   }, messageHistory, () => myName, commandNavigator);
