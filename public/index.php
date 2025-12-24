@@ -22,7 +22,7 @@ $basePath = get_base_path();
 <link rel="icon" href="assets/favicon.png" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css?v=4">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
@@ -36,8 +36,18 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
+<link rel="stylesheet" href="css/navigation.css?v=1">
 </head>
 <body>
+<nav class="main-nav">
+  <a href="./" class="nav-item active">Беседка</a>
+  <span class="nav-separator">|</span>
+  <a href="gnezdo.php" class="nav-item">Гнездо</a>
+  <span class="nav-separator">|</span>
+  <span class="nav-item disabled">Послания</span>
+  <span class="nav-separator">|</span>
+  <span class="nav-item disabled">Ветки</span>
+</nav>
 <div class="wrap">
   <div id="header-container">
     <div id="user-header">

@@ -4,9 +4,23 @@
 <meta charset="utf-8">
 <title>Беседка</title>
 <link rel="icon" href="assets/favicon.png" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/colors.css">
 <link rel="stylesheet" href="css/chat.css">
+<link rel="stylesheet" href="css/navigation.css">
 </head>
 <body>
+<nav class="main-nav">
+  <a href="/pavilion/" class="nav-item active">Беседка</a>
+  <span class="nav-separator">|</span>
+  <span class="nav-item disabled">Гнездо</span>
+  <span class="nav-separator">|</span>
+  <span class="nav-item disabled">Послания</span>
+  <span class="nav-separator">|</span>
+  <span class="nav-item disabled">Ветки</span>
+</nav>
 <header>Беседка</header>
 <main id="chat"></main>
 <div class="input-row">
@@ -14,6 +28,6 @@
   <input id="inp" type="text" placeholder="Напишите сообщение...">
   <button id="send" class="send-btn hidden">[ отправить ]</button>
 </div>
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
