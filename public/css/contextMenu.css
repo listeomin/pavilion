@@ -2,17 +2,17 @@
 
 .context-menu {
   position: fixed;
-  background: #ffffff;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 4px 0;
-  min-width: 180px;
+  background: #5A57D9;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  min-width: 200px;
   z-index: 10000;
   opacity: 0;
   pointer-events: none;
   transform: scale(0.95);
-  transition: opacity 0.1s ease, transform 0.1s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 .context-menu.active {
@@ -22,20 +22,23 @@
 }
 
 .context-menu-item {
-  padding: 8px 16px;
+  padding: 12px 16px;
   cursor: pointer;
-  font-size: 14px;
-  color: #333333;
+  font-size: 16px;
+  font-weight: 500;
+  color: #ffffff;
   user-select: none;
-  transition: background-color 0.1s ease;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background-color 0.15s ease;
 }
 
 .context-menu-item:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .context-menu-item.disabled {
-  color: #999999;
+  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
 }
 
@@ -45,27 +48,30 @@
 
 .context-menu-divider {
   height: 1px;
-  background: #e0e0e0;
-  margin: 4px 0;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 12px 0;
 }
 
 .context-menu-reactions {
   display: flex;
-  gap: 4px;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 0 0 12px 0;
   justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .context-menu-reaction {
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   user-select: none;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.1s ease, transform 0.1s ease;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .context-menu-reaction:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(255, 255, 255, 0.1);
   transform: scale(1.15);
 }

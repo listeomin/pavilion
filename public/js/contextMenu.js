@@ -18,10 +18,6 @@ export class ContextMenu {
     this.menu.id = 'context-menu';
     this.menu.className = 'context-menu';
     this.menu.innerHTML = `
-      <div class="context-menu-item" data-action="copy">Скопировать</div>
-      <div class="context-menu-item" data-action="quote">Цитировать</div>
-      <div class="context-menu-item disabled" data-action="branch">Создать ветку</div>
-      <div class="context-menu-divider"></div>
       <div class="context-menu-reactions">
         <span class="context-menu-reaction" data-emoji="😂">😂</span>
         <span class="context-menu-reaction" data-emoji="❤️">❤️</span>
@@ -31,6 +27,9 @@ export class ContextMenu {
         <span class="context-menu-reaction" data-emoji="🍋">🍋</span>
         <span class="context-menu-reaction" data-emoji="😳">😳</span>
       </div>
+      <div class="context-menu-item" data-action="copy">Скопировать</div>
+      <div class="context-menu-item" data-action="quote">Цитировать</div>
+      <div class="context-menu-item disabled" data-action="branch">Создать ветку</div>
     `;
     document.body.appendChild(this.menu);
   }
