@@ -7,6 +7,9 @@ $db = get_db();
 $sessionRepo = new SessionRepository();
 $msgRepo = new MessageRepository();
 
+// Устанавливаем московское время
+date_default_timezone_set('Europe/Moscow');
+
 // Очистка
 $db->exec('DELETE FROM messages');
 $db->exec('DELETE FROM sessions');
@@ -23,29 +26,38 @@ $stmt->execute([
     ':created_at' => $now
 ]);
 
-// Получаем инфо из git
-$gitHash = trim(shell_exec('git rev-parse --short HEAD 2>/dev/null') ?: 'unknown');
-$gitDate = trim(shell_exec('git log -1 --pretty=%ci 2>/dev/null') ?: date('Y-m-d H:i:s'));
+// Генерируем версию в формате 0.075.ХХХХ (используем commit count)
+$commitCount = trim(shell_exec('git rev-list --count HEAD 2>/dev/null') ?: '0');
+$version = "0.075.{$commitCount}";
 
-// Прямые GIF ссылки (отдают .gif файл)
-$gifs = [
-    'https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif',
-    'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif',
-    'https://media.giphy.com/media/kyLYXonQYYfwYDIeZl/giphy.gif',
-    'https://media.giphy.com/media/111ebonMs90YLu/giphy.gif',
-    'https://media.giphy.com/media/g9582DNuQppxC/giphy.gif',
-    'https://cataas.com/cat/gif',
-];
+// Форматируем текущее время создания базы
+function formatRussianDate($dateStr) {
+    $months = [
+        1 => 'января', 2 => 'февраля', 3 => 'марта', 4 => 'апреля',
+        5 => 'мая', 6 => 'июня', 7 => 'июля', 8 => 'августа',
+        9 => 'сентября', 10 => 'октября', 11 => 'ноября', 12 => 'декабря'
+    ];
+    
+    try {
+        $dt = new DateTime($dateStr);
+        $day = $dt->format('j');
+        $month = $months[(int)$dt->format('n')];
+        $year = $dt->format('Y');
+        $time = $dt->format('H:i:s');
+        return "{$day} {$month} {$year} в {$time} (по Москве)";
+    } catch (Exception $e) {
+        return $dateStr;
+    }
+}
 
-$randomGif = $gifs[array_rand($gifs)];
+// Используем текущее время (момент создания базы)
+$formattedDate = formatRussianDate($now);
 
 // Формируем приветственное сообщение
 $welcomeText = <<<MD
-{$randomGif}
-
-Намасте!
-Последнее обновление: {$gitDate}
-Версия: {$gitHash}
+Жизнь с чистого листа 🍃
+Последнее обновление {$formattedDate}
+Версия {$version}
 MD;
 
 // Добавляем системное сообщение
@@ -53,4 +65,4 @@ $msgRepo->add($systemId, $systemName, $welcomeText);
 
 echo "✓ База очищена\n";
 echo "✓ Системное сообщение от {$systemName} добавлено\n";
-echo "✓ Версия: {$gitHash}\n";
+echo "✓ Версия: {$version}\n";
