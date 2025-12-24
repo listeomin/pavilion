@@ -37,6 +37,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/empty-state.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
@@ -44,7 +45,7 @@ $basePath = get_base_path();
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item">Сообщения</a>
+  <a href="messages" class="nav-item">Послания</a>
   <span class="nav-separator">|</span>
   <a href="branches" class="nav-item active">Ветки</a>
 </nav>
@@ -55,6 +56,10 @@ $basePath = get_base_path();
       <span id="user-label-header">– это вы!</span>
     </div>
     <h1>Ветки</h1>
+  </div>
+  <div class="empty-state">
+    <img src="assets/empty-brnch.png" alt="Пусто">
+    <div class="empty-state-text">Здесь пока пусто</div>
   </div>
 </div>
 <div id="telegram-auth-container"></div>

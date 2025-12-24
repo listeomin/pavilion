@@ -18,7 +18,7 @@ $basePath = get_base_path();
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <base href="<?php echo htmlspecialchars($basePath); ?>/">
-<title>Сообщения</title>
+<title>Послания</title>
 <link rel="icon" href="assets/favicon.png" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,6 +37,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/empty-state.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
@@ -44,7 +45,7 @@ $basePath = get_base_path();
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item active">Сообщения</a>
+  <a href="messages" class="nav-item active">Послания</a>
   <span class="nav-separator">|</span>
   <a href="branches" class="nav-item">Ветки</a>
 </nav>
@@ -54,7 +55,11 @@ $basePath = get_base_path();
       <span id="user-emoji" class="user-emoji-clickable"></span>
       <span id="user-label-header">– это вы!</span>
     </div>
-    <h1>Сообщения</h1>
+    <h1>Послания</h1>
+  </div>
+  <div class="empty-state">
+    <img src="assets/empty-msg.png" alt="Пусто">
+    <div class="empty-state-text">Здесь пока пусто</div>
   </div>
 </div>
 <div id="telegram-auth-container"></div>

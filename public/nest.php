@@ -44,7 +44,7 @@ $basePath = get_base_path();
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item">Сообщения</a>
+  <a href="messages" class="nav-item">Послания</a>
   <span class="nav-separator">|</span>
   <a href="branches" class="nav-item">Ветки</a>
 </nav>
