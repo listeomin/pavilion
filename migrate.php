@@ -20,6 +20,7 @@ try {
             author TEXT NOT NULL,
             text TEXT NOT NULL,
             created_at TEXT NOT NULL,
+            is_seed INTEGER DEFAULT 0,
             FOREIGN KEY(session_id) REFERENCES sessions(id) ON DELETE CASCADE
         );
     ");

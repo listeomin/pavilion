@@ -115,7 +115,8 @@ import { CommandNavigator } from './command-navigator.js?v=1';
           // Clear chat and render fresh messages
           chatLog.innerHTML = '';
           lastIdRef.value = 0;
-          renderMessages(chatLog, result.messages || [], lastIdRef);
+          // SYSTEM_MSG_CLASS: Render rebase seed messages as system messages
+          renderMessages(chatLog, result.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
           
           editor.clear();
           updateSendButton(sendBtn, editor, inlineInput);
@@ -216,7 +217,8 @@ import { CommandNavigator } from './command-navigator.js?v=1';
    
     wsClient.on('message_new', (message) => {
       console.log('[Main] New message via WS:', message);
-      renderMessages(chatLog, [message], lastIdRef);
+      // SYSTEM_MSG_CLASS: Pass current session ID to determine if message is seed
+      renderMessages(chatLog, [message], lastIdRef, { currentSessionId: sessionId });
     });
    
     wsClient.on('message_updated', (message) => {
@@ -251,7 +253,8 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         }
         
         // Render messages from rebase event
-        renderMessages(chatLog, data.messages || [], lastIdRef);
+        // SYSTEM_MSG_CLASS: Render rebase seed messages as system messages
+        renderMessages(chatLog, data.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
       } catch (error) {
         console.error('[Main] Rebase reinit failed:', error);
         renderSystemMessage(chatLog, 'Ошибка переподключения после rebase', {});
@@ -306,7 +309,8 @@ import { CommandNavigator } from './command-navigator.js?v=1';
     // Extract emoji from name (first character before space)
     const emoji = myName.split(' ')[0];
     userEmojiEl.textContent = emoji;
-    renderMessages(chatLog, data.messages || [], lastIdRef);
+    // SYSTEM_MSG_CLASS: Pass session ID to determine which messages are seed (from other sessions)
+    renderMessages(chatLog, data.messages || [], lastIdRef, { currentSessionId: sessionId });
     setupWebSocket();
     inputEl.focus();
    

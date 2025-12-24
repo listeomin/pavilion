@@ -77,6 +77,12 @@
   display: inline;
 }
 
+/* SYSTEM_MSG_CLASS: Allow images to display properly in system messages */
+.system-msg img,
+.system-text img {
+  display: block !important;
+}
+
 .system-spinner {
   display: inline;
   font-family: 'Ubuntu Mono', monospace;

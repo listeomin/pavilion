@@ -84,8 +84,11 @@ export function removeSystemMessage(element) {
   }
 }
 
-export function renderMessages(chatLog, messages, lastIdRef) {
+// SYSTEM_MSG_CLASS: All rebase/seed messages use .system-msg class (🛳️ капитанская рубка)
+// Messages from other sessions are rendered as system messages (seed data)
+export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
   if (!messages || !messages.length) return;
+  const { asSystemMessages = false, currentSessionId = null } = options;
   console.log('Rendering messages:', messages);
   const frag = document.createDocumentFragment();
   messages.forEach(m => {
@@ -98,17 +101,25 @@ export function renderMessages(chatLog, messages, lastIdRef) {
                        lastMsg.classList.contains('msg') && 
                        lastMsg.dataset.author === m.author;
     
+    // SYSTEM_MSG_CLASS: Determine if this should be a system message
+    // Either forced via asSystemMessages OR if message is from a different session (seed data)
+    const isSystemMsg = asSystemMessages || (currentSessionId && m.session_id !== currentSessionId);
+    
     const div = document.createElement('div');
-    div.className = 'msg';
+    // SYSTEM_MSG_CLASS: Use system-msg class for rebase/seed messages
+    div.className = isSystemMsg ? 'system-msg' : 'msg';
     div.dataset.author = m.author;
     div.dataset.messageId = m.id;
     
     // Only add meta if not merging
     if (!shouldMerge) {
       const meta = document.createElement('span');
-      meta.className = 'meta meta-clickable';
+      // SYSTEM_MSG_CLASS: Use system-meta for system messages
+      meta.className = isSystemMsg ? 'system-meta' : 'meta meta-clickable';
       meta.textContent = m.author + ':';
-      meta.style.cursor = 'pointer';
+      if (!isSystemMsg) {
+        meta.style.cursor = 'pointer';
+      }
       div.appendChild(meta);
     }
     
