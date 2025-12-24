@@ -1,5 +1,5 @@
 <?php
-// poslaniya.php
+// nest.php
 
 // Auto-detect BASE_PATH from request URI
 function get_base_path() {
@@ -18,7 +18,7 @@ $basePath = get_base_path();
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <base href="<?php echo htmlspecialchars($basePath); ?>/">
-<title>Послания</title>
+<title>Гнездо</title>
 <link rel="icon" href="assets/favicon.png" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,11 +42,11 @@ $basePath = get_base_path();
 <nav class="main-nav">
   <a href="./" class="nav-item">Беседка</a>
   <span class="nav-separator">|</span>
-  <a href="gnezdo" class="nav-item">Гнездо</a>
+  <a href="nest" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="poslaniya" class="nav-item active">Послания</a>
+  <a href="messages" class="nav-item">Сообщения</a>
   <span class="nav-separator">|</span>
-  <span class="nav-item disabled">Ветки</span>
+  <a href="branches" class="nav-item">Ветки</a>
 </nav>
 <div class="wrap">
   <div id="header-container">
@@ -54,7 +54,7 @@ $basePath = get_base_path();
       <span id="user-emoji" class="user-emoji-clickable"></span>
       <span id="user-label-header">– это вы!</span>
     </div>
-    <h1>Послания</h1>
+    <h1>Гнездо</h1>
   </div>
 </div>
 <div id="telegram-auth-container"></div>
@@ -64,6 +64,6 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/poslaniya.js"></script>
+<script type="module" src="js/nest.js"></script>
 </body>
 </html>

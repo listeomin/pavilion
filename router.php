@@ -60,9 +60,19 @@ if (preg_match('/\.(css|js|json|png|jpg|jpeg|gif|ico|svg|mp3|wav|ogg|m4a)$/', $u
     }
 }
 
-// Если запрос к gnezdo
-if (preg_match('/^\/gnezdo/', $uri)) {
-    require __DIR__ . '/public/gnezdo.php';
+// Маршруты страниц
+if (preg_match('/^\/nest/', $uri)) {
+    require __DIR__ . '/public/nest.php';
+    return true;
+}
+
+if (preg_match('/^\/messages/', $uri)) {
+    require __DIR__ . '/public/messages.php';
+    return true;
+}
+
+if (preg_match('/^\/branches/', $uri)) {
+    require __DIR__ . '/public/branches.php';
     return true;
 }
 

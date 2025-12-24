@@ -1,5 +1,5 @@
 <?php
-// vetki.php
+// branches.php
 
 // Auto-detect BASE_PATH from request URI
 function get_base_path() {
@@ -42,11 +42,11 @@ $basePath = get_base_path();
 <nav class="main-nav">
   <a href="./" class="nav-item">Беседка</a>
   <span class="nav-separator">|</span>
-  <a href="gnezdo" class="nav-item">Гнездо</a>
+  <a href="nest" class="nav-item">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="poslaniya" class="nav-item">Послания</a>
+  <a href="messages" class="nav-item">Сообщения</a>
   <span class="nav-separator">|</span>
-  <a href="vetki" class="nav-item active">Ветки</a>
+  <a href="branches" class="nav-item active">Ветки</a>
 </nav>
 <div class="wrap">
   <div id="header-container">
@@ -64,6 +64,6 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/vetki.js"></script>
+<script type="module" src="js/branches.js"></script>
 </body>
 </html>

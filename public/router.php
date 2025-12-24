@@ -17,12 +17,6 @@ if (preg_match('/\.(css|js|json|png|jpg|jpeg|gif|ico|svg|mp3|wav|ogg|m4a|html)$/
     return false;
 }
 
-// Если запрос к gnezdo
-if (preg_match('/^\/pavilion\/gnezdo/', $uri) || preg_match('/^\/gnezdo/', $uri)) {
-    require __DIR__ . '/gnezdo.php';
-    return true;
-}
-
 // Всё остальное - отдаём index.php
 require __DIR__ . '/index.php';
 return true;

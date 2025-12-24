@@ -1,4 +1,4 @@
-// vetki.js - инициализация страницы Ветки без чата
+// nest.js - инициализация страницы Гнездо без чата
 import { getCookie, apiInit } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';

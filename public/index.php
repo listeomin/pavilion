@@ -42,11 +42,11 @@ $basePath = get_base_path();
 <nav class="main-nav">
   <a href="./" class="nav-item active">Беседка</a>
   <span class="nav-separator">|</span>
-  <a href="gnezdo/" class="nav-item">Гнездо</a>
+  <a href="nest" class="nav-item">Гнездо</a>
   <span class="nav-separator">|</span>
-  <a href="poslaniya" class="nav-item">Послания</a>
+  <a href="messages" class="nav-item">Сообщения</a>
   <span class="nav-separator">|</span>
-  <a href="vetki" class="nav-item">Ветки</a>
+  <a href="branches" class="nav-item">Ветки</a>
 </nav>
 <div class="wrap">
   <div id="header-container">
