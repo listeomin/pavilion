@@ -5,6 +5,13 @@
   padding-right: 8px;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+#chat-log.chat-centered {
+  justify-content: center;
 }
 
 #chat-log::before {

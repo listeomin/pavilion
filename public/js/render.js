@@ -199,6 +199,14 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
   });
   chatLog.appendChild(frag);
   chatLog.scrollTop = chatLog.scrollHeight;
+  
+  // Центрирование: первое сообщение по центру, потом вверх
+  const allMessages = chatLog.querySelectorAll('.msg, .system-msg');
+  if (allMessages.length <= 2 && chatLog.scrollHeight <= chatLog.clientHeight) {
+    chatLog.classList.add('chat-centered');
+  } else {
+    chatLog.classList.remove('chat-centered');
+  }
 }
 
 export function updateMessage(chatLog, updatedMessage) {

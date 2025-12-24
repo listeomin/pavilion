@@ -24,21 +24,46 @@ $basePath = get_base_path();
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css?v=4">
+<link rel="stylesheet" href="css/chat.css?v=5">
+<link rel="stylesheet" href="css/input.css?v=7">
+<link rel="stylesheet" href="css/format-menu.css?v=4">
 <link rel="stylesheet" href="css/colors.css?v=1">
+<link rel="stylesheet" href="css/inline-input.css?v=3">
+<link rel="stylesheet" href="css/music.css?v=1">
+<link rel="stylesheet" href="css/track-preview.css?v=1">
+<link rel="stylesheet" href="css/audio-player.css?v=1">
+<link rel="stylesheet" href="css/nightshift.css?v=1">
+<link rel="stylesheet" href="css/animalProfile.css?v=17">
+<link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
   <a href="./" class="nav-item">Беседка</a>
   <span class="nav-separator">|</span>
-  <a href="gnezdo.php" class="nav-item active">Гнездо</a>
+  <a href="gnezdo" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>
-  <span class="nav-item disabled">Послания</span>
+  <a href="poslaniya" class="nav-item">Послания</a>
   <span class="nav-separator">|</span>
-  <span class="nav-item disabled">Ветки</span>
+  <a href="vetki" class="nav-item">Ветки</a>
 </nav>
 <div class="wrap">
-  <h1>Вы в Гнезде</h1>
+  <div id="header-container">
+    <div id="user-header">
+      <span id="user-emoji" class="user-emoji-clickable"></span>
+      <span id="user-label-header">– это вы!</span>
+    </div>
+    <h1>Гнездо</h1>
+  </div>
 </div>
+<div id="telegram-auth-container"></div>
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
+  <img src="assets/paw.svg" alt="Animal Profile">
+</button>
+<button id="nightshift-toggle">
+  <img src="assets/moon.svg" alt="Night Shift">
+</button>
+<script type="module" src="js/gnezdo.js"></script>
 </body>
 </html>
