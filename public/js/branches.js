@@ -1,7 +1,21 @@
 // branches.js - инициализация страницы Ветки без чата
-import { getCookie, apiInit } from './api.js?v=7';
+import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
+
+// Function to align user header to the right edge of the title
+function alignUserHeader() {
+  const h1 = document.querySelector('h1');
+  const userHeader = document.getElementById('user-header');
+  
+  if (h1 && userHeader) {
+    const h1Rect = h1.getBoundingClientRect();
+    const containerRect = h1.parentElement.getBoundingClientRect();
+    const rightOffset = h1Rect.right - containerRect.left;
+    
+    userHeader.style.marginLeft = rightOffset - userHeader.offsetWidth + 'px';
+  }
+}
 
 (async function () {
   const COOKIE_NAME = 'chat_session_id';
@@ -17,6 +31,43 @@ import { AnimalProfile } from './animalProfile.js?v=18';
   const myName = data.name;
   const emoji = myName.split(' ')[0];
   userEmojiEl.textContent = emoji;
+  
+  // Align user header after content loads
+  setTimeout(alignUserHeader, 0);
+  window.addEventListener('resize', alignUserHeader);
+
+  // Handle emoji click for changing animal
+  userEmojiEl.addEventListener('click', async () => {
+    userEmojiEl.classList.add('user-emoji-fade');
+   
+    setTimeout(async () => {
+      const data = await apiChangeName('/server/api.php', sessionId);
+      if (data && data.name) {
+        const emoji = data.name.split(' ')[0];
+       
+        // Check if this animal has a saved profile
+        let finalName = data.name;
+        if (animalProfile) {
+          const savedProfile = await animalProfile.fetchProfile(emoji);
+          if (savedProfile && savedProfile.kind) {
+            // Use saved custom name
+            finalName = emoji + ' ' + savedProfile.kind;
+          }
+        }
+       
+        userEmojiEl.textContent = emoji;
+        userEmojiEl.classList.remove('user-emoji-fade');
+       
+        // Update animal profile with new emoji
+        if (animalProfile) {
+          animalProfile.updateCurrentEmoji(emoji);
+        }
+        
+        // Realign header after emoji change
+        setTimeout(alignUserHeader, 0);
+      }
+    }, 250);
+  });
 
   // Инициализация AnimalProfile
   const animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {

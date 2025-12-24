@@ -37,7 +37,7 @@ h1 {
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
-  margin: 0 0 -12px 70px;
+  margin: 0 0 -12px 0;
 }
 
 #user-emoji {

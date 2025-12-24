@@ -16,6 +16,20 @@ import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
 import { CommandNavigator } from './command-navigator.js?v=1';
 
+// Function to align user header to the right edge of the title
+function alignUserHeader() {
+  const h1 = document.querySelector('h1');
+  const userHeader = document.getElementById('user-header');
+  
+  if (h1 && userHeader) {
+    const h1Rect = h1.getBoundingClientRect();
+    const containerRect = h1.parentElement.getBoundingClientRect();
+    const rightOffset = h1Rect.right - containerRect.left;
+    
+    userHeader.style.marginLeft = rightOffset - userHeader.offsetWidth + 'px';
+  }
+}
+
 (function () {
   const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
@@ -301,6 +315,9 @@ import { CommandNavigator } from './command-navigator.js?v=1';
         if (animalProfile) {
           animalProfile.updateCurrentEmoji(emoji);
         }
+        
+        // Realign header after emoji change
+        setTimeout(alignUserHeader, 0);
       }
     }, 250);
   });
@@ -314,6 +331,10 @@ import { CommandNavigator } from './command-navigator.js?v=1';
     renderMessages(chatLog, data.messages || [], lastIdRef, { currentSessionId: sessionId });
     setupWebSocket();
     inputEl.focus();
+    
+    // Align user header after content loads
+    setTimeout(alignUserHeader, 0);
+    window.addEventListener('resize', alignUserHeader);
    
     // Initialize animal profile
     animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
