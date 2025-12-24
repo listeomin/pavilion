@@ -64,6 +64,24 @@ function alignUserHeader() {
   setupHotkeys(inputEl, editor, () => {
     sendForm.dispatchEvent(new Event('submit'));
   }, messageHistory, () => myName, commandNavigator);
+  
+  // Global hotkey: "/" to focus input field
+  document.addEventListener('keydown', (e) => {
+    // Only if "/" is pressed and we're not already in an input/textarea
+    if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const activeElement = document.activeElement;
+      const isInInput = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.contentEditable === 'true'
+      );
+      
+      if (!isInInput) {
+        e.preventDefault();
+        inputEl.focus();
+      }
+    }
+  });
   sendForm.addEventListener('submit', async (e) => {
     e.preventDefault();
    

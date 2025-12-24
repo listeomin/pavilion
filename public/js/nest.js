@@ -83,4 +83,21 @@ function alignUserHeader() {
       animalProfile.open();
     });
   }
+  
+  // Global hotkey: "/" to go to Беседка page
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const activeElement = document.activeElement;
+      const isInInput = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.contentEditable === 'true'
+      );
+      
+      if (!isInInput) {
+        e.preventDefault();
+        window.location.href = './';
+      }
+    }
+  });
 })();
