@@ -30,11 +30,22 @@ class ApiHandler {
 
     public function init(array $input, array $cookies = []): array {
         $cookieId = $input['session_id'] ?? $cookies['chat_session_id'] ?? null;
+        Logger::log('API init() called', [
+            'cookieId' => $cookieId,
+            'input_session_id' => $input['session_id'] ?? null,
+            'cookie_session_id' => $cookies['chat_session_id'] ?? null
+        ]);
+
         $session = null;
         $isNew = false;
 
         if ($cookieId) {
             $session = $this->sessionRepo->get($cookieId);
+            Logger::log('Session lookup result', [
+                'cookieId' => $cookieId,
+                'session_found' => $session !== null,
+                'session' => $session
+            ]);
         }
 
         if ($session) {
@@ -45,6 +56,14 @@ class ApiHandler {
             $messages = $this->msgRepo->getLastPage(50);
             $isNew = true;
         }
+
+        Logger::log('API init() returning data', [
+            'session_id' => $session['id'],
+            'session_id_type' => gettype($session['id']),
+            'is_new' => $isNew,
+            'messages_count' => count($messages),
+            'first_3_messages' => array_slice($messages, 0, 3)
+        ]);
 
         return [
             'session_id' => $session['id'],

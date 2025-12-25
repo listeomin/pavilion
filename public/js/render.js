@@ -85,12 +85,11 @@ export function removeSystemMessage(element) {
   }
 }
 
-// SYSTEM_MSG_CLASS: All rebase/seed messages use .system-msg class (🛳️ капитанская рубка)
-// Messages from other sessions are rendered as system messages (seed data)
+// SYSTEM_MSG_CLASS: System messages (from "🛳️ капитанская рубка") use .system-msg class
+// Also applies to all messages when asSystemMessages flag is set (e.g., after rebase)
 export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
   if (!messages || !messages.length) return;
-  const { asSystemMessages = false, currentSessionId = null } = options;
-  console.log('Rendering messages:', messages);
+  const { asSystemMessages = false } = options;
   const frag = document.createDocumentFragment();
   messages.forEach(m => {
     // Check if we should merge with previous message
@@ -98,13 +97,14 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
     const lastInFrag = frag.lastElementChild;
     const lastInLog = chatLog.lastElementChild;
     const lastMsg = lastInFrag || lastInLog;
-    const shouldMerge = lastMsg && 
-                       lastMsg.classList.contains('msg') && 
+    const shouldMerge = lastMsg &&
+                       lastMsg.classList.contains('msg') &&
                        lastMsg.dataset.author === m.author;
-    
+
     // SYSTEM_MSG_CLASS: Determine if this should be a system message
-    // Either forced via asSystemMessages OR if message is from a different session (seed data)
-    const isSystemMsg = asSystemMessages || (currentSessionId && m.session_id !== currentSessionId);
+    // Messages from "🛳️ капитанская рубка" are always system messages
+    // OR when forced via asSystemMessages flag (e.g. after rebase)
+    const isSystemMsg = asSystemMessages || m.author === '🛳️ капитанская рубка';
     
     const div = document.createElement('div');
     // SYSTEM_MSG_CLASS: Use system-msg class for rebase/seed messages

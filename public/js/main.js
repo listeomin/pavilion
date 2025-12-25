@@ -264,7 +264,7 @@ function alignUserHeader() {
     wsClient.on('message_new', (message) => {
       console.log('[Main] New message via WS:', message);
       // SYSTEM_MSG_CLASS: Pass current session ID to determine if message is seed
-      renderMessages(chatLog, [message], lastIdRef, { currentSessionId: sessionId });
+      renderMessages(chatLog, [message], lastIdRef);
     });
    
     wsClient.on('message_updated', (message) => {
@@ -358,8 +358,9 @@ function alignUserHeader() {
     // Extract emoji from name (first character before space)
     const emoji = myName.split(' ')[0];
     userEmojiEl.textContent = emoji;
-    // SYSTEM_MSG_CLASS: Pass session ID to determine which messages are seed (from other sessions)
-    renderMessages(chatLog, data.messages || [], lastIdRef, { currentSessionId: sessionId });
+    // Render all messages as regular messages (not system messages)
+    // Only rebase/seed operations should show messages as system messages
+    renderMessages(chatLog, data.messages || [], lastIdRef);
     setupWebSocket();
     inputEl.focus();
     
