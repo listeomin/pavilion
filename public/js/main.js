@@ -437,12 +437,38 @@ function alignUserHeader() {
       // Загружаем профиль ТОЛЬКО если это НОВАЯ авторизация (не при загрузке страницы)
       if (animalProfile && !authData) {
         console.log('[Main] New login detected, loading profile...');
+
+        // Переинициализируем сессию чтобы получить sessionId с user_id
+        const initData = await apiInit(API, null, COOKIE_NAME);
+        const oldSessionId = sessionId;
+        sessionId = initData.session_id;
+
+        console.log('[Main] Session updated after auth', {
+          oldSessionId: oldSessionId,
+          newSessionId: sessionId
+        });
+
+        // Загружаем профиль
         const savedProfile = await animalProfile.loadAndApplyUserProfile();
 
         if (savedProfile) {
           console.log('[Main] Loaded profile after login:', savedProfile);
           myName = savedProfile.name;
           userEmojiEl.textContent = savedProfile.emoji;
+
+          // Обновляем emoji в профиле
+          animalProfile.updateCurrentEmoji(savedProfile.emoji);
+        } else {
+          // Если нет сохранённого профиля - используем имя из новой сессии
+          myName = initData.name;
+          const emoji = myName.split(' ')[0];
+          userEmojiEl.textContent = emoji;
+          animalProfile.updateCurrentEmoji(emoji);
+        }
+
+        // Переподключаем WebSocket с новым sessionId
+        if (wsClient) {
+          wsClient.reconnectWithNewSession(sessionId);
         }
 
         animalProfile.showLogoutButton();
