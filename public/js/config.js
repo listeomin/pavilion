@@ -42,7 +42,7 @@ const WS_HOST = window.location.hostname === 'localhost'
 const WS_PATH = BASE_PATH + '/ws';
 
 // Version info (update when version.json changes)
-export const VERSION = '0.8.0';
+export const VERSION = '0.9.0';
 
 export const CONFIG = {
   BASE_PATH: BASE_PATH,

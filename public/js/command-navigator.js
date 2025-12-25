@@ -1,6 +1,6 @@
 // public/js/command-navigator.js
 export class CommandNavigator {
-  constructor(commands = ['/music', '/rebase']) {
+  constructor(commands = ['/music', '/rebase', '/version']) {
     this.commands = commands;
     this.currentIndex = -1;
   }

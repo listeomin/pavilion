@@ -93,3 +93,11 @@ export async function apiRebase(API) {
   if (!res.ok) return { success: false, error: 'Rebase failed' };
   return await res.json();
 }
+
+export async function apiVersion(API) {
+  const res = await fetch(API + '?action=version', {
+    method: 'POST'
+  });
+  if (!res.ok) return { success: false, error: 'Version request failed' };
+  return await res.json();
+}

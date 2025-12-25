@@ -191,7 +191,7 @@ export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, g
 
       // Remove any 'в' character that might have been inserted by browser
       const text = inputEl.textContent;
-      if (text.endsWith('в') && (text.startsWith('/music') || text.startsWith('/rebase'))) {
+      if (text.endsWith('в') && (text.startsWith('/music') || text.startsWith('/rebase') || text.startsWith('/version'))) {
         inputEl.textContent = text.slice(0, -1);
         editor.markdownText = inputEl.textContent;
 

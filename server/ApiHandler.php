@@ -227,26 +227,70 @@ class ApiHandler {
 
     public function rebase(): array {
         $scriptPath = __DIR__ . '/../db-reset.sh';
-        
+
         if (!file_exists($scriptPath)) {
             throw new RuntimeException('rebase script not found');
         }
-        
+
         // Execute script
         $output = [];
         $returnCode = 0;
         exec("bash {$scriptPath} 2>&1", $output, $returnCode);
-        
+
         if ($returnCode !== 0) {
             throw new RuntimeException('rebase failed: ' . implode("\n", $output));
         }
-        
+
         // Get fresh messages
         $messages = $this->msgRepo->getAll();
-        
+
         // Broadcast to all clients
         $this->broadcastService->rebase($messages);
-        
+
         return ['success' => true, 'messages' => $messages];
+    }
+
+    public function version(): array {
+        // Read version from version.json
+        $projectRoot = dirname(__DIR__);
+        $versionFile = $projectRoot . '/public/js/version.json';
+        $version = '0.0.0'; // fallback
+
+        if (file_exists($versionFile)) {
+            $content = file_get_contents($versionFile);
+            if ($content !== false) {
+                $versionData = json_decode($content, true);
+                if ($versionData && isset($versionData['version'])) {
+                    $version = $versionData['version'];
+                }
+            }
+        }
+
+        // Create system session (captain's bridge)
+        $systemId = 'system_captain';
+        $systemName = '🛳️ капитанская рубка';
+
+        // Check if system session exists, create if not
+        $systemSession = $this->sessionRepo->get($systemId);
+        if (!$systemSession) {
+            // Create system session manually
+            $db = get_db();
+            $now = (new DateTime())->format(DateTime::ATOM);
+            $stmt = $db->prepare('INSERT OR REPLACE INTO sessions (id, name, created_at) VALUES (:id, :name, :created_at)');
+            $stmt->execute([
+                ':id' => $systemId,
+                ':name' => $systemName,
+                ':created_at' => $now
+            ]);
+        }
+
+        // Add version message from captain's bridge
+        $versionText = "Версия {$version}";
+        $message = $this->msgRepo->add($systemId, $systemName, $versionText);
+
+        // Broadcast new message
+        $this->broadcastService->messageNew($message);
+
+        return ['success' => true, 'version' => $version];
     }
 }

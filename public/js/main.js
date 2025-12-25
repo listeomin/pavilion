@@ -1,6 +1,6 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=5';
-import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase } from './api.js?v=7';
+import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase, apiVersion } from './api.js?v=7';
 import { WebSocketClient } from './websocket-client.js?v=2';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=12';
 import { Editor } from './editor.js?v=10';
@@ -129,6 +129,26 @@ function alignUserHeader() {
    
     text = text.trim();
 
+    // Check for /version command
+    if (text === '/version') {
+      const versionPhrase = 'Капитан, покажите версию!';
+
+      try {
+        // Send user's phrase first
+        await apiSend(API, sessionId, versionPhrase);
+
+        // Then request version from server (will send system message)
+        await apiVersion(API);
+
+        editor.clear();
+        updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
+        inputEl.focus();
+      } catch (error) {
+        console.error('[Main] Version request failed:', error);
+      }
+      return;
+    }
+
     // Check for /rebase command
     if (text === '/rebase') {
       const sendingMsg = renderSystemMessage(chatLog, 'Сброс базы данных...', { spinner: true });
@@ -142,28 +162,28 @@ function alignUserHeader() {
           const initData = await apiInit(API, null, COOKIE_NAME);
           sessionId = initData.session_id;
           myName = initData.name;
-          
+
           // Update emoji
           const emoji = myName.split(' ')[0];
           userEmojiEl.textContent = emoji;
-          
+
           // Reconnect WebSocket with new session
           if (wsClient) {
             wsClient.reconnectWithNewSession(sessionId);
           }
-          
+
           // Update animal profile
           if (animalProfile) {
             animalProfile.updateCurrentEmoji(emoji);
             await animalProfile.init();
           }
-          
+
           // Clear chat and render fresh messages
           chatLog.innerHTML = '';
           lastIdRef.value = 0;
           // SYSTEM_MSG_CLASS: Render rebase seed messages as system messages
           renderMessages(chatLog, result.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
-          
+
           editor.clear();
           updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
           inputEl.focus();

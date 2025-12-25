@@ -92,6 +92,11 @@ try {
         json($result);
     }
 
+    if ($action === 'version') {
+        $result = $handler->version();
+        json($result);
+    }
+
     http_response_code(400);
     json(['error' => 'unknown action']);
 
