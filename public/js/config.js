@@ -36,13 +36,17 @@ const BASE_PATH = detectBasePath();
 
 // Auto-detect WebSocket URL
 const WS_PROTOCOL = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const WS_HOST = window.location.hostname === 'localhost' 
-  ? 'localhost:3001' 
+const WS_HOST = window.location.hostname === 'localhost'
+  ? 'localhost:3001'
   : window.location.host;
 const WS_PATH = BASE_PATH + '/ws';
+
+// Version info (update when version.json changes)
+export const VERSION = '0.8.0';
 
 export const CONFIG = {
   BASE_PATH: BASE_PATH,
   API_PATH: BASE_PATH + '/server/api.php',
-  WS_URL: `${WS_PROTOCOL}//${WS_HOST}${WS_PATH}`
+  WS_URL: `${WS_PROTOCOL}//${WS_HOST}${WS_PATH}`,
+  VERSION: VERSION
 };

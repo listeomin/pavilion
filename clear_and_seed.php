@@ -26,9 +26,16 @@ $stmt->execute([
     ':created_at' => $now
 ]);
 
-// Генерируем версию в формате 0.075.ХХХХ (используем commit count)
-$commitCount = trim(shell_exec('git rev-list --count HEAD 2>/dev/null') ?: '0');
-$version = "0.075.{$commitCount}";
+// Читаем версию из version.json
+$versionFile = __DIR__ . '/public/js/version.json';
+$version = '0.0.0'; // fallback
+
+if (file_exists($versionFile)) {
+    $versionData = json_decode(file_get_contents($versionFile), true);
+    if ($versionData && isset($versionData['version'])) {
+        $version = $versionData['version'];
+    }
+}
 
 // Форматируем текущее время создания базы
 function formatRussianDate($dateStr) {
