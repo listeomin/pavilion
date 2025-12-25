@@ -92,7 +92,7 @@ export class AnimalProfile {
           </div>
 
           <button class="animal-profile-submit" id="submit-profile">Сохранить</button>
-          <button class="animal-profile-logout" id="logout-profile" style="display: none;">Разлогиниться</button>
+          <button class="text-button" id="logout-profile" style="display: none;">Уйти</button>
         </div>
       </div>
     `;

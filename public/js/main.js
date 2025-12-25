@@ -385,6 +385,9 @@ function alignUserHeader() {
         myName = data.name;
         userEmojiEl.textContent = initialEmoji;
       }
+
+      // Показываем кнопку "Уйти" для авторизованных пользователей
+      animalProfile.showLogoutButton();
     } else {
       // Не авторизован - используем имя из сессии
       console.log('[Main] Not authorized, using session name');
