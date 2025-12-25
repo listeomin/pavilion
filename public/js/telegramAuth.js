@@ -74,27 +74,49 @@ export class TelegramAuth {
    * Обработка авторизации через Telegram
    */
   async handleTelegramAuth(event) {
-    if (event.origin !== 'https://oauth.telegram.org') return;
-    const data = event.data;
-    if (!data || !data.id) return;
+    console.log('[TelegramAuth] handleTelegramAuth called', event);
+    console.log('[TelegramAuth] event.origin:', event.origin);
+    console.log('[TelegramAuth] event.data:', event.data);
 
+    if (event.origin !== 'https://oauth.telegram.org') {
+      console.warn('[TelegramAuth] Origin mismatch, expected oauth.telegram.org, got:', event.origin);
+      return;
+    }
+    const data = event.data;
+    if (!data || !data.id) {
+      console.warn('[TelegramAuth] Invalid data:', data);
+      return;
+    }
+
+    console.log('[TelegramAuth] Sending auth request to server...');
     try {
-      const res = await fetch(`${CONFIG.BASE_PATH}/api/telegram_auth.php?action=auth`, {
+      const url = `${CONFIG.BASE_PATH}/api/telegram_auth.php?action=auth`;
+      console.log('[TelegramAuth] URL:', url);
+      console.log('[TelegramAuth] Data:', data);
+
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
+
+      console.log('[TelegramAuth] Response status:', res.status);
       const result = await res.json();
+      console.log('[TelegramAuth] Response data:', result);
+
       if (result.success) {
+        console.log('[TelegramAuth] Auth successful!');
         this.authData = result.data;
-        
+
         // Скрываем кнопку авторизации
         const container = document.querySelector('[data-telegram-login]')?.parentElement;
+        console.log('[TelegramAuth] Container:', container);
         if (container) {
           this.hideLoginButton(container.id);
           this.renderMyChatButton(container.id, result.data.telegram_username);
         }
         if (this.onAuthCallback) {
+          console.log('[TelegramAuth] Calling onAuthCallback...');
           this.onAuthCallback(result.data);
         }
       } else {
@@ -102,6 +124,7 @@ export class TelegramAuth {
       }
     } catch (e) {
       console.error('[TelegramAuth] Auth failed:', e);
+      console.error('[TelegramAuth] Stack:', e.stack);
     }
   }
 

@@ -3,16 +3,42 @@ ini_set('display_errors', 1); error_reporting(E_ALL);
 // api/animal_profile.php
 header('Content-Type: application/json');
 
+// Логирование
+$logFile = __DIR__ . '/../../logs/animal_profile.log';
+$logDir = dirname($logFile);
+if (!file_exists($logDir)) {
+    mkdir($logDir, 0755, true);
+}
+
+function logToFile($message, $data = null) {
+    global $logFile;
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[{$timestamp}] {$message}";
+    if ($data !== null) {
+        $logEntry .= "\n" . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    }
+    $logEntry .= "\n" . str_repeat('-', 80) . "\n";
+    file_put_contents($logFile, $logEntry, FILE_APPEND);
+}
+
+logToFile('[animal_profile] Request started', [
+    'action' => $_GET['action'] ?? 'none',
+    'method' => $_SERVER['REQUEST_METHOD']
+]);
+
 // Use the centralized DB connection that already knows the correct path
 try {
     require_once __DIR__ . '/../../server/db.php';
 } catch (Exception $e) {
+    logToFile('[animal_profile] ERROR loading db.php', ['error' => $e->getMessage()]);
     echo json_encode(['error' => 'Failed to load db.php: ' . $e->getMessage()]);
     exit;
 }
 
 $action = $_GET['action'] ?? '';
 $db_path = __DIR__ . '/../data/animal.sqlite';
+
+logToFile('[animal_profile] Action: ' . $action, ['db_path' => $db_path]);
 
 // Initialize database if not exists
 function initDB($db_path) {
@@ -43,20 +69,51 @@ $db = new SQLite3($db_path);
 
 switch ($action) {
     case 'get':
+        session_start();
         $session_id = $_GET['session_id'] ?? '';
         $emoji = $_GET['emoji'] ?? '';
-        
-        if (!$session_id || !$emoji) {
-            echo json_encode(['error' => 'Missing parameters']);
-            exit;
+
+        logToFile('[animal_profile] GET action', [
+            'session_id' => $session_id,
+            'emoji' => $emoji
+        ]);
+
+        // Сначала ищем по user_id (если пользователь авторизован через Telegram)
+        $user_id = $_SESSION['telegram_user']['user_id'] ?? null;
+
+        if ($user_id) {
+            // Для авторизованных: ищем ТОЛЬКО по user_id (игнорируем emoji)
+            // Один пользователь = один профиль
+            $stmt = $db->prepare('SELECT * FROM animal_profiles WHERE user_id = :user_id ORDER BY updated_at DESC LIMIT 1');
+            $stmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
+            $result = $stmt->execute();
+            $row = $result->fetchArray(SQLITE3_ASSOC);
+
+            logToFile('[animal_profile] GET - Found by user_id', [
+                'user_id' => $user_id,
+                'found' => (bool)$row,
+                'profile' => $row ?: null
+            ]);
+        } else {
+            // Для неавторизованных: ищем по session_id + emoji
+            if (!$emoji) {
+                echo json_encode(['error' => 'Missing emoji parameter']);
+                exit;
+            }
+
+            $stmt = $db->prepare('SELECT * FROM animal_profiles WHERE session_id = :session_id AND emoji = :emoji AND user_id IS NULL');
+            $stmt->bindValue(':session_id', $session_id, SQLITE3_TEXT);
+            $stmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
+            $result = $stmt->execute();
+            $row = $result->fetchArray(SQLITE3_ASSOC);
+
+            logToFile('[animal_profile] GET - Found by session_id+emoji', [
+                'session_id' => $session_id,
+                'emoji' => $emoji,
+                'found' => (bool)$row
+            ]);
         }
-        
-        $stmt = $db->prepare('SELECT * FROM animal_profiles WHERE session_id = :session_id AND emoji = :emoji');
-        $stmt->bindValue(':session_id', $session_id, SQLITE3_TEXT);
-        $stmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
-        $result = $stmt->execute();
-        $row = $result->fetchArray(SQLITE3_ASSOC);
-        
+
         if ($row) {
             echo json_encode([
                 'success' => true,
@@ -74,23 +131,39 @@ switch ($action) {
         break;
         
     case 'save':
+        session_start();
         $raw_input = file_get_contents('php://input');
-        error_log('[animal_profile] Raw input: ' . $raw_input);
-        
+        logToFile('[animal_profile] SAVE - Raw input', ['raw' => $raw_input]);
+
         $input = json_decode($raw_input, true);
-        error_log('[animal_profile] Decoded input: ' . json_encode($input));
-        
+        logToFile('[animal_profile] SAVE - Decoded input', $input);
+
         $session_id = $input['session_id'] ?? '';
         $emoji = $input['emoji'] ?? '';
         $kind = $input['kind'] ?? '';
         $arial = $input['arial'] ?? '';
         $role = $input['role'] ?? '';
         $lifecycle = $input['lifecycle'] ?? '';
-        
-        error_log('[animal_profile] Parsed: session_id=' . $session_id . ', emoji=' . $emoji . ', kind=' . $kind);
-        
-        if (!$session_id || !$emoji || !$kind) {
+
+        // Получаем user_id из PHP сессии (если пользователь авторизован через Telegram)
+        $user_id = $_SESSION['telegram_user']['user_id'] ?? null;
+
+        logToFile('[animal_profile] SAVE - Parsed data', [
+            'session_id' => $session_id,
+            'user_id' => $user_id,
+            'emoji' => $emoji,
+            'kind' => $kind,
+            'session_data' => $_SESSION['telegram_user'] ?? 'not set'
+        ]);
+
+        if (!$emoji || !$kind) {
             echo json_encode(['error' => 'Missing required fields']);
+            exit;
+        }
+
+        // session_id НЕ обязателен для Telegram пользователей (у них есть user_id)
+        if (!$user_id && !$session_id) {
+            echo json_encode(['error' => 'Missing session_id or user_id']);
             exit;
         }
         
@@ -117,25 +190,72 @@ switch ($action) {
             }
         }
         
-        $stmt = $db->prepare('
-            INSERT INTO animal_profiles (session_id, emoji, kind, arial, role, lifecycle, updated_at)
-            VALUES (:session_id, :emoji, :kind, :arial, :role, :lifecycle, CURRENT_TIMESTAMP)
-            ON CONFLICT(session_id, emoji) DO UPDATE SET
-                kind = :kind,
-                arial = :arial,
-                role = :role,
-                lifecycle = :lifecycle,
-                updated_at = CURRENT_TIMESTAMP
-        ');
-        
-        $stmt->bindValue(':session_id', $session_id, SQLITE3_TEXT);
-        $stmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
-        $stmt->bindValue(':kind', $kind, SQLITE3_TEXT);
-        $stmt->bindValue(':arial', $arial, SQLITE3_TEXT);
-        $stmt->bindValue(':role', $role, SQLITE3_TEXT);
-        $stmt->bindValue(':lifecycle', $lifecycle, SQLITE3_TEXT);
-        
-        if ($stmt->execute()) {
+        // Проверяем существует ли профиль
+        if ($user_id) {
+            // Для авторизованных - ищем ТОЛЬКО по user_id (один пользователь = один профиль)
+            $checkStmt = $db->prepare('SELECT id FROM animal_profiles WHERE user_id = :user_id ORDER BY updated_at DESC LIMIT 1');
+            $checkStmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
+        } else {
+            // Для неавторизованных - ищем по session_id + emoji
+            $checkStmt = $db->prepare('SELECT id FROM animal_profiles WHERE session_id = :session_id AND emoji = :emoji AND user_id IS NULL');
+            $checkStmt->bindValue(':session_id', $session_id, SQLITE3_TEXT);
+            $checkStmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
+        }
+
+        $checkResult = $checkStmt->execute();
+        $existingProfile = $checkResult->fetchArray(SQLITE3_ASSOC);
+
+        logToFile('[animal_profile] SAVE - Existing profile check', [
+            'has_user_id' => $user_id !== null,
+            'existing_profile_id' => $existingProfile['id'] ?? null
+        ]);
+
+        if ($existingProfile) {
+            // UPDATE существующего профиля (включая emoji!)
+            $stmt = $db->prepare('
+                UPDATE animal_profiles
+                SET emoji = :emoji, kind = :kind, arial = :arial, role = :role, lifecycle = :lifecycle, updated_at = CURRENT_TIMESTAMP
+                WHERE id = :id
+            ');
+            $stmt->bindValue(':id', $existingProfile['id'], SQLITE3_INTEGER);
+            $stmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
+            $stmt->bindValue(':kind', $kind, SQLITE3_TEXT);
+            $stmt->bindValue(':arial', $arial, SQLITE3_TEXT);
+            $stmt->bindValue(':role', $role, SQLITE3_TEXT);
+            $stmt->bindValue(':lifecycle', $lifecycle, SQLITE3_TEXT);
+
+            logToFile('[animal_profile] SAVE - Updating existing profile', [
+                'id' => $existingProfile['id'],
+                'new_emoji' => $emoji
+            ]);
+        } else {
+            // INSERT нового профиля
+            if ($user_id) {
+                $stmt = $db->prepare('
+                    INSERT INTO animal_profiles (user_id, session_id, emoji, kind, arial, role, lifecycle, created_at, updated_at)
+                    VALUES (:user_id, :session_id, :emoji, :kind, :arial, :role, :lifecycle, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ');
+                $stmt->bindValue(':user_id', $user_id, SQLITE3_INTEGER);
+            } else {
+                $stmt = $db->prepare('
+                    INSERT INTO animal_profiles (session_id, emoji, kind, arial, role, lifecycle, created_at, updated_at)
+                    VALUES (:session_id, :emoji, :kind, :arial, :role, :lifecycle, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                ');
+            }
+            $stmt->bindValue(':session_id', $session_id, SQLITE3_TEXT);
+            $stmt->bindValue(':emoji', $emoji, SQLITE3_TEXT);
+            $stmt->bindValue(':kind', $kind, SQLITE3_TEXT);
+            $stmt->bindValue(':arial', $arial, SQLITE3_TEXT);
+            $stmt->bindValue(':role', $role, SQLITE3_TEXT);
+            $stmt->bindValue(':lifecycle', $lifecycle, SQLITE3_TEXT);
+
+            logToFile('[animal_profile] SAVE - Inserting new profile');
+        }
+
+        $executeResult = $stmt->execute();
+        logToFile('[animal_profile] SAVE - Execute result', ['success' => (bool)$executeResult]);
+
+        if ($executeResult) {
             // Update session name in chat.sqlite using centralized DB connection
             try {
                 $chat_db = get_db(); // Use the centralized connection from server/db.php
