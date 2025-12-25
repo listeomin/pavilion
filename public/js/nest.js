@@ -79,6 +79,10 @@ function alignUserHeader() {
   });
   await animalProfile.init();
 
+  // Check nest configuration from PHP
+  const nestConfig = window.NEST_CONFIG || {};
+  console.log('[Nest] Config:', nestConfig);
+
   // Инициализация Telegram Auth
   const telegramAuth = new TelegramAuth();
 
@@ -86,39 +90,61 @@ function alignUserHeader() {
   const authData = await telegramAuth.checkAuth();
   console.log('[Nest] Auth data:', authData);
 
-  // Если авторизован - загружаем профиль и показываем кнопку logout
-  if (authData && authData.telegram_id) {
-    console.log('[Nest] User already authorized');
-    const savedProfile = await animalProfile.loadAndApplyUserProfile();
+  // Show Telegram auth button ONLY on /nest (not on personal pages /nest/{user_id})
+  if (!nestConfig.urlUserId) {
+    // We're on /nest page (not personal page)
+    if (authData && authData.telegram_id) {
+      console.log('[Nest] User already authorized');
+      const savedProfile = await animalProfile.loadAndApplyUserProfile();
 
-    if (savedProfile) {
-      console.log('[Nest] Using saved profile:', savedProfile);
-      userEmojiEl.textContent = savedProfile.emoji;
+      if (savedProfile) {
+        console.log('[Nest] Using saved profile:', savedProfile);
+        userEmojiEl.textContent = savedProfile.emoji;
+      }
+
+      // Show logout button
+      const container = document.getElementById('telegram-auth-container');
+      if (container) {
+        const displayName = authData.telegram_username || authData.first_name || 'Telegram User';
+        const btn = document.createElement('button');
+        btn.className = 'my-chat-button';
+        btn.textContent = displayName + ' (выйти)';
+        btn.onclick = function() {
+          telegramAuth.logout();
+        };
+        container.appendChild(btn);
+      }
+
+      // Show logout button in profile
+      animalProfile.showLogoutButton();
+    } else {
+      // Show login widget
+      console.log('[Nest] Not authorized, showing login widget');
+      telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', async (newAuthData) => {
+        console.log('[Nest] New Telegram authorization:', newAuthData);
+        // Reload page - PHP will redirect to /nest/{user_id}
+        location.reload();
+      });
+    }
+  } else {
+    // We're on /nest/{user_id} page
+    console.log('[Nest] On personal page:', nestConfig.urlUserId);
+    console.log('[Nest] Is own nest:', nestConfig.isOwnNest);
+
+    // Load profile for authorized users
+    if (authData && authData.telegram_id) {
+      const savedProfile = await animalProfile.loadAndApplyUserProfile();
+      if (savedProfile) {
+        userEmojiEl.textContent = savedProfile.emoji;
+      }
+      animalProfile.showLogoutButton();
     }
 
-    // Показываем кнопку выхода
+    // Hide telegram-auth-container on personal pages
     const container = document.getElementById('telegram-auth-container');
     if (container) {
-      const displayName = authData.telegram_username || authData.first_name || 'Telegram User';
-      const btn = document.createElement('button');
-      btn.className = 'my-chat-button';
-      btn.textContent = displayName + ' (выйти)';
-      btn.onclick = function() {
-        telegramAuth.logout();
-      };
-      container.appendChild(btn);
+      container.style.display = 'none';
     }
-
-    // Показываем кнопку "Уйти" в профиле
-    animalProfile.showLogoutButton();
-  } else {
-    // Показываем виджет авторизации
-    console.log('[Nest] Not authorized, showing login widget');
-    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', async (newAuthData) => {
-      console.log('[Nest] New Telegram authorization:', newAuthData);
-      // Перезагружаем страницу для применения изменений
-      location.reload();
-    });
   }
 
   // Кнопка профиля

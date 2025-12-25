@@ -22,9 +22,13 @@ $segments = array_filter(explode('/', $cleanPath));
 $segments = array_values($segments); // Re-index array
 
 // Check if we have /nest/{user_id} format
+// Now we're in /nest/index.php, so URL is /nest/ or /nest/{user_id}
 $urlUserId = null;
-if (count($segments) >= 2 && $segments[0] === 'nest') {
-    $urlUserId = $segments[1];
+if (count($segments) >= 1 && $segments[0] === 'nest') {
+    // If there's a second segment, it's the user_id
+    if (isset($segments[1]) && $segments[1] !== '') {
+        $urlUserId = $segments[1];
+    }
 }
 
 // Check Telegram authorization
