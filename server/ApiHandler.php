@@ -30,10 +30,16 @@ class ApiHandler {
 
     public function init(array $input, array $cookies = []): array {
         $cookieId = $input['session_id'] ?? $cookies['chat_session_id'] ?? null;
+
+        // Проверяем авторизацию через Telegram
+        session_start();
+        $telegram_user_id = $_SESSION['telegram_user']['user_id'] ?? null;
+
         Logger::log('API init() called', [
             'cookieId' => $cookieId,
             'input_session_id' => $input['session_id'] ?? null,
-            'cookie_session_id' => $cookies['chat_session_id'] ?? null
+            'cookie_session_id' => $cookies['chat_session_id'] ?? null,
+            'telegram_user_id' => $telegram_user_id
         ]);
 
         $session = null;
@@ -48,11 +54,28 @@ class ApiHandler {
             ]);
         }
 
+        // Если сессия не найдена по cookie, но пользователь авторизован через Telegram,
+        // попробуем найти существующую сессию по user_id
+        if (!$session && $telegram_user_id) {
+            $session = $this->sessionRepo->getByUserId($telegram_user_id);
+            Logger::log('Session lookup by user_id', [
+                'user_id' => $telegram_user_id,
+                'session_found' => $session !== null,
+                'session' => $session
+            ]);
+
+            if ($session) {
+                // Нашли существующую сессию - будем обновлять cookie
+                $isNew = false; // Cookie обновится
+            }
+        }
+
         if ($session) {
             $messages = $this->msgRepo->getAll();
-            $isNew = false;
+            $isNew = $isNew; // Preserve the value set above
         } else {
-            $session = $this->sessionRepo->create();
+            // Создаём новую сессию
+            $session = $this->sessionRepo->create($telegram_user_id);
             $messages = $this->msgRepo->getLastPage(50);
             $isNew = true;
         }

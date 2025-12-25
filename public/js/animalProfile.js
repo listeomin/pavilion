@@ -324,6 +324,84 @@ export class AnimalProfile {
     }
   }
 
+  /**
+   * Загрузить профиль авторизованного пользователя (без привязки к emoji)
+   * Для Telegram пользователей - возвращает сохранённый профиль по user_id
+   */
+  async fetchUserProfile() {
+    try {
+      // Не передаём emoji - сервер найдёт профиль по user_id
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/animal_profile.php?action=get&session_id=${this.sessionId}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      console.log('[AnimalProfile] fetchUserProfile result:', data);
+      return data.profile || null;
+    } catch (e) {
+      console.error('[AnimalProfile] fetchUserProfile error:', e);
+      return null;
+    }
+  }
+
+  /**
+   * Загрузить сохранённый профиль пользователя и применить его
+   * Возвращает объект {emoji, name} для обновления UI
+   */
+  async loadAndApplyUserProfile() {
+    const profile = await this.fetchUserProfile();
+
+    if (profile && profile.emoji) {
+      console.log('[AnimalProfile] Loading saved profile:', profile);
+
+      // Обновляем текущий emoji
+      this.currentEmoji = profile.emoji;
+      this.selectedEmoji = profile.emoji;
+
+      // Сохраняем профиль в память
+      this.profiles[profile.emoji] = {
+        emoji: profile.emoji,
+        kind: profile.kind || '',
+        arial: profile.arial || 'not_specified',
+        role: profile.role || 'not_specified',
+        lifecycle: profile.lifecycle || 'not_specified'
+      };
+
+      const newName = profile.emoji + ' ' + (profile.kind || 'существо');
+
+      // Обновляем имя в sessions.name в БД
+      await this.updateSessionName(newName);
+
+      return {
+        emoji: profile.emoji,
+        name: newName
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Обновить имя сессии в БД
+   */
+  async updateSessionName(name) {
+    try {
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/animal_profile.php?action=update_session_name`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: this.sessionId,
+          name: name
+        })
+      });
+
+      const result = await res.json();
+      console.log('[AnimalProfile] updateSessionName result:', result);
+      return result.success;
+    } catch (e) {
+      console.error('[AnimalProfile] updateSessionName error:', e);
+      return false;
+    }
+  }
+
   async save() {
     if (!this.validateKind()) {
       return;

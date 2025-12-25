@@ -68,6 +68,41 @@ error_log('DB path: ' . $db_path . ' | Exists: ' . file_exists($db_path));
 $db = new SQLite3($db_path);
 
 switch ($action) {
+    case 'update_session_name':
+        // Обновить имя сессии после загрузки профиля
+        session_start();
+        $raw_input = file_get_contents('php://input');
+        $input = json_decode($raw_input, true);
+
+        $session_id = $input['session_id'] ?? '';
+        $name = $input['name'] ?? '';
+
+        logToFile('[animal_profile] UPDATE_SESSION_NAME', [
+            'session_id' => $session_id,
+            'name' => $name
+        ]);
+
+        if (!$session_id || !$name) {
+            echo json_encode(['error' => 'Missing required fields']);
+            exit;
+        }
+
+        try {
+            $chat_db = get_db();
+            $stmt = $chat_db->prepare('UPDATE sessions SET name = :name WHERE id = :session_id');
+            $stmt->execute([':name' => $name, ':session_id' => $session_id]);
+
+            logToFile('[animal_profile] Session name updated', [
+                'rows_affected' => $stmt->rowCount()
+            ]);
+
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            logToFile('[animal_profile] ERROR updating session name', ['error' => $e->getMessage()]);
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        break;
+
     case 'get':
         session_start();
         $session_id = $_GET['session_id'] ?? '';

@@ -9,7 +9,7 @@ import { setupHotkeys } from './hotkeys.js?v=6';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
-import { AnimalProfile } from './animalProfile.js?v=18';
+import { AnimalProfile } from './animalProfile.js?v=20';
 import { TelegramAuth } from './telegramAuth.js?v=2';
 import { ContextMenu } from './contextMenu.js?v=1';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
@@ -354,31 +354,58 @@ function alignUserHeader() {
   });
   apiInit(API, sessionId, COOKIE_NAME).then(async (data) => {
     sessionId = data.session_id;
-    myName = data.name;
-    // Extract emoji from name (first character before space)
-    const emoji = myName.split(' ')[0];
-    userEmojiEl.textContent = emoji;
+
+    // Сначала инициализируем animal profile (НЕ устанавливаем myName пока!)
+    const initialEmoji = data.name.split(' ')[0];
+    animalProfile = new AnimalProfile(sessionId, initialEmoji, (newName) => {
+      // Update display when profile is saved
+      console.log('[Main] Animal profile saved, updating name:', myName, '->', newName);
+      myName = newName;
+      const newEmoji = newName.split(' ')[0];
+      userEmojiEl.textContent = newEmoji;
+      console.log('[Main] Updated myName:', myName);
+    });
+    await animalProfile.init();
+
+    // Проверяем авторизацию Telegram СРАЗУ
+    const telegramAuth = new TelegramAuth();
+    const authData = await telegramAuth.checkAuth();
+
+    // Если авторизован - загружаем профиль ДО установки myName
+    if (authData && authData.user_id) {
+      console.log('[Main] User already authorized, loading profile...');
+      const savedProfile = await animalProfile.loadAndApplyUserProfile();
+
+      if (savedProfile) {
+        console.log('[Main] Using saved profile:', savedProfile);
+        myName = savedProfile.name;
+        userEmojiEl.textContent = savedProfile.emoji;
+      } else {
+        console.log('[Main] No saved profile, using session name');
+        myName = data.name;
+        userEmojiEl.textContent = initialEmoji;
+      }
+    } else {
+      // Не авторизован - используем имя из сессии
+      console.log('[Main] Not authorized, using session name');
+      myName = data.name;
+      userEmojiEl.textContent = initialEmoji;
+    }
+
+    console.log('[Main] Final myName:', myName);
+
     // Render all messages as regular messages (not system messages)
     // Only rebase/seed operations should show messages as system messages
     renderMessages(chatLog, data.messages || [], lastIdRef);
     setupWebSocket();
     inputEl.focus();
-    
+
     // Initialize image zoom for existing images
     initImageZoom();
-    
+
     // Align user header after content loads
     setTimeout(alignUserHeader, 0);
     window.addEventListener('resize', alignUserHeader);
-   
-    // Initialize animal profile
-    animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
-      // Update display when profile is saved
-      myName = newName;
-      const newEmoji = newName.split(' ')[0];
-      userEmojiEl.textContent = newEmoji;
-    });
-    await animalProfile.init();
    
     // Animal profile button
     const profileBtn = document.getElementById('animal-profile-btn');
@@ -388,13 +415,12 @@ function alignUserHeader() {
       });
     }
    
-// Initialize Telegram Auth
-    const telegramAuth = new TelegramAuth();
-    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', (authData) => {
-      console.log('[Main] Telegram authorized:', authData);
-      
-      const displayName = authData.first_name || authData.username || 'Telegram User';
-      
+// Initialize Telegram Auth UI
+    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', async (newAuthData) => {
+      console.log('[Main] New Telegram authorization:', newAuthData);
+
+      const displayName = newAuthData.first_name || newAuthData.username || 'Telegram User';
+
       const container = document.getElementById('telegram-auth-container');
       if (container) {
         // Создаём кнопку и вешаем обработчик напрямую
@@ -407,8 +433,18 @@ function alignUserHeader() {
         container.innerHTML = '';
         container.appendChild(btn);
       }
-      
-      if (animalProfile) {
+
+      // Загружаем профиль ТОЛЬКО если это НОВАЯ авторизация (не при загрузке страницы)
+      if (animalProfile && !authData) {
+        console.log('[Main] New login detected, loading profile...');
+        const savedProfile = await animalProfile.loadAndApplyUserProfile();
+
+        if (savedProfile) {
+          console.log('[Main] Loaded profile after login:', savedProfile);
+          myName = savedProfile.name;
+          userEmojiEl.textContent = savedProfile.emoji;
+        }
+
         animalProfile.showLogoutButton();
       }
     });
