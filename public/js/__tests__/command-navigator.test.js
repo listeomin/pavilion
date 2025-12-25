@@ -11,7 +11,7 @@ describe('CommandNavigator', () => {
 
   describe('initialization', () => {
     it('should have default commands', () => {
-      expect(navigator.commands).toEqual(['/music', '/rebase']);
+      expect(navigator.commands).toEqual(['/music', '/rebase', '/version']);
     });
 
     it('should start with no current command', () => {
@@ -23,6 +23,7 @@ describe('CommandNavigator', () => {
     it('should cycle through commands forward', () => {
       expect(navigator.next()).toBe('/music');
       expect(navigator.next()).toBe('/rebase');
+      expect(navigator.next()).toBe('/version');
       expect(navigator.next()).toBe('/music'); // cycle
     });
 
@@ -35,26 +36,27 @@ describe('CommandNavigator', () => {
 
   describe('prev()', () => {
     it('should cycle through commands backward', () => {
+      expect(navigator.prev()).toBe('/version');
       expect(navigator.prev()).toBe('/rebase');
       expect(navigator.prev()).toBe('/music');
-      expect(navigator.prev()).toBe('/rebase'); // cycle
+      expect(navigator.prev()).toBe('/version'); // cycle
     });
 
     it('should maintain position across multiple calls', () => {
       navigator.prev();
       navigator.prev();
-      expect(navigator.getCurrentCommand()).toBe('/music');
+      expect(navigator.getCurrentCommand()).toBe('/rebase');
     });
   });
 
   describe('mixed navigation', () => {
     it('should handle next then prev', () => {
       navigator.next(); // /music
-      expect(navigator.prev()).toBe('/rebase');
+      expect(navigator.prev()).toBe('/version');
     });
 
     it('should handle prev then next', () => {
-      navigator.prev(); // /rebase
+      navigator.prev(); // /version
       expect(navigator.next()).toBe('/music');
     });
   });
