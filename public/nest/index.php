@@ -35,6 +35,7 @@ if (count($segments) >= 1 && $segments[0] === 'nest') {
 session_start();
 $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
 $telegramUsername = $_SESSION['telegram_user']['telegram_username'] ?? null;
+$telegramUserTelegramId = $_SESSION['telegram_user']['telegram_id'] ?? null;
 
 // Now $urlUserId contains either user_id OR telegram_username from URL
 // We need to determine if it's a username or user_id and get the actual user_id
@@ -42,6 +43,8 @@ $urlUsername = $urlUserId; // Rename for clarity - this is from URL, could be us
 $actualUserId = null;
 $profileOwnerUsername = null;
 $profileOwnerName = null;
+$profileOwnerFirstName = null;
+$profileOwnerEmoji = null;
 
 if ($urlUsername) {
     // Try to find user by username or telegram_id
@@ -51,23 +54,25 @@ if ($urlUsername) {
     // First check if URL param is a username (has letters) or pure numeric telegram_id
     if (!is_numeric($urlUsername)) {
         // It's a username - find users.id by username
-        $stmt = $db->prepare('SELECT id, telegram_id FROM users WHERE telegram_username = :username LIMIT 1');
+        $stmt = $db->prepare('SELECT id, telegram_id, telegram_first_name FROM users WHERE telegram_username = :username LIMIT 1');
         $stmt->execute([':username' => $urlUsername]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
             $actualUserId = $user['id']; // users.id, not telegram_id
             $profileOwnerUsername = $urlUsername;
+            $profileOwnerFirstName = $user['telegram_first_name'];
         }
     } else {
         // It's a numeric telegram_id - get username and users.id
-        $stmt = $db->prepare('SELECT id, telegram_username FROM users WHERE telegram_id = :telegram_id LIMIT 1');
+        $stmt = $db->prepare('SELECT id, telegram_username, telegram_first_name FROM users WHERE telegram_id = :telegram_id LIMIT 1');
         $stmt->execute([':telegram_id' => $urlUsername]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
             $actualUserId = $user['id']; // users.id, not telegram_id
             $profileOwnerUsername = $user['telegram_username'];
+            $profileOwnerFirstName = $user['telegram_first_name'];
 
             // Redirect from /nest/{telegram_id} to /nest/{username}
             if ($profileOwnerUsername) {
@@ -89,23 +94,45 @@ if ($urlUsername) {
 
         if ($profile) {
             $profileOwnerName = $profile['emoji'] . ' ' . $profile['kind'];
+            $profileOwnerEmoji = $profile['emoji'];
         } else {
-            $profileOwnerName = "Зверь @{$profileOwnerUsername}";
+            // Fallback to sessions.name if no animal profile
+            $stmt = $db->prepare('SELECT name FROM sessions WHERE user_id = :user_id LIMIT 1');
+            $stmt->execute([':user_id' => $actualUserId]);
+            $session = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($session && $session['name']) {
+                $profileOwnerName = $session['name'];
+                // Extract emoji (first part before space)
+                $parts = explode(' ', $session['name'], 2);
+                $profileOwnerEmoji = $parts[0]; // emoji is first part
+            } else {
+                $profileOwnerName = "Зверь @{$profileOwnerUsername}";
+                $profileOwnerEmoji = null;
+            }
         }
     }
 }
 
 // Logic for redirects:
-// If authorized user visits /nest → redirect to /nest/{username}
+// If authorized user visits /nest → redirect to /nest/{username} or /nest/{telegram_id}
 if ($telegramUserId && !$urlUsername) {
     // Authorized user on /nest → redirect to personal page using USERNAME
     if ($telegramUsername) {
         header("Location: {$basePath}/nest/{$telegramUsername}");
     } else {
         // Fallback to telegram_id if no username
-        header("Location: {$basePath}/nest/{$telegramUserId}");
+        header("Location: {$basePath}/nest/{$telegramUserTelegramId}");
     }
     exit;
+}
+
+// Check if this is user's own page
+$isOwnNest = false;
+if ($telegramUserId && $urlUsername) {
+    // Check by username OR by telegram_id
+    $isOwnNest = ($telegramUsername && $telegramUsername == $urlUsername)
+              || (!$telegramUsername && $urlUsername == $telegramUserTelegramId);
 }
 
 // If user is on their own page - good!
@@ -117,7 +144,13 @@ if ($telegramUserId && !$urlUsername) {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <base href="<?php echo htmlspecialchars($basePath); ?>/">
-<title><?php echo $profileOwnerName ? "Гнездо {$profileOwnerName}" : "Гнездо"; ?></title>
+<title><?php
+  if ($profileOwnerFirstName) {
+    echo $profileOwnerEmoji ? "Гнездо {$profileOwnerEmoji} {$profileOwnerFirstName}" : "Гнездо {$profileOwnerFirstName}";
+  } else {
+    echo "Гнездо";
+  }
+?></title>
 <script>
   // Pass PHP variables to JavaScript
   window.NEST_CONFIG = {
@@ -125,7 +158,7 @@ if ($telegramUserId && !$urlUsername) {
     profileOwnerName: <?php echo $profileOwnerName ? json_encode($profileOwnerName) : 'null'; ?>,
     telegramUserId: <?php echo $telegramUserId ? json_encode($telegramUserId) : 'null'; ?>,
     telegramUsername: <?php echo $telegramUsername ? json_encode($telegramUsername) : 'null'; ?>,
-    isOwnNest: <?php echo ($telegramUsername && $urlUsername && $telegramUsername == $urlUsername) ? 'true' : 'false'; ?>
+    isOwnNest: <?php echo $isOwnNest ? 'true' : 'false'; ?>
   };
 </script>
 <link rel="icon" href="assets/favicon.png" sizes="any">
@@ -161,17 +194,23 @@ if ($telegramUserId && !$urlUsername) {
 </nav>
 <div class="wrap">
   <div id="header-container">
-    <?php if (!($telegramUsername && $urlUsername && $telegramUsername == $urlUsername)): ?>
+    <?php if (!$urlUsername): ?>
     <div id="user-header">
       <span id="user-emoji" class="user-emoji-clickable"></span>
       <span id="user-label-header">– это вы!</span>
     </div>
     <?php endif; ?>
-    <h1><?php echo $profileOwnerName ? htmlspecialchars($profileOwnerName) : 'Гнездо'; ?></h1>
+    <h1><?php
+      if ($profileOwnerFirstName) {
+        echo $profileOwnerEmoji ? htmlspecialchars($profileOwnerEmoji) . ' ' . htmlspecialchars($profileOwnerFirstName) : htmlspecialchars($profileOwnerFirstName);
+      } else {
+        echo 'Гнездо';
+      }
+    ?></h1>
   </div>
   <div class="nest-description">
     <?php if ($urlUsername): ?>
-      <?php if ($telegramUsername && $telegramUsername == $urlUsername): ?>
+      <?php if ($isOwnNest): ?>
         <p style="opacity: 0.6; font-size: 14px;">Добро пожаловать домой!</p>
       <?php else: ?>
         <p>Гнездо <?php echo htmlspecialchars($profileOwnerName ? $profileOwnerName : "пользователя @{$urlUsername}"); ?></p>
@@ -184,7 +223,7 @@ if ($telegramUserId && !$urlUsername) {
       <p>Взлетай через Telegram — оживи уголок, где только твой зверь свободен.</p>
     <?php endif; ?>
   </div>
-  <?php if (!($telegramUsername && $urlUsername && $telegramUsername == $urlUsername)): ?>
+  <?php if (!$isOwnNest): ?>
   <div id="telegram-auth-container"></div>
   <?php endif; ?>
 </div>
@@ -194,8 +233,10 @@ if ($telegramUserId && !$urlUsername) {
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
+<?php if (!$urlUsername): ?>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
+<?php endif; ?>
 <script type="module" src="js/nest.js?v=2"></script>
 </body>
 </html>

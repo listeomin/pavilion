@@ -33,14 +33,18 @@ function alignUserHeader() {
   sessionId = data.session_id;
   const myName = data.name;
   const emoji = myName.split(' ')[0];
-  userEmojiEl.textContent = emoji;
-  
+
+  if (userEmojiEl) {
+    userEmojiEl.textContent = emoji;
+  }
+
   // Align user header after content loads
   setTimeout(alignUserHeader, 0);
   window.addEventListener('resize', alignUserHeader);
 
   // Handle emoji click for changing animal
-  userEmojiEl.addEventListener('click', async () => {
+  if (userEmojiEl) {
+    userEmojiEl.addEventListener('click', async () => {
     userEmojiEl.classList.add('user-emoji-fade');
    
     setTimeout(async () => {
@@ -70,12 +74,15 @@ function alignUserHeader() {
         setTimeout(alignUserHeader, 0);
       }
     }, 250);
-  });
+    });
+  }
 
   // Инициализация AnimalProfile
   const animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
     const newEmoji = newName.split(' ')[0];
-    userEmojiEl.textContent = newEmoji;
+    if (userEmojiEl) {
+      userEmojiEl.textContent = newEmoji;
+    }
   });
   await animalProfile.init();
 
@@ -90,8 +97,8 @@ function alignUserHeader() {
   const authData = await telegramAuth.checkAuth();
   console.log('[Nest] Auth data:', authData);
 
-  // Show Telegram auth button ONLY on /nest (not on personal pages /nest/{user_id})
-  if (!nestConfig.urlUserId) {
+  // Show Telegram auth button ONLY on /nest (not on personal pages /nest/{username})
+  if (!nestConfig.urlUsername) {
     // We're on /nest page (not personal page)
     if (authData && authData.telegram_id) {
       console.log('[Nest] User already authorized');
@@ -134,10 +141,14 @@ function alignUserHeader() {
     // Load profile for authorized users
     if (authData && authData.telegram_id) {
       const savedProfile = await animalProfile.loadAndApplyUserProfile();
-      if (savedProfile) {
+      if (savedProfile && userEmojiEl) {
         userEmojiEl.textContent = savedProfile.emoji;
       }
-      animalProfile.showLogoutButton();
+
+      // Show logout button ONLY on own nest
+      if (nestConfig.isOwnNest) {
+        animalProfile.showLogoutButton();
+      }
     }
 
     // Hide telegram-auth-container on personal pages
