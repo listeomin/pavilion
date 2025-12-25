@@ -151,7 +151,7 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
       // Replace image placeholders with actual images
       m.metadata.images.forEach(img => {
         const placeholder = `__IMAGE_TAG_${img.id}__`;
-        const imgTag = `<img src="${img.url}" style="width: 100%; max-width: 100%; max-height: 600px; object-fit: contain; margin: 8px 0; display: block;" loading="lazy" />`;
+        const imgTag = `<img src="${img.url}" style="max-width: 100%; height: auto; object-fit: contain; margin: 8px 0; display: block;" loading="lazy" class="chat-image" />`;
         content = content.replace(placeholder, imgTag);
       });
       
@@ -253,7 +253,7 @@ export function updateMessage(chatLog, updatedMessage) {
     content = escapeHtml(cleanText);
     m.metadata.images.forEach(img => {
       const placeholder = `__IMAGE_TAG_${img.id}__`;
-      const imgTag = `<img src="${img.url}" style="width: 100%; max-width: 100%; max-height: 600px; object-fit: contain; margin: 8px 0; display: block;" loading="lazy" />`;
+      const imgTag = `<img src="${img.url}" style="max-width: 100%; height: auto; object-fit: contain; margin: 8px 0; display: block;" loading="lazy" class="chat-image" />`;
       content = content.replace(placeholder, imgTag);
     });
     content = parseMarkdown(content);
