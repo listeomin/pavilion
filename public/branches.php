@@ -69,6 +69,6 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/branches.js"></script>
+<script type="module" src="js/branches.js?v=2"></script>
 </body>
 </html>

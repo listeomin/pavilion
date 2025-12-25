@@ -1,4 +1,5 @@
 // messages.js - инициализация страницы Сообщения без чата
+import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
@@ -7,17 +8,18 @@ import { AnimalProfile } from './animalProfile.js?v=18';
 function alignUserHeader() {
   const h1 = document.querySelector('h1');
   const userHeader = document.getElementById('user-header');
-  
+
   if (h1 && userHeader) {
     const h1Rect = h1.getBoundingClientRect();
     const containerRect = h1.parentElement.getBoundingClientRect();
     const rightOffset = h1Rect.right - containerRect.left;
-    
+
     userHeader.style.marginLeft = rightOffset - userHeader.offsetWidth + 'px';
   }
 }
 
 (async function () {
+  const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
   const userEmojiEl = document.getElementById('user-emoji');
@@ -26,7 +28,7 @@ function alignUserHeader() {
   NightShift.init();
 
   // Инициализация API чтобы получить session_id и emoji
-  const data = await apiInit('/server/api.php', sessionId, COOKIE_NAME);
+  const data = await apiInit(API, sessionId, COOKIE_NAME);
   sessionId = data.session_id;
   const myName = data.name;
   const emoji = myName.split(' ')[0];
@@ -41,7 +43,7 @@ function alignUserHeader() {
     userEmojiEl.classList.add('user-emoji-fade');
    
     setTimeout(async () => {
-      const data = await apiChangeName('/server/api.php', sessionId);
+      const data = await apiChangeName(API, sessionId);
       if (data && data.name) {
         const emoji = data.name.split(' ')[0];
        

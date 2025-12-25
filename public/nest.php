@@ -73,6 +73,6 @@ $basePath = get_base_path();
 </button>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
-<script type="module" src="js/nest.js"></script>
+<script type="module" src="js/nest.js?v=2"></script>
 </body>
 </html>
