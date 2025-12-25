@@ -41,9 +41,12 @@ export class InlineInput {
   }
 
   handleBeforeInput(e) {
+    console.log('[INLINE-INPUT] handleBeforeInput, inputType:', e.inputType, 'data:', e.data, 'commandMode:', this.commandMode);
+
     if (!this.commandMode) return;
-    
+
     if (e.inputType === 'insertText' || e.inputType === 'deleteContentBackward') {
+      console.log('[INLINE-INPUT] Preventing default for', e.inputType);
       e.preventDefault();
       
       const text = this.getPlainText();
@@ -88,14 +91,18 @@ export class InlineInput {
   async handleInput() {
     const text = this.pendingText !== undefined ? this.pendingText : this.getPlainText();
     this.pendingText = undefined;
-    
+
+    console.log('[INLINE-INPUT] handleInput, text:', text);
+
     if (text.startsWith('/')) {
+      console.log('[INLINE-INPUT] Entering command mode');
       this.enterCommandMode();
       await this.processCommandInput(text);
     } else {
+      console.log('[INLINE-INPUT] Exiting command mode');
       this.exitCommandMode();
     }
-    
+
     if (this.updateCallback) {
       this.updateCallback();
     }
@@ -150,9 +157,10 @@ export class InlineInput {
   }
 
   async processCommandInput(text) {
+    console.log('[INLINE-INPUT] processCommandInput, text:', text);
     const savedCursorPos = this.pendingCursorPos !== undefined ? this.pendingCursorPos : this.saveCursorPosition();
     this.pendingCursorPos = undefined;
-    
+
     if (text === '/') {
       this.renderCommandHint();
       this.restoreCursorPosition(1);
@@ -392,8 +400,13 @@ export class InlineInput {
   }
 
   async handleKeydown(e) {
+    // Log Alt events
+    if (e.key === 'Alt' || e.altKey) {
+      console.log('[INLINE-INPUT] handleKeydown Alt event:', e.key, 'altKey:', e.altKey, 'commandMode:', this.commandMode);
+    }
+
     const text = this.getPlainText();
-    
+
     if (e.key === 'ArrowUp' && !this.commandMode && text === '') {
       e.preventDefault();
       this.input.innerHTML = `<span class="cmd-prefix">/</span><span class="cmd-hint">music</span>`;

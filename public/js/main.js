@@ -94,8 +94,10 @@ function alignUserHeader() {
     }
   });
   sendForm.addEventListener('submit', async (e) => {
+    console.log('[SUBMIT] Form submit triggered!', e);
+    console.trace('[SUBMIT] Stack trace:');
     e.preventDefault();
-   
+
     // Extract quotes first
     const quotes = extractQuoteData(inputEl);
     console.log('Extracted quotes:', quotes);

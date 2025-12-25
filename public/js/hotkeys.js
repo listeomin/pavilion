@@ -1,29 +1,57 @@
 // public/js/hotkeys.js
 export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, getCurrentAuthor = null, commandNavigator = null) {
+  // Track if Alt was pressed for command navigation
+  let altPressedForCommand = false;
+
+  // Prevent character insertion from Alt key on Russian layout
+  inputEl.addEventListener('beforeinput', (e) => {
+    if (altPressedForCommand && (e.data === 'в' || e.data === 'д')) {
+      e.preventDefault();
+    } else if (altPressedForCommand && e.inputType === 'insertText') {
+      // User started typing normal text - reset the flag
+      altPressedForCommand = false;
+    }
+  });
+
   inputEl.addEventListener('keydown', (e) => {
     const isMod = e.metaKey || e.ctrlKey;
     const text = inputEl.textContent.trim();
 
+    // Reset flag if user starts editing after Alt command insertion
+    if (altPressedForCommand && e.key !== 'Alt' && !e.altKey) {
+      altPressedForCommand = false;
+    }
+
     // Alt (without other keys): Command navigation
-    if (e.altKey && !e.shiftKey && !isMod && e.key === 'Alt' && commandNavigator) {
+    if (e.altKey && !e.shiftKey && !isMod && e.key === 'Alt' && !e.repeat && commandNavigator) {
       // Only works when field is empty or starts with /
       if (text === '' || (text.startsWith('/') && !text.includes(':'))) {
         e.preventDefault();
-        
+        e.stopPropagation();
+        altPressedForCommand = true;
+
         const command = commandNavigator.next();
-        
+
         if (command) {
+
+          // Use innerHTML instead of textContent to avoid cursor issues
+          inputEl.innerHTML = '';
           inputEl.textContent = command;
           editor.markdownText = command;
           inputEl.classList.add('command-active');
-          
-          // Move cursor to end
-          const sel = window.getSelection();
-          const range = document.createRange();
-          range.selectNodeContents(inputEl);
-          range.collapse(false);
-          sel.removeAllRanges();
-          sel.addRange(range);
+
+          // Force focus without moving cursor - let browser handle it naturally
+          inputEl.blur();
+          setTimeout(() => {
+            inputEl.focus();
+            // Move cursor to end AFTER focus settles
+            const sel = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(inputEl);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }, 0);
         }
         return;
       }
@@ -110,6 +138,15 @@ export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, g
       return;
     }
 
+    // TEST: F18 to submit
+    if (e.key === 'F18') {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      onSubmit();
+      return;
+    }
+
     // Submit on Enter, new line on Shift+Enter
     if (e.key === 'Enter') {
       if (e.shiftKey) {
@@ -117,30 +154,54 @@ export function setupHotkeys(inputEl, editor, onSubmit, messageHistory = null, g
         e.preventDefault();
         const sel = window.getSelection();
         if (!sel.rangeCount) return;
-        
+
         const range = sel.getRangeAt(0);
         range.deleteContents();
-        
+
         // Insert <br> for line break
         const br = document.createElement('br');
         range.insertNode(br);
-        
+
         // Insert empty text node or zero-width space after br to make it visible
         const emptyText = document.createTextNode('\u200B'); // zero-width space
         br.parentNode.insertBefore(emptyText, br.nextSibling);
-        
+
         // Move cursor to empty text node
         range.setStart(emptyText, 1);
         range.setEnd(emptyText, 1);
         sel.removeAllRanges();
         sel.addRange(range);
-        
+
         // Manually sync
         editor.syncMarkdownText();
       } else {
         // Enter: submit
         e.preventDefault();
         onSubmit();
+      }
+    }
+  });
+
+  // Prevent Alt key from inserting character on keyup (Russian layout issue)
+  inputEl.addEventListener('keyup', (e) => {
+    if (e.key === 'Alt' && altPressedForCommand) {
+      e.preventDefault();
+      e.stopPropagation();
+      altPressedForCommand = false;
+
+      // Remove any 'в' character that might have been inserted by browser
+      const text = inputEl.textContent;
+      if (text.endsWith('в') && (text.startsWith('/music') || text.startsWith('/rebase'))) {
+        inputEl.textContent = text.slice(0, -1);
+        editor.markdownText = inputEl.textContent;
+
+        // Move cursor to end
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(inputEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
       }
     }
   });
