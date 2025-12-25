@@ -38,6 +38,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
+<link rel="stylesheet" href="css/nest.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
@@ -63,8 +64,8 @@ $basePath = get_base_path();
     <p>Только настоящий зверь может обрести здесь свой угол.</p>
     <p>Взлетай через Telegram — оживи уголок, где только твой зверь свободен.</p>
   </div>
+  <div id="telegram-auth-container"></div>
 </div>
-<div id="telegram-auth-container"></div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
   <img src="assets/paw.svg" alt="Animal Profile">
 </button>

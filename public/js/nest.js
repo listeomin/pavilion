@@ -3,6 +3,7 @@ import { CONFIG } from './config.js?v=5';
 import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
+import { TelegramAuth } from './telegramAuth.js?v=2';
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
@@ -77,6 +78,48 @@ function alignUserHeader() {
     userEmojiEl.textContent = newEmoji;
   });
   await animalProfile.init();
+
+  // Инициализация Telegram Auth
+  const telegramAuth = new TelegramAuth();
+
+  console.log('[Nest] Checking Telegram auth...');
+  const authData = await telegramAuth.checkAuth();
+  console.log('[Nest] Auth data:', authData);
+
+  // Если авторизован - загружаем профиль и показываем кнопку logout
+  if (authData && authData.telegram_id) {
+    console.log('[Nest] User already authorized');
+    const savedProfile = await animalProfile.loadAndApplyUserProfile();
+
+    if (savedProfile) {
+      console.log('[Nest] Using saved profile:', savedProfile);
+      userEmojiEl.textContent = savedProfile.emoji;
+    }
+
+    // Показываем кнопку выхода
+    const container = document.getElementById('telegram-auth-container');
+    if (container) {
+      const displayName = authData.telegram_username || authData.first_name || 'Telegram User';
+      const btn = document.createElement('button');
+      btn.className = 'my-chat-button';
+      btn.textContent = displayName + ' (выйти)';
+      btn.onclick = function() {
+        telegramAuth.logout();
+      };
+      container.appendChild(btn);
+    }
+
+    // Показываем кнопку "Уйти" в профиле
+    animalProfile.showLogoutButton();
+  } else {
+    // Показываем виджет авторизации
+    console.log('[Nest] Not authorized, showing login widget');
+    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', async (newAuthData) => {
+      console.log('[Nest] New Telegram authorization:', newAuthData);
+      // Перезагружаем страницу для применения изменений
+      location.reload();
+    });
+  }
 
   // Кнопка профиля
   const profileBtn = document.getElementById('animal-profile-btn');

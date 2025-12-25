@@ -1,0 +1,37 @@
+/* nest.css - стили для страницы Гнездо */
+
+/* Telegram Auth container styling for Nest page */
+#telegram-auth-container {
+  /* Переопределяем fixed позицию из telegramAuth.css */
+  position: static;
+  /* Убираем позиционирование справа */
+  top: auto;
+  right: auto;
+  /* Располагаем под текстом */
+  margin-top: 24px;
+  margin-bottom: 48px;
+  /* Убираем центрирование */
+  display: block;
+}
+
+/* My Chat Button - переопределяем стили для страницы Гнездо */
+#telegram-auth-container .my-chat-button {
+  /* Переопределяем стили из telegramAuth.css */
+  display: inline-block;
+  background: var(--color-iris);
+  color: var(--color-cloud-light);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+#telegram-auth-container .my-chat-button:hover {
+  opacity: 1;
+}
