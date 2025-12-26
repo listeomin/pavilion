@@ -178,7 +178,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=9">
 <!-- Editor.js -->
@@ -188,11 +188,11 @@ if ($telegramUserId && $urlUsername) {
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item active">Гнездо</a>
+  <a href="branches" class="nav-item">Ветки</a>
   <span class="nav-separator">|</span>
   <a href="messages" class="nav-item">Послания</a>
   <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item">Ветки</a>
+  <a href="nest" class="nav-item active">Гнездо</a>
 </nav>
 <div class="wrap">
   <div id="header-container">

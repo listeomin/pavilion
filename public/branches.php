@@ -36,18 +36,18 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
 </head>
 <body>
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item">Гнездо</a>
+  <a href="branches" class="nav-item active">Ветки</a>
   <span class="nav-separator">|</span>
   <a href="messages" class="nav-item">Послания</a>
   <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item active">Ветки</a>
+  <a href="nest" class="nav-item">Гнездо</a>
 </nav>
 <div class="wrap">
   <div id="header-container">

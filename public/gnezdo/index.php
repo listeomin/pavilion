@@ -27,17 +27,17 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/colors.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
-<link rel="stylesheet" href="css/navigation.css?v=1">
+<link rel="stylesheet" href="css/navigation.css?v=2">
 </head>
 <body>
 <nav class="main-nav">
   <a href="../" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
-  <a href="./" class="nav-item active">Гнездо</a>
+  <span class="nav-item disabled">Ветки</span>
   <span class="nav-separator">|</span>
   <span class="nav-item disabled">Послания</span>
   <span class="nav-separator">|</span>
-  <span class="nav-item disabled">Ветки</span>
+  <a href="./" class="nav-item active">Гнездо</a>
 </nav>
 <div class="wrap">
   <div id="header-container">
