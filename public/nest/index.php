@@ -180,9 +180,9 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=2">
-<!-- Quill Editor -->
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<link rel="stylesheet" href="css/nest.css?v=6">
+<!-- Editor.js -->
+<link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 </head>
 <body>
 <nav class="main-nav">
@@ -210,21 +210,21 @@ if ($telegramUserId && $urlUsername) {
       }
     ?></h1>
   </div>
+  <?php if (!$urlUsername): ?>
   <div class="nest-description">
-    <?php if ($urlUsername): ?>
-      <?php if ($isOwnNest): ?>
-        <p style="opacity: 0.6; font-size: 14px;">Добро пожаловать домой!</p>
-      <?php else: ?>
-        <p>Гнездо <?php echo htmlspecialchars($profileOwnerName ? $profileOwnerName : "пользователя @{$urlUsername}"); ?></p>
-        <p style="opacity: 0.6; font-size: 14px;">Вы в гостях</p>
-      <?php endif; ?>
-    <?php else: ?>
-      <p>Твоя стая.</p>
-      <p>Твои правила!</p>
-      <p>Только настоящий зверь может обрести здесь свой угол.</p>
-      <p>Взлетай через Telegram — оживи уголок, где только твой зверь свободен.</p>
-    <?php endif; ?>
+    <p>Твоя стая.</p>
+    <p>Твои правила!</p>
+    <p>Только настоящий зверь может обрести здесь свой угол.</p>
+    <p>Взлетай через Telegram — оживи уголок, где только твой зверь свободен.</p>
   </div>
+  <?php endif; ?>
+
+  <?php if ($urlUsername && !$isOwnNest): ?>
+  <div class="nest-description">
+    <p>Гнездо <?php echo htmlspecialchars($profileOwnerName ? $profileOwnerName : "пользователя @{$urlUsername}"); ?></p>
+    <p style="opacity: 0.6; font-size: 14px;">Вы в гостях</p>
+  </div>
+  <?php endif; ?>
   <?php if (!$isOwnNest): ?>
   <div id="telegram-auth-container"></div>
   <?php endif; ?>
@@ -246,8 +246,14 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<!-- Quill Editor JS -->
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-<script type="module" src="js/nest.js?v=3"></script>
+<!-- Editor.js Core -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.28.2/dist/editorjs.umd.min.js"></script>
+<!-- Editor.js Plugins -->
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.7.0/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.8.0/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.5.0/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.3.0/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@1.4.0/dist/bundle.js"></script>
+<script type="module" src="js/nest.js?v=5"></script>
 </body>
 </html>

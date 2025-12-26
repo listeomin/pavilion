@@ -53,10 +53,10 @@ h1 .editable-name:focus {
   outline: none;
 }
 
-/* Telegraph-style editor */
+/* Telegraph-style Editor.js */
 #nest-editor-container {
-  max-width: 680px;
-  margin: 40px auto 60px;
+  max-width: 980px;
+  margin: 40px 0 60px 0;
   padding: 0 20px;
 }
 
@@ -65,91 +65,173 @@ h1 .editable-name:focus {
   font-size: 18px;
   line-height: 1.6;
   color: #222;
+  min-height: 300px;
 }
 
-/* Quill toolbar customization */
-.ql-toolbar.ql-snow {
-  border: none;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 12px 0;
-  position: sticky;
-  top: 0;
-  background: #fff;
-  z-index: 10;
+/* Editor.js core styles */
+.codex-editor {
+  border: none !important;
 }
 
-.ql-container.ql-snow {
-  border: none;
+.codex-editor__redactor {
+  padding-bottom: 100px !important;
+}
+
+.ce-block__content {
+  max-width: 980px;
+  margin: 0;
+}
+
+/* Hide settings button and tune menu in read-only */
+.codex-editor--narrow .ce-toolbar__plus,
+.codex-editor--narrow .ce-toolbar__settings-btn {
+  display: none;
+}
+
+/* Paragraph */
+.ce-paragraph {
   font-family: 'Georgia', 'Times New Roman', serif;
   font-size: 18px;
+  line-height: 1.6;
+  color: #222;
+  margin: 0.8em 0;
 }
 
 /* Headers */
-.ql-editor h1,
-.ql-editor h2,
-.ql-editor h3 {
+.ce-header {
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
   line-height: 1.3;
+  color: #222;
 }
 
-.ql-editor h1 {
-  font-size: 32px;
+h1.ce-header {
+  font-size: 36px;
+  letter-spacing: -0.02em;
 }
 
-.ql-editor h2 {
-  font-size: 26px;
+h2.ce-header {
+  font-size: 28px;
 }
 
-.ql-editor h3 {
+h3.ce-header {
   font-size: 22px;
 }
 
-/* Paragraphs */
-.ql-editor p {
-  margin-bottom: 1em;
+/* Lists */
+.cdx-list {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.cdx-list__item {
+  padding: 0.3em 0;
+  line-height: 1.6;
+}
+
+/* Quote */
+.cdx-quote {
+  margin: 1.5em 0;
+  padding-left: 1.2em;
+  border-left: 3px solid var(--color-iris);
+}
+
+.cdx-quote__text {
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #666;
+  min-height: auto;
+}
+
+.cdx-quote__caption {
+  margin-top: 0.5em;
+  font-size: 14px;
+  color: #999;
+  text-align: right;
+}
+
+/* Delimiter */
+.ce-delimiter {
+  line-height: 1.6em;
+  width: 100%;
+  text-align: center;
+  margin: 2em 0;
+}
+
+.ce-delimiter::before {
+  display: inline-block;
+  content: "***";
+  font-size: 28px;
+  line-height: 65px;
+  height: 30px;
+  letter-spacing: 0.2em;
+  color: #999;
+}
+
+/* Inline code */
+.cdx-inline-code {
+  background: rgba(124, 119, 238, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 16px;
+  color: var(--color-iris);
+}
+
+/* Toolbar customization */
+.ce-toolbar__plus {
+  left: -40px;
+  color: #999;
+}
+
+.ce-toolbar__plus:hover {
+  color: var(--color-iris);
+}
+
+.ce-toolbar__settings-btn {
+  color: #999;
+}
+
+.ce-toolbar__settings-btn:hover {
+  color: var(--color-iris);
+}
+
+/* Inline toolbar */
+.ce-inline-toolbar {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ce-inline-tool {
+  color: #666;
+}
+
+.ce-inline-tool:hover {
+  color: var(--color-iris);
+  background: rgba(124, 119, 238, 0.05);
+}
+
+/* Placeholder */
+.ce-block--empty .ce-block__content::before {
+  color: #999;
+  font-style: italic;
 }
 
 /* Links */
-.ql-editor a {
+.ce-paragraph a,
+.cdx-list a,
+.cdx-quote__text a {
   color: var(--color-iris);
   text-decoration: none;
   border-bottom: 1px solid rgba(124, 119, 238, 0.3);
   transition: border-color 0.2s;
 }
 
-.ql-editor a:hover {
+.ce-paragraph a:hover,
+.cdx-list a:hover,
+.cdx-quote__text a:hover {
   border-bottom-color: var(--color-iris);
-}
-
-/* Lists */
-.ql-editor ul,
-.ql-editor ol {
-  padding-left: 1.5em;
-  margin-bottom: 1em;
-}
-
-.ql-editor li {
-  margin-bottom: 0.3em;
-}
-
-/* Blockquotes */
-.ql-editor blockquote {
-  border-left: 3px solid var(--color-iris);
-  padding-left: 1em;
-  margin: 1em 0;
-  font-style: italic;
-  color: #666;
-}
-
-/* Hide toolbar when read-only */
-.ql-container.ql-disabled ~ .ql-toolbar {
-  display: none;
-}
-
-/* Placeholder */
-.ql-editor.ql-blank::before {
-  color: #999;
-  font-style: italic;
 }

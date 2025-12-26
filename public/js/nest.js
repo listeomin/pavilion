@@ -320,26 +320,71 @@ function alignUserHeader() {
     }
   });
 
-  // Quill Editor for Nest content
+  // Editor.js for Nest content
   const editorContainer = document.getElementById('nest-editor');
   if (editorContainer && nestConfig.urlUsername) {
-    console.log('[Nest] Initializing Quill editor...');
+    console.log('[Nest] Initializing Editor.js...');
 
-    // Configure Quill
-    const quill = new Quill('#nest-editor', {
-      theme: 'snow',
-      modules: {
-        toolbar: nestConfig.isOwnNest ? [
-          [{ 'header': [1, 2, 3, false] }],
-          ['bold', 'italic', 'link'],
-          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-          ['blockquote'],
-          ['clean']
-        ] : false
-      },
-      placeholder: nestConfig.isOwnNest ? 'Напишите что-нибудь...' : '',
-      readOnly: !nestConfig.isOwnNest
-    });
+    let editor;
+    let saveTimeout = null;
+    let isSaving = false;
+
+    // Configure Editor.js
+    const initEditor = async (initialData = null) => {
+      editor = new EditorJS({
+        holder: 'nest-editor',
+        readOnly: !nestConfig.isOwnNest,
+        placeholder: nestConfig.isOwnNest ? 'Начните печатать или нажмите Tab для команд...' : '',
+        data: initialData || {
+          blocks: []
+        },
+        tools: {
+          header: {
+            class: Header,
+            config: {
+              placeholder: 'Заголовок',
+              levels: [1, 2, 3],
+              defaultLevel: 2
+            },
+            inlineToolbar: true
+          },
+          list: {
+            class: List,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered'
+            }
+          },
+          quote: {
+            class: Quote,
+            inlineToolbar: true,
+            config: {
+              quotePlaceholder: 'Введите цитату',
+              captionPlaceholder: 'Автор цитаты'
+            }
+          },
+          delimiter: Delimiter,
+          inlineCode: {
+            class: InlineCode
+          }
+        },
+        onChange: async () => {
+          if (!nestConfig.isOwnNest) return;
+
+          // Debounced autosave
+          if (saveTimeout) {
+            clearTimeout(saveTimeout);
+          }
+
+          saveTimeout = setTimeout(async () => {
+            await saveContent();
+          }, 2000);
+        }
+      });
+
+      await editor.isReady;
+      console.log('[Nest] Editor.js ready!');
+    };
 
     // Load content from server
     const loadContent = async () => {
@@ -352,66 +397,120 @@ function alignUserHeader() {
 
         if (result.success && result.content) {
           console.log('[Nest] Loading content:', result.content);
-          quill.setContents(result.content);
+
+          // Convert Quill Delta to Editor.js format if needed
+          let editorData = result.content;
+          if (result.content.ops) {
+            // This is Quill Delta format - convert it
+            editorData = convertQuillToEditorJS(result.content);
+            console.log('[Nest] Converted Quill → Editor.js:', editorData);
+          }
+
+          await initEditor(editorData);
         } else {
-          console.log('[Nest] No content found or error:', result.error);
+          console.log('[Nest] No content found, starting with empty editor');
+          await initEditor();
         }
       } catch (err) {
         console.error('[Nest] Error loading content:', err);
+        await initEditor();
       }
     };
 
-    // Load content on init
+    // Save content to server
+    const saveContent = async () => {
+      if (isSaving || !editor) return;
+
+      isSaving = true;
+      console.log('[Nest] Saving content...');
+
+      try {
+        const savedData = await editor.save();
+        const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: savedData })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log('[Nest] Content saved successfully');
+        } else {
+          console.error('[Nest] Save error:', result.error);
+        }
+      } catch (err) {
+        console.error('[Nest] Save error:', err);
+      } finally {
+        isSaving = false;
+      }
+    };
+
+    // Convert Quill Delta to Editor.js blocks
+    const convertQuillToEditorJS = (quillData) => {
+      const blocks = [];
+      let currentText = '';
+      let currentType = 'paragraph';
+      let currentLevel = 2;
+
+      if (!quillData.ops) {
+        return { blocks: [] };
+      }
+
+      for (const op of quillData.ops) {
+        const text = op.insert || '';
+        const attrs = op.attributes || {};
+
+        if (text === '\n') {
+          // New block
+          if (currentText.trim()) {
+            if (attrs.header) {
+              blocks.push({
+                type: 'header',
+                data: {
+                  text: currentText.trim(),
+                  level: attrs.header
+                }
+              });
+            } else if (attrs.blockquote) {
+              blocks.push({
+                type: 'quote',
+                data: {
+                  text: currentText.trim()
+                }
+              });
+            } else {
+              blocks.push({
+                type: 'paragraph',
+                data: {
+                  text: currentText.trim()
+                }
+              });
+            }
+          }
+          currentText = '';
+        } else {
+          currentText += text;
+        }
+      }
+
+      // Add remaining text
+      if (currentText.trim()) {
+        blocks.push({
+          type: 'paragraph',
+          data: {
+            text: currentText.trim()
+          }
+        });
+      }
+
+      return { blocks: blocks };
+    };
+
+    // Initialize editor with content
     loadContent();
 
-    // Autosave functionality (only for own nest)
-    if (nestConfig.isOwnNest) {
-      let saveTimeout = null;
-      let isSaving = false;
-
-      const saveContent = async () => {
-        if (isSaving) return;
-
-        isSaving = true;
-        console.log('[Nest] Saving content...');
-
-        try {
-          const content = quill.getContents();
-          const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: content })
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            console.log('[Nest] Content saved successfully');
-          } else {
-            console.error('[Nest] Save error:', result.error);
-          }
-        } catch (err) {
-          console.error('[Nest] Save network error:', err);
-        } finally {
-          isSaving = false;
-        }
-      };
-
-      // Debounced autosave on text change
-      quill.on('text-change', () => {
-        if (saveTimeout) {
-          clearTimeout(saveTimeout);
-        }
-
-        saveTimeout = setTimeout(() => {
-          saveContent();
-        }, 2000); // Save 2 seconds after user stops typing
-      });
-
-      console.log('[Nest] Autosave enabled (2s delay)');
-    }
-
     // Make editor globally accessible
-    window.nestQuill = quill;
+    window.nestEditor = () => editor;
   }
 })();
