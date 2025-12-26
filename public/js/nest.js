@@ -303,7 +303,7 @@ function alignUserHeader() {
     });
   }
 
-  // Global hotkey: "/" to go to Беседка page
+  // Global hotkey: "/" to go to Мурмурация page
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const activeElement = document.activeElement;
@@ -512,5 +512,396 @@ function alignUserHeader() {
 
     // Make editor globally accessible
     window.nestEditor = () => editor;
+
+    // Markdown shortcuts for headings
+    if (nestConfig.isOwnNest && editor) {
+      document.addEventListener('keydown', async (e) => {
+        if (e.key !== ' ') return;
+
+        // Get current block
+        const currentBlockIndex = editor.blocks.getCurrentBlockIndex();
+        const currentBlock = editor.blocks.getBlockByIndex(currentBlockIndex);
+
+        if (!currentBlock || currentBlock.name !== 'paragraph') return;
+
+        // Get block text
+        const blockData = await editor.save();
+        const block = blockData.blocks[currentBlockIndex];
+        if (!block || !block.data || !block.data.text) return;
+
+        const text = block.data.text.trim();
+
+        // Check for markdown heading syntax (without trailing space)
+        let level = 0;
+        let cleanText = text;
+
+        if (text === '###' || text.startsWith('### ')) {
+          level = 3;
+          cleanText = text === '###' ? '' : text.substring(4);
+        } else if (text === '##' || text.startsWith('## ')) {
+          level = 2;
+          cleanText = text === '##' ? '' : text.substring(3);
+        } else if (text === '#' || text.startsWith('# ')) {
+          level = 1;
+          cleanText = text === '#' ? '' : text.substring(2);
+        }
+
+        if (level > 0) {
+          e.preventDefault();
+
+          // Convert to header
+          setTimeout(async () => {
+            try {
+              await editor.blocks.delete(currentBlockIndex);
+              await editor.blocks.insert('header', {
+                text: cleanText,
+                level: level
+              }, {}, currentBlockIndex);
+
+              // Move cursor to end of the new block
+              editor.caret.setToBlock(currentBlockIndex, 'end');
+            } catch (err) {
+              console.error('[Nest] Error converting to header:', err);
+            }
+          }, 0);
+        }
+      });
+
+      console.log('[Nest] Markdown shortcuts enabled (# ## ###)');
+    }
+
+    // Terminal readline shortcuts
+    let killRing = ''; // Store killed text for yank (Ctrl+Y)
+    console.log('[Readline] Shortcuts initialized');
+
+    document.addEventListener('keydown', (e) => {
+      // Debug: log all Ctrl key presses
+      if (e.ctrlKey && ['a', 'e', 'u', 'k', 'w', 'd', 'f', 'b', 't', 'h', 'y'].includes(e.key)) {
+        console.log('[Readline] Hotkey detected:', e.ctrlKey, e.altKey, e.key, 'target:', e.target);
+      }
+
+      // Only apply shortcuts when editing in Editor.js
+      const target = e.target;
+
+      // Check if we're in an editable element
+      const isEditable = target.isContentEditable ||
+                        target.getAttribute('contenteditable') === 'true' ||
+                        target.closest('[contenteditable="true"]');
+
+      if (!isEditable) {
+        console.log('[Readline] Not in editable element');
+        return;
+      }
+
+      // Skip if we're in the h1 title editor
+      if (target.tagName === 'H1' || target.closest('h1')) {
+        console.log('[Readline] Skipping h1 editor');
+        return;
+      }
+
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+
+      // Helper functions
+      const getEditableElement = () => {
+        // Find the contentEditable container
+        let el = target;
+        while (el && el.getAttribute('contenteditable') !== 'true') {
+          el = el.parentElement;
+        }
+        return el || target;
+      };
+
+      const getTextNode = () => {
+        const editable = getEditableElement();
+        // Get the first text node or create one
+        let textNode = editable.firstChild;
+        if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+          textNode = document.createTextNode(editable.textContent || '');
+          editable.textContent = '';
+          editable.appendChild(textNode);
+        }
+        return textNode;
+      };
+
+      const getLineText = () => {
+        const editable = getEditableElement();
+        return editable.textContent || '';
+      };
+
+      const getCursorPos = () => {
+        const editable = getEditableElement();
+        let pos = 0;
+        const walker = document.createTreeWalker(
+          editable,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
+
+        let node;
+        while ((node = walker.nextNode())) {
+          if (node === range.startContainer) {
+            return pos + range.startOffset;
+          }
+          pos += node.textContent.length;
+        }
+        return pos;
+      };
+
+      const setCursorPos = (pos) => {
+        const textNode = getTextNode();
+        const safePos = Math.min(Math.max(0, pos), textNode.textContent.length);
+
+        try {
+          const newRange = document.createRange();
+          newRange.setStart(textNode, safePos);
+          newRange.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        } catch (err) {
+          console.error('[Readline] Error setting cursor:', err);
+        }
+      };
+
+      const deleteText = (start, end) => {
+        const editable = getEditableElement();
+        const text = getLineText();
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+        editable.textContent = before + after;
+
+        // Trigger Editor.js change event
+        editable.dispatchEvent(new Event('input', { bubbles: true }));
+
+        setTimeout(() => setCursorPos(start), 0);
+      };
+
+      const insertText = (text) => {
+        const pos = getCursorPos();
+        const editable = getEditableElement();
+        const lineText = getLineText();
+        const before = lineText.substring(0, pos);
+        const after = lineText.substring(pos);
+        editable.textContent = before + text + after;
+
+        // Trigger Editor.js change event
+        editable.dispatchEvent(new Event('input', { bubbles: true }));
+
+        setTimeout(() => setCursorPos(pos + text.length), 0);
+      };
+
+      // Navigation shortcuts
+      if (e.ctrlKey && e.key === 'a') {
+        e.preventDefault();
+        setCursorPos(0); // Beginning of line
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'e') {
+        e.preventDefault();
+        setCursorPos(getLineText().length); // End of line
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        setCursorPos(Math.min(pos + 1, getLineText().length)); // Forward one char
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'b') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        setCursorPos(Math.max(0, pos - 1)); // Back one char
+        return;
+      }
+
+      if (e.altKey && e.key === 'f') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const match = text.substring(pos).match(/\w+/);
+        if (match) {
+          setCursorPos(pos + match.index + match[0].length); // Forward one word
+        }
+        return;
+      }
+
+      if (e.altKey && e.key === 'b') {
+        e.preventDefault();
+        const text = getLineText();
+        const beforeCursor = text.substring(0, getCursorPos());
+        const match = beforeCursor.match(/\w+(?=\W*$)/);
+        if (match) {
+          setCursorPos(match.index); // Back one word
+        }
+        return;
+      }
+
+      // Deletion shortcuts
+      if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        const text = getLineText();
+        killRing = text.substring(0, pos);
+        deleteText(0, pos); // Kill to beginning of line
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        const text = getLineText();
+        killRing = text.substring(pos);
+        deleteText(pos, text.length); // Kill to end of line
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'w') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const beforeCursor = text.substring(0, pos);
+        const match = beforeCursor.match(/\w+(?=\W*$)/);
+        if (match) {
+          killRing = beforeCursor.substring(match.index);
+          deleteText(match.index, pos); // Kill word before cursor
+        }
+        return;
+      }
+
+      if (e.altKey && e.key === 'd') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const afterCursor = text.substring(pos);
+        const match = afterCursor.match(/\w+/);
+        if (match) {
+          killRing = match[0];
+          deleteText(pos, pos + match.index + match[0].length); // Kill word after cursor
+        }
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        deleteText(pos, pos + 1); // Delete char under cursor
+        return;
+      }
+
+      if (e.ctrlKey && e.key === 'h') {
+        e.preventDefault();
+        const pos = getCursorPos();
+        if (pos > 0) {
+          deleteText(pos - 1, pos); // Delete char before cursor (backspace)
+        }
+        return;
+      }
+
+      // Yank (paste killed text)
+      if (e.ctrlKey && e.key === 'y') {
+        e.preventDefault();
+        if (killRing) {
+          insertText(killRing);
+        }
+        return;
+      }
+
+      // Transpose characters
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        if (pos > 0 && pos < text.length) {
+          const before = text.substring(0, pos - 1);
+          const char1 = text[pos - 1];
+          const char2 = text[pos];
+          const after = text.substring(pos + 1);
+          target.textContent = before + char2 + char1 + after;
+          setCursorPos(pos + 1);
+        }
+        return;
+      }
+
+      // Transpose words
+      if (e.altKey && e.key === 't') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const beforeCursor = text.substring(0, pos);
+        const afterCursor = text.substring(pos);
+
+        const word1Match = beforeCursor.match(/(\w+)(\W*)$/);
+        const word2Match = afterCursor.match(/^(\W*)(\w+)/);
+
+        if (word1Match && word2Match) {
+          const word1 = word1Match[1];
+          const space1 = word1Match[2];
+          const space2 = word2Match[1];
+          const word2 = word2Match[2];
+
+          const before = beforeCursor.substring(0, beforeCursor.length - word1.length - space1.length);
+          const after = afterCursor.substring(space2.length + word2.length);
+
+          target.textContent = before + word2 + space1 + space2 + word1 + after;
+          setCursorPos(before.length + word2.length + space1.length + space2.length + word1.length);
+        }
+        return;
+      }
+
+      // Case manipulation
+      if (e.altKey && e.key === 'u') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const afterCursor = text.substring(pos);
+        const match = afterCursor.match(/\w+/);
+        if (match) {
+          const before = text.substring(0, pos + match.index);
+          const word = match[0].toUpperCase();
+          const after = text.substring(pos + match.index + match[0].length);
+          target.textContent = before + word + after;
+          setCursorPos(pos + match.index + word.length);
+        }
+        return;
+      }
+
+      if (e.altKey && e.key === 'l') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const afterCursor = text.substring(pos);
+        const match = afterCursor.match(/\w+/);
+        if (match) {
+          const before = text.substring(0, pos + match.index);
+          const word = match[0].toLowerCase();
+          const after = text.substring(pos + match.index + match[0].length);
+          target.textContent = before + word + after;
+          setCursorPos(pos + match.index + word.length);
+        }
+        return;
+      }
+
+      if (e.altKey && e.key === 'c') {
+        e.preventDefault();
+        const text = getLineText();
+        const pos = getCursorPos();
+        const afterCursor = text.substring(pos);
+        const match = afterCursor.match(/\w+/);
+        if (match) {
+          const before = text.substring(0, pos + match.index);
+          const word = match[0].charAt(0).toUpperCase() + match[0].slice(1).toLowerCase();
+          const after = text.substring(pos + match.index + match[0].length);
+          target.textContent = before + word + after;
+          setCursorPos(pos + match.index + word.length);
+        }
+        return;
+      }
+    });
   }
 })();

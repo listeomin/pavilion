@@ -85,7 +85,7 @@ if ($telegramUserId && !$urlUserId) {
 </head>
 <body>
 <nav class="main-nav">
-  <a href="./" class="nav-item">Беседка</a>
+  <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>

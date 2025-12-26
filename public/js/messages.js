@@ -86,7 +86,7 @@ function alignUserHeader() {
     });
   }
   
-  // Global hotkey: "/" to go to Беседка page
+  // Global hotkey: "/" to go to Мурмурация page
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
       const activeElement = document.activeElement;

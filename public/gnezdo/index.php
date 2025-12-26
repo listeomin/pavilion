@@ -31,7 +31,7 @@ $basePath = get_base_path();
 </head>
 <body>
 <nav class="main-nav">
-  <a href="../" class="nav-item">Беседка</a>
+  <a href="../" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
   <a href="./" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>

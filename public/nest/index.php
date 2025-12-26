@@ -180,13 +180,13 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=6">
+<link rel="stylesheet" href="css/nest.css?v=9">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 </head>
 <body>
 <nav class="main-nav">
-  <a href="./" class="nav-item">Беседка</a>
+  <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item active">Гнездо</a>
   <span class="nav-separator">|</span>
@@ -254,6 +254,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.5.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.3.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@1.4.0/dist/bundle.js"></script>
-<script type="module" src="js/nest.js?v=5"></script>
+<script type="module" src="js/nest.js?v=10"></script>
 </body>
 </html>

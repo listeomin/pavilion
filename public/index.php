@@ -18,7 +18,7 @@ $basePath = get_base_path();
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <base href="<?php echo htmlspecialchars($basePath); ?>/">
-<title>Беседка</title>
+<title>Мурмурация</title>
 <link rel="icon" href="assets/favicon.png" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,7 @@ $basePath = get_base_path();
 </head>
 <body>
 <nav class="main-nav">
-  <a href="./" class="nav-item active">Беседка</a>
+  <a href="./" class="nav-item active">Мурмурация</a>
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item">Гнездо</a>
   <span class="nav-separator">|</span>
@@ -55,7 +55,7 @@ $basePath = get_base_path();
       <span id="user-emoji" class="user-emoji-clickable"></span>
       <span id="user-label-header">– это вы!</span>
     </div>
-    <h1>Беседка</h1>
+    <h1>Мурмурация</h1>
   </div>
   <div id="chat-log" aria-live="polite"></div>
   <div id="format-menu">
