@@ -180,7 +180,9 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=1">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=1">
+<link rel="stylesheet" href="css/nest.css?v=2">
+<!-- Quill Editor -->
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
 <body>
 <nav class="main-nav">
@@ -226,6 +228,13 @@ if ($telegramUserId && $urlUsername) {
   <?php if (!$isOwnNest): ?>
   <div id="telegram-auth-container"></div>
   <?php endif; ?>
+
+  <?php if ($urlUsername): ?>
+  <!-- Content editor (only on personal pages) -->
+  <div id="nest-editor-container">
+    <div id="nest-editor"></div>
+  </div>
+  <?php endif; ?>
 </div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
   <img src="assets/paw.svg" alt="Animal Profile">
@@ -237,6 +246,8 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<script type="module" src="js/nest.js?v=2"></script>
+<!-- Quill Editor JS -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script type="module" src="js/nest.js?v=3"></script>
 </body>
 </html>

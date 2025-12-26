@@ -312,11 +312,106 @@ function alignUserHeader() {
         activeElement.tagName === 'TEXTAREA' ||
         activeElement.contentEditable === 'true'
       );
-      
+
       if (!isInInput) {
         e.preventDefault();
         window.location.href = './';
       }
     }
   });
+
+  // Quill Editor for Nest content
+  const editorContainer = document.getElementById('nest-editor');
+  if (editorContainer && nestConfig.urlUsername) {
+    console.log('[Nest] Initializing Quill editor...');
+
+    // Configure Quill
+    const quill = new Quill('#nest-editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: nestConfig.isOwnNest ? [
+          [{ 'header': [1, 2, 3, false] }],
+          ['bold', 'italic', 'link'],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          ['blockquote'],
+          ['clean']
+        ] : false
+      },
+      placeholder: nestConfig.isOwnNest ? 'Напишите что-нибудь...' : '',
+      readOnly: !nestConfig.isOwnNest
+    });
+
+    // Load content from server
+    const loadContent = async () => {
+      try {
+        const url = nestConfig.urlUsername
+          ? CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername)
+          : CONFIG.BASE_PATH + '/api/nest_content.php?action=get';
+        const response = await fetch(url);
+        const result = await response.json();
+
+        if (result.success && result.content) {
+          console.log('[Nest] Loading content:', result.content);
+          quill.setContents(result.content);
+        } else {
+          console.log('[Nest] No content found or error:', result.error);
+        }
+      } catch (err) {
+        console.error('[Nest] Error loading content:', err);
+      }
+    };
+
+    // Load content on init
+    loadContent();
+
+    // Autosave functionality (only for own nest)
+    if (nestConfig.isOwnNest) {
+      let saveTimeout = null;
+      let isSaving = false;
+
+      const saveContent = async () => {
+        if (isSaving) return;
+
+        isSaving = true;
+        console.log('[Nest] Saving content...');
+
+        try {
+          const content = quill.getContents();
+          const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: content })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            console.log('[Nest] Content saved successfully');
+          } else {
+            console.error('[Nest] Save error:', result.error);
+          }
+        } catch (err) {
+          console.error('[Nest] Save network error:', err);
+        } finally {
+          isSaving = false;
+        }
+      };
+
+      // Debounced autosave on text change
+      quill.on('text-change', () => {
+        if (saveTimeout) {
+          clearTimeout(saveTimeout);
+        }
+
+        saveTimeout = setTimeout(() => {
+          saveContent();
+        }, 2000); // Save 2 seconds after user stops typing
+      });
+
+      console.log('[Nest] Autosave enabled (2s delay)');
+    }
+
+    // Make editor globally accessible
+    window.nestQuill = quill;
+  }
 })();
