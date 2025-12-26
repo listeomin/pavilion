@@ -165,7 +165,144 @@ function alignUserHeader() {
       animalProfile.open();
     });
   }
-  
+
+  // Inline editing of nest title (only in own nest)
+  const h1 = document.querySelector('h1');
+  if (h1 && nestConfig.isOwnNest) {
+    let originalText = '';
+    let isEditing = false;
+
+    h1.style.cursor = 'pointer';
+    h1.title = 'Кликните чтобы изменить имя';
+
+    // Save function
+    const saveName = async () => {
+      if (!isEditing) return;
+
+      const editableSpan = h1.querySelector('.editable-name');
+      const newName = editableSpan ? editableSpan.textContent.trim() : '';
+
+      // Validate length
+      if (newName.length > 45) {
+        alert('Имя слишком длинное! Максимум 45 символов.');
+        return false;
+      }
+
+      if (newName.length === 0) {
+        alert('Имя не может быть пустым!');
+        return false;
+      }
+
+      // If unchanged, just exit
+      if (newName === originalText) {
+        const emoji = h1.textContent.split(' ')[0];
+        h1.contentEditable = 'false';
+        h1.textContent = emoji + ' ' + newName;
+        isEditing = false;
+        return true;
+      }
+
+      // Save to server
+      try {
+        console.log('[Nest] Saving name:', newName);
+        const response = await fetch(CONFIG.BASE_PATH + '/api/update_nest_name.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        });
+
+        console.log('[Nest] Response status:', response.status);
+        const text = await response.text();
+        console.log('[Nest] Response text:', text);
+
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (parseErr) {
+          console.error('[Nest] JSON parse error:', parseErr);
+          alert('Ошибка: сервер вернул некорректный ответ');
+          return false;
+        }
+
+        if (result.success) {
+          // Update display
+          const emoji = h1.textContent.split(' ')[0];
+          h1.contentEditable = 'false';
+          h1.textContent = emoji + ' ' + newName;
+          isEditing = false;
+
+          // Update page title
+          document.title = 'Гнездо ' + emoji + ' ' + newName;
+          return true;
+        } else {
+          console.error('[Nest] Server error:', result.error);
+          alert('Ошибка: ' + (result.error || 'Не удалось сохранить'));
+          return false;
+        }
+      } catch (err) {
+        console.error('[Nest] Network error:', err);
+        alert('Ошибка сети: ' + err.message);
+        return false;
+      }
+    };
+
+    h1.addEventListener('click', () => {
+      if (isEditing) return;
+
+      // Get current text (without emoji)
+      const fullText = h1.textContent;
+      const parts = fullText.split(' ');
+      const nameWithoutEmoji = parts.slice(1).join(' '); // Skip emoji
+
+      originalText = nameWithoutEmoji;
+      isEditing = true;
+
+      // Make editable
+      h1.contentEditable = 'true';
+      h1.innerHTML = parts[0] + ' <span class="editable-name">' + nameWithoutEmoji + '</span>';
+
+      // Focus on editable part
+      const editableSpan = h1.querySelector('.editable-name');
+      if (editableSpan) {
+        editableSpan.focus();
+        // Select text
+        const range = document.createRange();
+        range.selectNodeContents(editableSpan);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
+
+    h1.addEventListener('keydown', async (e) => {
+      if (!isEditing) return;
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        await saveName();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        // Cancel editing
+        h1.contentEditable = 'false';
+        h1.textContent = h1.textContent.split(' ')[0] + ' ' + originalText;
+        isEditing = false;
+      }
+    });
+
+    // Handle blur (click outside) - save instead of cancel
+    h1.addEventListener('blur', async () => {
+      if (isEditing) {
+        const saved = await saveName();
+        if (!saved) {
+          // If save failed, restore original
+          h1.contentEditable = 'false';
+          h1.textContent = h1.textContent.split(' ')[0] + ' ' + originalText;
+          isEditing = false;
+        }
+      }
+    });
+  }
+
   // Global hotkey: "/" to go to Беседка page
   document.addEventListener('keydown', (e) => {
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {

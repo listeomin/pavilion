@@ -35,3 +35,20 @@
 #telegram-auth-container .my-chat-button:hover {
   opacity: 1;
 }
+
+/* Inline editing styles for nest title */
+h1[contenteditable="true"] {
+  outline: none;
+}
+
+h1 .editable-name {
+  background: rgba(124, 119, 238, 0.1);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+  outline: none;
+}
+
+h1 .editable-name:focus {
+  background: rgba(124, 119, 238, 0.15);
+  outline: none;
+}
