@@ -1,5 +1,5 @@
 // public/js/main.js
-import { CONFIG } from './config.js?v=5';
+import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase, apiVersion } from './api.js?v=7';
 import { WebSocketClient } from './websocket-client.js?v=2';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=12';

@@ -1,5 +1,5 @@
 // public/js/telegramAuth.js
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=6';
 
 export class TelegramAuth {
   constructor() {

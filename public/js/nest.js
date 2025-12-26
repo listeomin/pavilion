@@ -1,5 +1,5 @@
 // nest.js - инициализация страницы Гнездо без чата
-import { CONFIG } from './config.js?v=5';
+import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';

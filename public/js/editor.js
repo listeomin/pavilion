@@ -1,7 +1,7 @@
 // public/js/editor.js
 import { escapeHtml, parseMarkdown } from './markdown.js?v=4';
 import { apiUploadImage, apiDeleteImage } from './api.js?v=5';
-import { CONFIG } from './config.js?v=5';
+import { CONFIG } from './config.js?v=6';
 
 export class Editor {
   constructor(inputEl, maxHistory = 50) {

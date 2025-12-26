@@ -1,5 +1,5 @@
 // public/js/inline-input.js
-import { CONFIG } from './config.js?v=5';
+import { CONFIG } from './config.js?v=6';
 import { getAudioUrl } from './audio-mapping.js?v=1';
 
 export class InlineInput {
