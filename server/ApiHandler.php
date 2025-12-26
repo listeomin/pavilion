@@ -45,29 +45,36 @@ class ApiHandler {
         $session = null;
         $isNew = false;
 
-        if ($cookieId) {
-            $session = $this->sessionRepo->get($cookieId);
-            Logger::log('Session lookup result', [
-                'cookieId' => $cookieId,
-                'session_found' => $session !== null,
-                'session' => $session
-            ]);
-        }
-
-        // Если сессия не найдена по cookie, но пользователь авторизован через Telegram,
-        // попробуем найти существующую сессию по user_id
-        if (!$session && $telegram_user_id) {
+        // ПРИОРИТЕТ: Telegram сессия важнее cookie!
+        if ($telegram_user_id) {
+            // Ищем сессию по Telegram user_id
             $session = $this->sessionRepo->getByUserId($telegram_user_id);
-            Logger::log('Session lookup by user_id', [
+            Logger::log('Session lookup by Telegram user_id', [
                 'user_id' => $telegram_user_id,
                 'session_found' => $session !== null,
                 'session' => $session
             ]);
 
             if ($session) {
-                // Нашли существующую сессию - будем обновлять cookie
-                $isNew = false; // Cookie обновится
+                // Нашли Telegram сессию - обновим cookie если нужно
+                if ($cookieId !== $session['id']) {
+                    $isNew = true; // Обновим cookie на правильный
+                    Logger::log('Updating cookie to Telegram session', [
+                        'old_cookie' => $cookieId,
+                        'new_session_id' => $session['id']
+                    ]);
+                }
             }
+        }
+
+        // Если нет Telegram сессии, проверяем cookie
+        if (!$session && $cookieId) {
+            $session = $this->sessionRepo->get($cookieId);
+            Logger::log('Session lookup by cookie (no Telegram auth)', [
+                'cookieId' => $cookieId,
+                'session_found' => $session !== null,
+                'session' => $session
+            ]);
         }
 
         if ($session) {

@@ -1,5 +1,16 @@
 /* nest.css - стили для страницы Гнездо */
 
+/* Reduce spacing between title and content on Nest page */
+#header-container {
+  margin-bottom: 12px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.nest-description {
+  text-align: left;
+}
+
 /* Telegram Auth container styling for Nest page */
 #telegram-auth-container {
   /* Переопределяем fixed позицию из telegramAuth.css */
@@ -56,8 +67,8 @@ h1 .editable-name:focus {
 /* Telegraph-style Editor.js */
 #nest-editor-container {
   max-width: 980px;
-  margin: 40px 0 60px 0;
-  padding: 0 20px;
+  margin: 20px 0 60px 0;
+  padding: 0;
 }
 
 #nest-editor {

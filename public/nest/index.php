@@ -180,7 +180,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=9">
+<link rel="stylesheet" href="css/nest.css?v=13">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 </head>
@@ -221,8 +221,8 @@ if ($telegramUserId && $urlUsername) {
 
   <?php if ($urlUsername && !$isOwnNest): ?>
   <div class="nest-description">
-    <p>Гнездо <?php echo htmlspecialchars($profileOwnerName ? $profileOwnerName : "пользователя @{$urlUsername}"); ?></p>
-    <p style="opacity: 0.6; font-size: 14px;">Вы в гостях</p>
+    <p style="font-style: italic; color: var(--color-nimbus-dark);">Рад встрече!</p>
+    <p style="font-style: italic; color: var(--color-nimbus-dark);">Что ты думаешь обо мне?</p>
   </div>
   <?php endif; ?>
   <?php if (!$isOwnNest): ?>

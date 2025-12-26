@@ -48,6 +48,6 @@
   font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 15px;
   font-weight: 500;
-  color: var(--color-nimbus-medium);
+  color: var(--color-nimbus-light);
   user-select: none;
 }

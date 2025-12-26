@@ -462,7 +462,8 @@ function alignUserHeader() {
         console.log('[Main] New login detected, loading profile...');
 
         // Переинициализируем сессию чтобы получить sessionId с user_id
-        const initData = await apiInit(API, null, COOKIE_NAME);
+        // НЕ передаём null - пусть API проверит Telegram сессию
+        const initData = await apiInit(API, sessionId, COOKIE_NAME);
         const oldSessionId = sessionId;
         sessionId = initData.session_id;
 
