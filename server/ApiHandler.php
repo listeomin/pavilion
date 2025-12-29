@@ -7,6 +7,7 @@ class ApiHandler {
     private GitHubService $githubService;
     private PinterestService $pinterestService;
     private NestPreviewService $nestPreviewService;
+    private YouTubePreviewService $youtubeService;
     private LinkPreviewService $linkPreviewService;
     private ImageUploadService $imageService;
     private BroadcastService $broadcastService;
@@ -17,6 +18,7 @@ class ApiHandler {
         ?GitHubService $githubService = null,
         ?PinterestService $pinterestService = null,
         ?NestPreviewService $nestPreviewService = null,
+        ?YouTubePreviewService $youtubeService = null,
         ?LinkPreviewService $linkPreviewService = null,
         ?ImageUploadService $imageService = null,
         ?BroadcastService $broadcastService = null
@@ -26,6 +28,7 @@ class ApiHandler {
         $this->githubService = $githubService ?? new GitHubService();
         $this->pinterestService = $pinterestService ?? new PinterestService();
         $this->nestPreviewService = $nestPreviewService ?? new NestPreviewService();
+        $this->youtubeService = $youtubeService ?? new YouTubePreviewService();
         $this->linkPreviewService = $linkPreviewService ?? new LinkPreviewService();
         $this->imageService = $imageService ?? new ImageUploadService();
         $this->broadcastService = $broadcastService ?? new BroadcastService();
@@ -133,6 +136,7 @@ class ApiHandler {
         }
 
         // Priority: client metadata > Pinterest > Nest > GitHub > generic link preview
+        // NOTE: YouTube enrichment is disabled - handled by frontend for instant sending
         $metadata = $clientMetadata;
         if (!$metadata) {
             $metadata = $this->pinterestService->enrichMessage($text);
@@ -140,6 +144,10 @@ class ApiHandler {
         if (!$metadata) {
             $metadata = $this->nestPreviewService->enrichMessage($text);
         }
+        // YouTube enrichment disabled - frontend handles it
+        // if (!$metadata) {
+        //     $metadata = $this->youtubeService->enrichMessage($text);
+        // }
         if (!$metadata) {
             $metadata = $this->githubService->enrichMessage($text);
         }
@@ -217,6 +225,7 @@ class ApiHandler {
         }
 
         // Priority: client metadata > Pinterest > Nest > GitHub > generic link preview
+        // NOTE: YouTube enrichment is disabled - handled by frontend for instant sending
         $metadata = $clientMetadata;
         if (!$metadata) {
             $metadata = $this->pinterestService->enrichMessage($text);
@@ -224,6 +233,10 @@ class ApiHandler {
         if (!$metadata) {
             $metadata = $this->nestPreviewService->enrichMessage($text);
         }
+        // YouTube enrichment disabled - frontend handles it
+        // if (!$metadata) {
+        //     $metadata = $this->youtubeService->enrichMessage($text);
+        // }
         if (!$metadata) {
             $metadata = $this->githubService->enrichMessage($text);
         }

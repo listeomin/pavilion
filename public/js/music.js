@@ -1,5 +1,6 @@
 // public/js/music.js
 import { initAudioPlayer } from './audio-player.js?v=3';
+import { initYouTubePlayer } from './youtube-player.js?v=1';
 
 export function renderMusicPlayer(metadata) {
   if (!metadata || metadata.type !== 'music') return '';
@@ -7,7 +8,8 @@ export function renderMusicPlayer(metadata) {
   const artist = metadata.artist || '';
   const track = metadata.track || '';
   const audioUrl = metadata.audioUrl || '';
-  
+  const isYouTube = metadata.youtube_id !== undefined;
+
   const playerHtml = `
     <div style="position: relative;">
       <div class="audio-play-btn" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; background: #BDBCE4; border-radius: 50%; cursor: pointer; z-index: 1;">
@@ -24,7 +26,7 @@ export function renderMusicPlayer(metadata) {
           ${track ? `<div class="audio-track">${escapeHtml(track)}</div>` : ''}
         </div>
         <div class="audio-time">00:00</div>
-        <a href="${escapeHtml(audioUrl)}" download class="audio-download-btn">Скачать</a>
+        ${!isYouTube ? `<a href="${escapeHtml(audioUrl)}" download class="audio-download-btn">Скачать</a>` : ''}
         <div class="audio-progress-container">
           <div class="audio-progress-bar"></div>
         </div>
@@ -41,9 +43,17 @@ export function renderMusicPlayer(metadata) {
         const wrapper = playerEl.parentElement;
         const playBtn = wrapper.querySelector('.audio-play-btn');
         const url = playerEl.dataset.audioUrl;
-        
+
         if (url && playBtn) {
-          const playerInstance = initAudioPlayer(playerEl, url, metadata, playBtn);
+          // Check if this is a YouTube video
+          const isYouTube = metadata.youtube_id !== undefined;
+
+          if (isYouTube) {
+            initYouTubePlayer(playerEl, metadata.youtube_id, metadata, playBtn);
+          } else {
+            const playerInstance = initAudioPlayer(playerEl, url, metadata, playBtn);
+          }
+
           playerEl.dataset.initialized = 'true';
         }
       }

@@ -21,6 +21,8 @@ function hideSkeleton() {
     if (skeletonContainer.parentNode) {
       skeletonContainer.parentNode.removeChild(skeletonContainer);
     }
+    // Realign user header after skeleton is removed
+    setTimeout(alignUserHeader, 50);
   }, 300);
 }
 
@@ -30,11 +32,15 @@ function alignUserHeader() {
   const userHeader = document.getElementById('user-header');
 
   if (h1 && userHeader) {
+    // Force a reflow to ensure layout is calculated
+    h1.offsetHeight;
+
     const h1Rect = h1.getBoundingClientRect();
     const containerRect = h1.parentElement.getBoundingClientRect();
     const rightOffset = h1Rect.right - containerRect.left;
 
-    userHeader.style.marginLeft = rightOffset - userHeader.offsetWidth + 'px';
+    userHeader.style.marginLeft = (rightOffset - userHeader.offsetWidth) + 'px';
+    console.log('[Nest] Aligned user header:', { rightOffset, userHeaderWidth: userHeader.offsetWidth, marginLeft: userHeader.style.marginLeft });
   }
 }
 
@@ -58,7 +64,24 @@ function alignUserHeader() {
   }
 
   // Align user header after content loads
-  setTimeout(alignUserHeader, 0);
+  // Use multiple strategies to ensure alignment happens after layout is stable
+  const doAlign = () => {
+    requestAnimationFrame(() => {
+      setTimeout(alignUserHeader, 0);
+    });
+  };
+
+  // Try after fonts load (most reliable)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      // Give extra time for layout to settle
+      setTimeout(doAlign, 100);
+    });
+  } else {
+    // Fallback if fonts API not available
+    setTimeout(doAlign, 500);
+  }
+
   window.addEventListener('resize', alignUserHeader);
 
   // Handle emoji click for changing animal

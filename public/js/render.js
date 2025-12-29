@@ -4,10 +4,39 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderNestPreview } from './nest-preview.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
-import { renderMusicPlayer } from './music.js?v=1';
+import { renderMusicPlayer } from './music.js?v=2';
 import { makeImageZoomable } from './image-zoom.js?v=1';
+import { parseYouTubeUrl, isYouTubeUrl } from './youtube.js?v=2';
+import { CONFIG } from './config.js?v=6';
 
 let spinnerInterval = null;
+
+// Helper to process YouTube URLs and convert to music player
+function processYouTubeUrls(text) {
+  // Find all URLs in text
+  const urlRegex = /(https?:\/\/[^\s<>"]+)/gi;
+  let hasYouTube = false;
+  let youtubeMetadata = null;
+
+  const processedText = text.replace(urlRegex, (url) => {
+    const videoId = parseYouTubeUrl(url);
+    if (videoId && !hasYouTube) {
+      hasYouTube = true;
+      youtubeMetadata = {
+        type: 'music',
+        artist: 'YouTube',
+        track: 'Загружается...',
+        audioUrl: `${CONFIG.BASE_PATH}/api/music/youtube-stream.php?v=${videoId}`,
+        youtube_id: videoId,
+        duration: 0
+      };
+      return '__YOUTUBE_PLAYER__';
+    }
+    return url;
+  });
+
+  return { processedText, youtubeMetadata };
+}
 
 function renderQuote(quote) {
   const { text, author, messageId } = quote;
@@ -201,12 +230,21 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
       // Replace placeholder with actual preview
       content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
     } else {
-      // Regular text with markdown
-      content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
-      
-      // Add GitHub preview if metadata exists
-      if (m.metadata && m.metadata.type === 'github') {
-        content += renderGitHubPreview(m.metadata);
+      // Check for YouTube URLs in text if no specific metadata
+      const { processedText, youtubeMetadata } = processYouTubeUrls(m.text);
+      if (youtubeMetadata) {
+        // Render YouTube as music player
+        const escapedText = escapeHtml(processedText);
+        content = linkifyImages(parseMarkdown(escapedText));
+        content = content.replace('__YOUTUBE_PLAYER__', renderMusicPlayer(youtubeMetadata));
+      } else {
+        // Regular text with markdown
+        content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
+
+        // Add GitHub preview if metadata exists
+        if (m.metadata && m.metadata.type === 'github') {
+          content += renderGitHubPreview(m.metadata);
+        }
       }
     }
     
@@ -305,9 +343,18 @@ export function updateMessage(chatLog, updatedMessage) {
     content = linkifyImages(parseMarkdown(escapeHtml(content)));
     content = content.replace('__LINK_PREVIEW__', renderLinkPreview(m.metadata));
   } else {
-    content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
-    if (m.metadata && m.metadata.type === 'github') {
-      content += renderGitHubPreview(m.metadata);
+    // Check for YouTube URLs in text if no specific metadata
+    const { processedText, youtubeMetadata } = processYouTubeUrls(m.text);
+    if (youtubeMetadata) {
+      // Render YouTube as music player
+      const escapedText = escapeHtml(processedText);
+      content = linkifyImages(parseMarkdown(escapedText));
+      content = content.replace('__YOUTUBE_PLAYER__', renderMusicPlayer(youtubeMetadata));
+    } else {
+      content += linkifyImages(parseMarkdown(escapeHtml(m.text)));
+      if (m.metadata && m.metadata.type === 'github') {
+        content += renderGitHubPreview(m.metadata);
+      }
     }
   }
 

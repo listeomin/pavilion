@@ -2,7 +2,7 @@
 import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase, apiVersion } from './api.js?v=7';
 import { WebSocketClient } from './websocket-client.js?v=2';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=13';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=14';
 import { Editor } from './editor.js?v=10';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=6';
@@ -215,10 +215,10 @@ function alignUserHeader() {
     }
   
     if (!text && images.length === 0 && !quotes) return;
-   
+
     // Show sending message
     const sendingMsg = renderSystemMessage(chatLog, 'Сообщение отправляется', { spinner: true });
-   
+
     // Prepare metadata
     let metadata = null;
     if (images.length > 0 || quotes) {
@@ -231,10 +231,15 @@ function alignUserHeader() {
         metadata.quotes = quotes;
       }
     }
-   
+
     console.log('Sending metadata:', metadata);
     console.log('Sending text:', text);
-   
+
+    // Clear input immediately for instant feedback
+    editor.clear();
+    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
+    inputEl.focus();
+
     try {
       let result;
       const wasEditing = messageHistory.isEditing();
@@ -287,9 +292,7 @@ function alignUserHeader() {
         }
       });
     }
-    editor.clear();
-    updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
-    inputEl.focus();
+    // Input already cleared above for instant feedback
   });
   function setupWebSocket() {
     wsClient = new WebSocketClient(CONFIG.WS_URL, sessionId);
