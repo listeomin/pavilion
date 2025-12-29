@@ -169,13 +169,10 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
     </div>
     <h1>Послания</h1>
   </div>
-</div>
 
-<div class="dm-container">
-  <!-- Chat area (left) -->
-  <div class="dm-chat-area">
-    <?php if ($recipientUsername): ?>
-      <!-- Chat header -->
+  <?php if ($recipientUsername): ?>
+    <!-- Chat area when user is selected -->
+    <div class="dm-chat-container">
       <div class="dm-chat-header">
         <span class="dm-recipient-emoji"><?php echo htmlspecialchars($recipientEmoji); ?></span>
         <span class="dm-recipient-name"><?php echo htmlspecialchars($recipientFirstName); ?></span>
@@ -193,20 +190,20 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
           </button>
         </form>
       </div>
-    <?php else: ?>
-      <!-- Empty state - no chat selected -->
-      <div class="empty-state">
-        <img src="assets/empty-brnch.png" alt="Пусто">
-        <div class="empty-state-text">Выберите пользователя из списка справа</div>
-      </div>
-    <?php endif; ?>
-  </div>
+    </div>
+  <?php else: ?>
+    <!-- Empty state - no chat selected -->
+    <div class="empty-state">
+      <img src="assets/empty-brnch.png" alt="Пусто">
+      <div class="empty-state-text">Выберите пользователя из списка справа</div>
+    </div>
+  <?php endif; ?>
+</div>
 
-  <!-- User list (right) -->
-  <div class="dm-users-sidebar">
-    <div class="dm-users-header">Пользователи</div>
-    <div id="dm-users-list" class="dm-users-list"></div>
-  </div>
+<!-- User list (right) - always visible -->
+<div class="dm-users-sidebar">
+  <div class="dm-users-header">Пользователи</div>
+  <div id="dm-users-list" class="dm-users-list"></div>
 </div>
 
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">

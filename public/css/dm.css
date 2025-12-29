@@ -1,36 +1,18 @@
 /* dm.css - Direct Messages styling */
 
-.page-dm {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
-
-.dm-container {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  margin-top: 0; /* Header added via .wrap */
-}
-
-/* Chat area (left side) */
-.dm-chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--color-nimbus);
-  background: var(--color-cloud-light);
-  position: relative;
-}
-
-/* Empty state positioning for DM page */
-.dm-chat-area .empty-state {
+/* Chat container when user is selected */
+.dm-chat-container {
   position: absolute;
-  top: 0;
+  top: calc(120px + 48px + 48px + 24px); /* Same as empty-state */
   bottom: 0;
-  left: 0;
-  right: 0;
-  max-width: none;
+  left: 80px;
+  width: 100%;
+  max-width: 640px;
+  background: #FAF9F5;
+  box-shadow: 0px 0px 64px rgba(0, 0, 0, 0.25);
+  border-radius: 8px 8px 0px 0px;
+  display: flex;
+  flex-direction: column;
 }
 
 .dm-chat-header {
@@ -188,11 +170,17 @@
   filter: brightness(0) invert(1);
 }
 
-/* Users sidebar (right side) */
+/* Users sidebar (right side) - fixed position */
 .dm-users-sidebar {
+  position: fixed;
+  top: calc(40px + 60px); /* nav height + margin */
+  right: 40px;
+  bottom: 40px;
   width: 280px;
   background: var(--color-cloud);
-  border-left: 1px solid var(--color-nimbus);
+  border: 1px solid var(--color-nimbus);
+  border-radius: 8px;
+  box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
 }

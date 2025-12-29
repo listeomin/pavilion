@@ -15,7 +15,7 @@
   position: absolute;
   top: calc(120px + 48px + 48px + 24px); /* падинг врапа + маргин хедера + высота h1 + 24px */
   bottom: 0;
-  left: 0;
+  left: 80px;
 }
 
 .empty-state img {
