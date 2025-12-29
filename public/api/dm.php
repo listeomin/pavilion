@@ -108,8 +108,9 @@ switch ($action) {
         $input = json_decode(file_get_contents('php://input'), true);
         $recipientId = $input['recipient_id'] ?? null;
         $text = $input['text'] ?? '';
+        $metadata = $input['metadata'] ?? null;
 
-        if (!$recipientId || !$text) {
+        if (!$recipientId || (!$text && !$metadata)) {
             echo json_encode(['error' => 'Missing required fields']);
             exit;
         }
@@ -120,15 +121,19 @@ switch ($action) {
             exit;
         }
 
+        // Prepare metadata JSON
+        $metadataJson = $metadata ? json_encode($metadata) : null;
+
         // Insert message
         $stmt = $db->prepare('
-            INSERT INTO direct_messages (from_user_id, to_user_id, text, created_at)
-            VALUES (:from_user_id, :to_user_id, :text, datetime(\'now\'))
+            INSERT INTO direct_messages (from_user_id, to_user_id, text, metadata, created_at)
+            VALUES (:from_user_id, :to_user_id, :text, :metadata, datetime(\'now\'))
         ');
         $result = $stmt->execute([
             ':from_user_id' => $currentUserId,
             ':to_user_id' => $recipientId,
-            ':text' => $text
+            ':text' => $text,
+            ':metadata' => $metadataJson
         ]);
 
         if ($result) {

@@ -195,9 +195,10 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
 
     container.innerHTML = messages.map(msg => {
       const time = formatTime(msg.createdAt);
+      const content = renderMessageContent(msg.text, msg.metadata);
       return `
         <div class="dm-message ${msg.fromMe ? 'from-me' : 'from-them'}">
-          <div class="dm-message-bubble">${escapeHtml(msg.text)}</div>
+          <div class="dm-message-bubble">${content}</div>
           <div class="dm-message-time">${time}</div>
         </div>
       `;
@@ -215,15 +216,62 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
 
     if (!sendForm || !inputEl || !sendBtn) return;
 
+    // Handle paste event for images
+    inputEl.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          await uploadAndInsertImage(file, inputEl);
+        }
+      }
+    });
+
     sendForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const text = inputEl.textContent.trim();
-      if (!text || !dmConfig.recipientUserId) return;
+      // Collect image tags
+      const imageTags = inputEl.querySelectorAll('.image-tag[data-loaded="true"]');
+      const images = Array.from(imageTags).map(tag => ({
+        id: tag.dataset.id,
+        url: tag.dataset.url
+      }));
+
+      // Get text content with image placeholders
+      let text = '';
+      const processNode = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+        } else if (node.classList && node.classList.contains('image-tag')) {
+          if (node.dataset.loaded === 'true') {
+            text += `__IMAGE_TAG_${node.dataset.id}__`;
+          }
+        } else if (node.childNodes) {
+          node.childNodes.forEach(processNode);
+        }
+      };
+      inputEl.childNodes.forEach(processNode);
+      text = text.trim();
+
+      if (!text && images.length === 0) return;
+      if (!dmConfig.recipientUserId) return;
 
       // Disable input
       inputEl.contentEditable = 'false';
       sendBtn.disabled = true;
+
+      // Prepare metadata
+      let metadata = null;
+      if (images.length > 0) {
+        metadata = {
+          type: 'images',
+          images: images
+        };
+      }
 
       try {
         const res = await fetch(`${DM_API}?action=send`, {
@@ -231,7 +279,8 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             recipient_id: dmConfig.recipientUserId,
-            text: text
+            text: text,
+            metadata: metadata
           })
         });
 
@@ -240,7 +289,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
         if (data.success) {
           // Add message to UI
           addMessage(data.message);
-          inputEl.textContent = '';
+          inputEl.innerHTML = '';
         } else {
           console.error('[DM] Send error:', data.error);
           alert('Ошибка отправки сообщения');
@@ -275,10 +324,11 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     if (!container) return;
 
     const time = formatTime(msg.createdAt);
+    const content = renderMessageContent(msg.text, msg.metadata);
     const div = document.createElement('div');
     div.className = `dm-message ${msg.fromMe ? 'from-me' : 'from-them'}`;
     div.innerHTML = `
-      <div class="dm-message-bubble">${escapeHtml(msg.text)}</div>
+      <div class="dm-message-bubble">${content}</div>
       <div class="dm-message-time">${time}</div>
     `;
     container.appendChild(div);
@@ -309,6 +359,70 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  };
+
+  // Render message content with images
+  const renderMessageContent = (text, metadata) => {
+    let content = escapeHtml(text || '');
+
+    // Replace image placeholders with actual images
+    if (metadata && metadata.images && metadata.images.length > 0) {
+      metadata.images.forEach(img => {
+        const placeholder = `__IMAGE_TAG_${img.id}__`;
+        const imageHtml = `<img src="${escapeHtml(img.url)}" alt="Image" style="max-width: 100%; border-radius: 8px; margin: 4px 0; display: block;">`;
+        content = content.replace(placeholder, imageHtml);
+      });
+    }
+
+    return content;
+  };
+
+  // Upload and insert image
+  const uploadAndInsertImage = async (file, inputEl) => {
+    const tempId = 'img_' + Date.now();
+
+    // Create image tag placeholder
+    const imgTag = document.createElement('span');
+    imgTag.className = 'image-tag';
+    imgTag.dataset.id = tempId;
+    imgTag.dataset.loaded = 'false';
+    imgTag.contentEditable = 'false';
+    imgTag.textContent = '📎 Загрузка...';
+    imgTag.style.cssText = 'display: inline-block; padding: 4px 8px; margin: 0 4px; background: var(--color-nimbus); border-radius: 4px; font-size: 13px;';
+
+    // Insert into input
+    inputEl.appendChild(imgTag);
+    inputEl.appendChild(document.createTextNode(' '));
+
+    try {
+      // Upload image
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(CONFIG.BASE_PATH + '/api/upload_image.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.file && result.file.url) {
+        // Update tag with success
+        imgTag.dataset.loaded = 'true';
+        imgTag.dataset.url = result.file.url;
+        imgTag.textContent = '📎 Изображение';
+        imgTag.style.background = 'var(--color-olive)';
+        imgTag.style.color = 'var(--color-cloud-light)';
+      } else {
+        // Upload failed
+        imgTag.textContent = '❌ Ошибка';
+        imgTag.style.background = 'var(--color-rust)';
+      }
+    } catch (error) {
+      console.error('[DM] Image upload error:', error);
+      imgTag.textContent = '❌ Ошибка';
+      imgTag.style.background = 'var(--color-rust)';
+    }
   };
 
   // Initialize
