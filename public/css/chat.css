@@ -153,4 +153,5 @@
 .ai-mention {
   color: var(--color-olive);
   font-weight: 500;
+  cursor: pointer;
 }

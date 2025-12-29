@@ -243,6 +243,8 @@ h3.ce-header {
   text-decoration: none;
   border-bottom: 1px solid rgba(124, 119, 238, 0.3);
   transition: border-color 0.2s;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .ce-paragraph a:hover,

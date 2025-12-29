@@ -74,7 +74,61 @@ function alignUserHeader() {
     updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
   });
   wheelScroll.attachListener(inputEl);
+
+  // Function to highlight @сова mentions in input field
+  function highlightMentionsInInput() {
+    const selection = window.getSelection();
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    const cursorOffset = range ? range.startOffset : 0;
+    const cursorNode = range ? range.startContainer : null;
+
+    // Get plain text content
+    const text = inputEl.textContent;
+
+    // Check if @сова is present
+    if (/@сова/i.test(text)) {
+      // Replace @сова with styled span
+      const styledText = text.replace(/@сова/gi, '<span class="ai-mention">@сова</span>');
+
+      // Only update if content changed
+      if (inputEl.innerHTML !== styledText) {
+        inputEl.innerHTML = styledText;
+
+        // Restore cursor position
+        if (cursorNode && range) {
+          try {
+            // Find the text node to place cursor in
+            const textNodes = [];
+            const walker = document.createTreeWalker(inputEl, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            while (node = walker.nextNode()) {
+              textNodes.push(node);
+            }
+
+            // Place cursor at the end of the last text node
+            if (textNodes.length > 0) {
+              const lastNode = textNodes[textNodes.length - 1];
+              const newRange = document.createRange();
+              newRange.setStart(lastNode, Math.min(cursorOffset, lastNode.length));
+              newRange.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+            }
+          } catch (e) {
+            // If cursor restoration fails, just place it at the end
+            const newRange = document.createRange();
+            newRange.selectNodeContents(inputEl);
+            newRange.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+          }
+        }
+      }
+    }
+  }
+
   inputEl.addEventListener('input', () => {
+    highlightMentionsInInput();
     editor.syncMarkdownText();
     // editor.renderLiveMarkdown(); // TEMPORARILY DISABLED
     updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
@@ -449,6 +503,26 @@ function alignUserHeader() {
 
     // Initialize image zoom for existing images
     initImageZoom();
+
+    // Handle clicks on @сова mentions to insert into input field
+    chatLog.addEventListener('click', (e) => {
+      if (e.target.classList.contains('ai-mention')) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Insert "@сова, " into input field
+        inputEl.textContent = '@сова, ';
+        inputEl.focus();
+
+        // Move cursor to end
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(inputEl);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    });
 
     // Set fixed margin for user header (Мурмурация)
     const userHeader = document.getElementById('user-header');

@@ -11,8 +11,19 @@ export function escapeHtml(s) {
 
 export function parseMarkdown(text) {
   const urlPlaceholders = [];
+  const markdownLinkPlaceholders = [];
+
+  // First, extract markdown links [text](url) before processing URLs
+  const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/gi;
+  let processed = text.replace(markdownLinkRegex, (match, linkText, url) => {
+    const idx = markdownLinkPlaceholders.length;
+    markdownLinkPlaceholders.push({ text: linkText, url: url });
+    return `__MDLINK_${idx}__`;
+  });
+
+  // Now extract regular URLs
   const urlRegex = /(https?:\/\/[^\s<>"]+)/gi;
-  let processed = text.replace(urlRegex, (url) => {
+  processed = processed.replace(urlRegex, (url) => {
     const idx = urlPlaceholders.length;
     urlPlaceholders.push(url);
     return `__URL_${idx}__`;
@@ -25,7 +36,13 @@ export function parseMarkdown(text) {
   processed = processed.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   processed = processed.replace(/\*([^*]+)\*/g, '<em>$1</em>');
   processed = processed.replace(/\b_([^_]+)_\b/g, '<em>$1</em>');
-  
+
+  // Convert markdown links to styled links
+  processed = processed.replace(/__MDLINK_(\d+)__/g, (_, idx) => {
+    const link = markdownLinkPlaceholders[parseInt(idx)];
+    return `<a href="${link.url}" target="_blank" style="color: var(--color-iris); text-decoration: none; cursor: pointer;">${link.text}</a>`;
+  });
+
   // Convert URLs to clickable links
   processed = processed.replace(/__URL_(\d+)__/g, (_, idx) => {
     const url = urlPlaceholders[parseInt(idx)];

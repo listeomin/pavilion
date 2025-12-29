@@ -1,0 +1,91 @@
+/* Documentation page styles */
+
+.doc-content {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-cumulonimbus-dark);
+  max-width: 720px;
+}
+
+.doc-date {
+  font-style: italic;
+  color: var(--color-nimbus-dark);
+  margin-bottom: 24px;
+}
+
+.doc-intro {
+  font-size: 17px;
+  font-weight: normal;
+  margin-bottom: 40px;
+  color: var(--color-cumulonimbus-medium);
+}
+
+.doc-section {
+  margin-bottom: 40px;
+}
+
+.doc-section h2 {
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: normal;
+  margin: 0 0 16px 0;
+  color: var(--color-cumulonimbus-dark);
+}
+
+.doc-section p {
+  margin: 12px 0;
+  line-height: 1.8;
+}
+
+.doc-section p strong {
+  font-weight: bold;
+  color: var(--color-cumulonimbus-dark);
+}
+
+.doc-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-nimbus-light);
+}
+
+.doc-button {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.doc-button.primary {
+  background: var(--color-olive);
+  color: white;
+}
+
+.doc-button.primary:hover {
+  background: var(--color-iris);
+}
+
+.doc-button.secondary {
+  background: var(--color-nimbus-light);
+  color: var(--color-cumulonimbus-medium);
+}
+
+.doc-button.secondary:hover:not(:disabled) {
+  background: var(--color-nimbus-dark);
+  color: white;
+}
+
+.doc-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.doc-button:active:not(:disabled) {
+  transform: translateY(1px);
+}

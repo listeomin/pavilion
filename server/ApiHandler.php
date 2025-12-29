@@ -177,7 +177,25 @@ class ApiHandler {
                     $aiPrompt = trim($aiPrompt);
 
                     if (!empty($aiPrompt)) {
-                        $ch = curl_init();
+                        // Check for license/agreement keywords
+                        $isLicenseRequest = preg_match('/лицензи|соглашени/ui', $aiPrompt);
+
+                        if ($isLicenseRequest) {
+                            // Respond with link to license agreement
+                            $basePath = (strpos($_SERVER['REQUEST_URI'] ?? '', '/pavilion/') === 0) ? '/pavilion' : '';
+                            $licenseUrl = 'https://hhrrr.ru' . $basePath . '/doc/';
+                            $owlResponse = "Конечно! Лицензионное соглашение доступно здесь:\n[Лицензионное соглашение]({$licenseUrl})\n\nВы можете ознакомиться с условиями использования нашего продукта и скачать документ в формате PDF.";
+
+                            $owlMessage = $this->msgRepo->add(
+                                'owl_ai_session',
+                                '🦉 сова',
+                                $owlResponse,
+                                null
+                            );
+                            $this->broadcastService->messageNew($owlMessage);
+                        } else {
+                            // Regular AI request
+                            $ch = curl_init();
                         curl_setopt_array($ch, [
                             CURLOPT_URL => $aiConfig['api_endpoint'],
                             CURLOPT_RETURNTRANSFER => true,
@@ -213,6 +231,7 @@ class ApiHandler {
                                 $this->broadcastService->messageNew($owlMessage);
                             }
                         }
+                        } // end of else block (regular AI request)
                     }
                 }
             } catch (Exception $e) {
