@@ -2,7 +2,7 @@
 import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase, apiVersion } from './api.js?v=7';
 import { WebSocketClient } from './websocket-client.js?v=2';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=12';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=13';
 import { Editor } from './editor.js?v=10';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=6';

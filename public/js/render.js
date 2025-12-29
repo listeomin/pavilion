@@ -2,6 +2,7 @@
 import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=5';
 import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
+import { renderNestPreview } from './nest-preview.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=1';
 import { makeImageZoomable } from './image-zoom.js?v=1';
@@ -167,6 +168,22 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
       });
       // Apply markdown to the result
       content = linkifyImages(parseMarkdown(escapeHtml(content)));
+    } else if (m.metadata && m.metadata.type === 'nest') {
+      // Replace URL with preview in place
+      let replacedUrl = false;
+      content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+        if (!replacedUrl && url === m.metadata.url) {
+          replacedUrl = true;
+          return '__NEST_PREVIEW__';
+        }
+        return url;
+      });
+
+      // Apply markdown to text parts
+      content = linkifyImages(parseMarkdown(escapeHtml(content)));
+
+      // Replace placeholder with actual preview
+      content = content.replace('__NEST_PREVIEW__', renderNestPreview(m.metadata));
     } else if (m.metadata && m.metadata.type === 'link') {
       // Replace URL with preview in place
       let replacedUrl = false;
@@ -265,6 +282,17 @@ export function updateMessage(chatLog, updatedMessage) {
       return url;
     });
     content = linkifyImages(parseMarkdown(escapeHtml(content)));
+  } else if (m.metadata && m.metadata.type === 'nest') {
+    let replacedUrl = false;
+    content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+      if (!replacedUrl && url === m.metadata.url) {
+        replacedUrl = true;
+        return '__NEST_PREVIEW__';
+      }
+      return url;
+    });
+    content = linkifyImages(parseMarkdown(escapeHtml(content)));
+    content = content.replace('__NEST_PREVIEW__', renderNestPreview(m.metadata));
   } else if (m.metadata && m.metadata.type === 'link') {
     let replacedUrl = false;
     content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {

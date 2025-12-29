@@ -38,6 +38,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/image-zoom.css?v=1">
+<link rel="stylesheet" href="css/nest-preview.css?v=4">
 </head>
 <body class="page-chat">
 <nav class="main-nav">
@@ -81,6 +82,6 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/main.js?v=8"></script>
+<script type="module" src="js/main.js?v=9"></script>
 </body>
 </html>

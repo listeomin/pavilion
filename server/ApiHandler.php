@@ -6,6 +6,7 @@ class ApiHandler {
     private MessageRepository $msgRepo;
     private GitHubService $githubService;
     private PinterestService $pinterestService;
+    private NestPreviewService $nestPreviewService;
     private LinkPreviewService $linkPreviewService;
     private ImageUploadService $imageService;
     private BroadcastService $broadcastService;
@@ -15,6 +16,7 @@ class ApiHandler {
         ?MessageRepository $msgRepo = null,
         ?GitHubService $githubService = null,
         ?PinterestService $pinterestService = null,
+        ?NestPreviewService $nestPreviewService = null,
         ?LinkPreviewService $linkPreviewService = null,
         ?ImageUploadService $imageService = null,
         ?BroadcastService $broadcastService = null
@@ -23,6 +25,7 @@ class ApiHandler {
         $this->msgRepo = $msgRepo ?? new MessageRepository();
         $this->githubService = $githubService ?? new GitHubService();
         $this->pinterestService = $pinterestService ?? new PinterestService();
+        $this->nestPreviewService = $nestPreviewService ?? new NestPreviewService();
         $this->linkPreviewService = $linkPreviewService ?? new LinkPreviewService();
         $this->imageService = $imageService ?? new ImageUploadService();
         $this->broadcastService = $broadcastService ?? new BroadcastService();
@@ -129,10 +132,13 @@ class ApiHandler {
             throw new RuntimeException('invalid session');
         }
 
-        // Priority: client metadata > Pinterest > GitHub > generic link preview
+        // Priority: client metadata > Pinterest > Nest > GitHub > generic link preview
         $metadata = $clientMetadata;
         if (!$metadata) {
             $metadata = $this->pinterestService->enrichMessage($text);
+        }
+        if (!$metadata) {
+            $metadata = $this->nestPreviewService->enrichMessage($text);
         }
         if (!$metadata) {
             $metadata = $this->githubService->enrichMessage($text);
@@ -210,10 +216,13 @@ class ApiHandler {
             throw new RuntimeException('invalid session');
         }
 
-        // Priority: client metadata > Pinterest > GitHub > generic link preview
+        // Priority: client metadata > Pinterest > Nest > GitHub > generic link preview
         $metadata = $clientMetadata;
         if (!$metadata) {
             $metadata = $this->pinterestService->enrichMessage($text);
+        }
+        if (!$metadata) {
+            $metadata = $this->nestPreviewService->enrichMessage($text);
         }
         if (!$metadata) {
             $metadata = $this->githubService->enrichMessage($text);
