@@ -1,0 +1,290 @@
+/* dm.css - Direct Messages styling */
+
+.page-dm {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.dm-container {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  margin-top: 60px; /* Space for nav */
+}
+
+/* Chat area (left side) */
+.dm-chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-nimbus);
+  background: var(--color-cloud-light);
+}
+
+.dm-chat-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-nimbus);
+  background: var(--color-cloud);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dm-recipient-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.dm-recipient-name {
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-night);
+}
+
+.dm-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Message bubbles */
+.dm-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dm-message.from-me {
+  align-self: flex-end;
+}
+
+.dm-message.from-them {
+  align-self: flex-start;
+}
+
+.dm-message-bubble {
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.dm-message.from-me .dm-message-bubble {
+  background: var(--color-iris);
+  color: var(--color-cloud-light);
+}
+
+.dm-message.from-them .dm-message-bubble {
+  background: var(--color-cloud);
+  color: var(--color-night);
+}
+
+.dm-message-time {
+  font-size: 11px;
+  color: var(--color-nimbus-dark);
+  margin-top: 4px;
+  padding: 0 8px;
+}
+
+.dm-message.from-me .dm-message-time {
+  text-align: right;
+}
+
+.dm-message.from-them .dm-message-time {
+  text-align: left;
+}
+
+/* Input area */
+.dm-input-wrapper {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-nimbus);
+  background: var(--color-cloud);
+}
+
+.dm-send-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.dm-input {
+  flex: 1;
+  min-height: 44px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px 16px;
+  border-radius: 22px;
+  background: var(--color-cloud-light);
+  border: 1px solid var(--color-nimbus);
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-night);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.dm-input:focus {
+  border-color: var(--color-iris);
+}
+
+.dm-input[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--color-nimbus-dark);
+  pointer-events: none;
+}
+
+.dm-send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-iris);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dm-send-btn:hover {
+  opacity: 0.9;
+}
+
+.dm-send-btn img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(1);
+}
+
+/* Users sidebar (right side) */
+.dm-users-sidebar {
+  width: 280px;
+  background: var(--color-cloud);
+  border-left: 1px solid var(--color-nimbus);
+  display: flex;
+  flex-direction: column;
+}
+
+.dm-users-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--color-nimbus);
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-night);
+}
+
+.dm-users-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.dm-user-item {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  border-bottom: 1px solid var(--color-nimbus);
+}
+
+.dm-user-item:hover {
+  background: var(--color-cloud-light);
+}
+
+.dm-user-item.active {
+  background: rgba(124, 119, 238, 0.1);
+  border-left: 3px solid var(--color-iris);
+}
+
+.dm-user-emoji {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.dm-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dm-user-name {
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-night);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-user-username {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  color: var(--color-nimbus-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Empty state */
+.dm-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+}
+
+.dm-empty-icon {
+  font-size: 64px;
+  opacity: 0.5;
+}
+
+.dm-empty-text {
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 16px;
+  color: var(--color-nimbus-dark);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dm-users-sidebar {
+    display: none;
+  }
+
+  .page-dm.has-chat .dm-users-sidebar {
+    display: none;
+  }
+
+  .dm-message {
+    max-width: 85%;
+  }
+}

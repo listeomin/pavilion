@@ -1,0 +1,222 @@
+// dm.js - Direct Messages frontend logic
+import { CONFIG } from './config.js?v=6';
+import * as NightShift from './nightshift.js?v=1';
+import { AnimalProfile } from './animalProfile.js?v=18';
+import { getCookie } from './api.js?v=7';
+
+(async function () {
+  const API = CONFIG.API_PATH;
+  const COOKIE_NAME = 'chat_session_id';
+  let sessionId = getCookie(COOKIE_NAME) || null;
+
+  // Initialize NightShift
+  NightShift.init();
+
+  // Get config from PHP
+  const dmConfig = window.DM_CONFIG || {};
+  console.log('[DM] Config:', dmConfig);
+
+  // Initialize Animal Profile
+  const animalProfile = new AnimalProfile(sessionId, '🐾', () => {});
+  await animalProfile.init();
+
+  // Show profile button
+  const profileBtn = document.getElementById('animal-profile-btn');
+  if (profileBtn) {
+    profileBtn.addEventListener('click', () => {
+      animalProfile.open();
+    });
+  }
+
+  // Load users list
+  const loadUsers = async () => {
+    try {
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_users`);
+      const data = await res.json();
+
+      if (data.success) {
+        renderUsersList(data.users);
+      }
+    } catch (e) {
+      console.error('[DM] Error loading users:', e);
+    }
+  };
+
+  // Render users list
+  const renderUsersList = (users) => {
+    const listEl = document.getElementById('dm-users-list');
+    if (!listEl) return;
+
+    listEl.innerHTML = users.map(user => `
+      <a href="${CONFIG.BASE_PATH}/messages/${user.username}"
+         class="dm-user-item ${user.username === dmConfig.recipientUsername ? 'active' : ''}">
+        <div class="dm-user-emoji">${user.emoji}</div>
+        <div class="dm-user-info">
+          <div class="dm-user-name">${escapeHtml(user.firstName)}</div>
+          <div class="dm-user-username">@${escapeHtml(user.username)}</div>
+        </div>
+      </a>
+    `).join('');
+  };
+
+  // Load messages for current chat
+  const loadMessages = async () => {
+    if (!dmConfig.recipientUserId) return;
+
+    try {
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
+      const data = await res.json();
+
+      if (data.success) {
+        renderMessages(data.messages);
+      }
+    } catch (e) {
+      console.error('[DM] Error loading messages:', e);
+    }
+  };
+
+  // Render messages
+  const renderMessages = (messages) => {
+    const container = document.getElementById('dm-messages');
+    if (!container) return;
+
+    container.innerHTML = messages.map(msg => {
+      const time = formatTime(msg.createdAt);
+      return `
+        <div class="dm-message ${msg.fromMe ? 'from-me' : 'from-them'}">
+          <div class="dm-message-bubble">${escapeHtml(msg.text)}</div>
+          <div class="dm-message-time">${time}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Scroll to bottom
+    container.scrollTop = container.scrollHeight;
+  };
+
+  // Send message
+  const sendForm = document.getElementById('dm-send-form');
+  const inputEl = document.getElementById('dm-input');
+  const sendBtn = document.getElementById('dm-send-btn');
+
+  if (sendForm && inputEl && sendBtn) {
+    sendForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const text = inputEl.textContent.trim();
+      if (!text || !dmConfig.recipientUserId) return;
+
+      // Disable input
+      inputEl.contentEditable = 'false';
+      sendBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            recipient_id: dmConfig.recipientUserId,
+            text: text
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Add message to UI
+          addMessage(data.message);
+          inputEl.textContent = '';
+        } else {
+          console.error('[DM] Send error:', data.error);
+          alert('Ошибка отправки сообщения');
+        }
+      } catch (e) {
+        console.error('[DM] Send error:', e);
+        alert('Ошибка отправки сообщения');
+      } finally {
+        inputEl.contentEditable = 'true';
+        sendBtn.disabled = false;
+        inputEl.focus();
+      }
+    });
+
+    // Enter to send (Shift+Enter for new line)
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendForm.dispatchEvent(new Event('submit'));
+      }
+    });
+  }
+
+  // Add message to UI
+  const addMessage = (msg) => {
+    const container = document.getElementById('dm-messages');
+    if (!container) return;
+
+    const time = formatTime(msg.createdAt);
+    const div = document.createElement('div');
+    div.className = `dm-message ${msg.fromMe ? 'from-me' : 'from-them'}`;
+    div.innerHTML = `
+      <div class="dm-message-bubble">${escapeHtml(msg.text)}</div>
+      <div class="dm-message-time">${time}</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  };
+
+  // Format time
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+
+    if (messageDate.getTime() === today.getTime()) {
+      return time;
+    } else if (messageDate.getTime() === today.getTime() - 86400000) {
+      return `вчера ${time}`;
+    } else {
+      const dateStr = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      return `${dateStr} ${time}`;
+    }
+  };
+
+  // Escape HTML
+  const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
+  // Initialize
+  await loadUsers();
+  if (dmConfig.recipientUserId) {
+    await loadMessages();
+    if (inputEl) inputEl.focus();
+  }
+
+  // Poll for new messages every 3 seconds
+  if (dmConfig.recipientUserId) {
+    setInterval(async () => {
+      try {
+        const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
+        const data = await res.json();
+
+        if (data.success) {
+          const container = document.getElementById('dm-messages');
+          const currentCount = container.querySelectorAll('.dm-message').length;
+
+          if (data.messages.length > currentCount) {
+            // New messages - render all
+            renderMessages(data.messages);
+          }
+        }
+      } catch (e) {
+        console.error('[DM] Poll error:', e);
+      }
+    }, 3000);
+  }
+})();
