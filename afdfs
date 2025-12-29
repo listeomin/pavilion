@@ -1,0 +1,847 @@
+[33mcommit 6596b208924ec6d8814236dd22900d7e687b9480[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 24 19:08:06 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 24 19:08:06 2025 +0300
+
+    Добавили заглушки страниц
+
+[33mcommit f87684fb983f49aa51c480223c02391ce99bbe76[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 24 17:25:48 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 24 17:25:48 2025 +0300
+
+    Добавили Навигацию
+
+[33mcommit 282e9df1c7073276df02135bf0385f93372fd9dc[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 24 17:02:33 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 24 17:02:33 2025 +0300
+
+    Изменили вывод сообщения после ребейс
+
+[33mcommit a906bc24a9b363526a1c92e40445ad66975e3549[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 24 16:40:20 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 24 16:40:20 2025 +0300
+
+    Пофиксили отправку системных сообщений
+
+[33mcommit c637f09b48b5a169aa52f6f032622ded1d25d348[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 24 16:14:59 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 24 16:14:59 2025 +0300
+
+    Пофиксили отправку сообщений после /rebase
+
+[33mcommit e86ff0a093fbe5d43591c923d0ac135bb735c43c[m
+Merge: e718f52 6d59a85
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Mon Dec 22 11:24:48 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Mon Dec 22 11:24:48 2025 +0300
+
+    Merge remote main into local mainMerge branch 'main' of https://github.com/listeomin/pavilion
+
+[33mcommit e718f525c3a45f78cbca65043d8423b3c02b08c5[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Mon Dec 22 11:20:51 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Mon Dec 22 11:20:51 2025 +0300
+
+    Фикшу баги
+
+[33mcommit 6d59a8509aeadc9ddf645f2b0935b639732c5513[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Mon Dec 22 11:18:30 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon Dec 22 11:18:30 2025 +0300
+
+    Delete .github/workflows/eslint.yml
+
+[33mcommit 68e3d2e0669cbbabf71dc5cba78793f4662c0b09[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Mon Dec 22 10:42:26 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Mon Dec 22 10:42:26 2025 +0300
+
+    Навожу красоту
+
+[33mcommit 9e4af6d8afb70229227a14aa962ae403cc476f48[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Mon Dec 22 10:38:33 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Mon Dec 22 10:38:33 2025 +0300
+
+    Fix .gitignore for local folder #ведро
+
+[33mcommit 85f602fbb75da28c3b797a91f0e37013282d826a[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 23:55:19 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Sun Dec 21 23:55:19 2025 +0300
+
+    Create ci.yml
+
+[33mcommit d8afb1f6fd4462511ff78a60d2642446af1782e6[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 21:15:09 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Sun Dec 21 21:15:09 2025 +0300
+
+    Create eslint.yml
+
+[33mcommit 3316688245b39c55b78f48064986a1d38e4c2b0e[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 05:04:02 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 05:04:02 2025 +0300
+
+    Remove node_modules, vendor, .phpunit.cache and #ведро from repository
+    
+    Added these directories to .gitignore and removed them from tracking.
+    These dependency and cache directories should not be in version control.
+    
+    🤖 Generated with [Claude Code](https://claude.com/claude-code)
+    
+    Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+
+[33mcommit ae8e4a280885d9949f5569f2fe25b5aea5d33e6b[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 05:01:13 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 05:01:13 2025 +0300
+
+    Remove venv/ directory from repository and update .gitignore
+    
+    Removed Python virtual environment files that were accidentally committed.
+    These files are now properly ignored via .gitignore.
+    
+    🤖 Generated with [Claude Code](https://claude.com/claude-code)
+    
+    Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+
+[33mcommit e160af967713aea2263abb7bbe51bf7df00ee79c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 04:40:24 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 04:40:24 2025 +0300
+
+    cleanup: remove ignored files from repository
+
+[33mcommit e6627261b034eedf6222aef2dfe8a1253bdc5b39[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 04:39:56 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 04:39:56 2025 +0300
+
+    fix: make .gitignore actually work
+
+[33mcommit aadc4ff3b1d0096025318313d93a31b3e915d054[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 04:36:57 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 04:36:57 2025 +0300
+
+    cleanup: remove ignored files from repository
+
+[33mcommit aeb5900b60362b6495b0635ca4cd39d26495e184[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 00:33:09 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 00:33:09 2025 +0000
+
+    Исправили авторизацию Телеграм
+
+[33mcommit b2065125428722097599b8b55cfb6edfa9f9b5cd[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 21 02:45:30 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 21 02:45:30 2025 +0300
+
+    Добавлена авторизация через Telegram бота
+    
+    - Реализован API endpoint для Telegram авторизации (public/api/telegram_auth.php)
+    - Добавлен клиентский модуль telegramAuth.js с виджетом входа
+    - Написаны тесты для Telegram авторизации (17 тестов)
+    - Исправлены WebSocket тесты (добавлены константы OPEN/CLOSED/etc)
+    - Добавлена миграция БД для Telegram полей (telegram_id, telegram_username, is_owner)
+    - Создана документация по быстрому старту и настройке
+    - Перенесены тесты в папку tester/, удалены старые тестовые скрипты
+    - Обновлен .gitignore для исключения .env и других временных файлов
+    
+    Все тесты проходят: 138 passed (13 файлов)
+    
+    🤖 Generated with [Claude Code](https://claude.com/claude-code)
+    
+    Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+
+[33mcommit 57afa031bf5e25426ac06986e7b88d238250db9a[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 20 10:04:26 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 20 10:04:26 2025 +0300
+
+    Посмотрим что на этот раз
+
+[33mcommit 2cbb2cf6efdd858b5c9065564f4e2471190bca58[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 20 09:44:36 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 20 09:44:36 2025 +0300
+
+    Фиксы
+
+[33mcommit 1644ae85081a080ba54c5e43a85fe79d85a8ca70[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 20 09:33:53 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 20 09:33:53 2025 +0300
+
+    Добавили команду на ребейс
+
+[33mcommit 4b2592dccd59c6d4870ffcddf27179dee3b671da[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 20 08:53:19 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 20 08:53:19 2025 +0300
+
+    1724b17 стабильная версия
+
+[33mcommit 1724b171b56125a654ee0ddc12fb2dcbf9adf41c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 20:12:51 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 20:12:51 2025 +0300
+
+    Пофиксили код с отображением GIF
+
+[33mcommit e5c432ce5a12fce001043d1b9997172729fe1ff1[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 20:08:18 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 20:08:18 2025 +0300
+
+    Пофиксили код с отображением GIF
+
+[33mcommit 9b267143c5d8aa417bdf3401df0f40733eaf3f52[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 19:40:57 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 19:41:26 2025 +0300
+
+    Пофиксили код с отображением GIF
+
+[33mcommit 463cb2eaae77dc71d051aa63e5b47a92a7d38eb9[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 16:36:12 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 16:36:12 2025 +0000
+
+    фикс конфига js
+
+[33mcommit c01ee0691a0ce8ab4df437e6b11217fb76cc5f22[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 19:32:08 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 19:32:08 2025 +0300
+
+    Пофиксили код с отображением GIF
+
+[33mcommit ef65eaa889ec4a53ad2b0275199acc3c1e7f3a44[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 16:11:36 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 16:11:36 2025 +0000
+
+    фикс конфига js
+
+[33mcommit d26012760deac3123d0c906c3d0c09ff28d479f7[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 18:37:09 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 18:37:09 2025 +0300
+
+    Фиксы перехода на WS
+
+[33mcommit 7451de47d555bca0d4cb915d55f95561938a730c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 14:12:42 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 14:12:42 2025 +0300
+
+    что-то новое
+
+[33mcommit ea7b8c79df00355872a9eb886e4c2efa04526c58[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 08:33:51 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 08:33:51 2025 +0300
+
+    Прошли тесты
+
+[33mcommit 3f94be2d431cce9125ac53b1d5f6914f65430121[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 19 07:15:32 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 19 07:15:32 2025 +0300
+
+    Добавили описание функционала и тестов
+
+[33mcommit 5cdec78a30776bb85323f7395c7446b697483ef6[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 22:29:20 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 22:29:20 2025 +0300
+
+    Фиксы путей v2
+
+[33mcommit 512c95e9e3ff0d2c96a9df4b762dfae041b6693b[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 22:20:49 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 22:20:49 2025 +0300
+
+    Обновления видов + фиксы путей для теста на сервере
+
+[33mcommit 8d086dea9b04db1a19db505c72560f98e4cc2065[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 20:20:31 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 20:20:31 2025 +0300
+
+    Фиксы путей
+
+[33mcommit 8d6b81e196215fae3d0f168797d1530972f4e140[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 20:01:55 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 20:01:55 2025 +0300
+
+    Стабильная версия Редактирование сообщений
+
+[33mcommit c7e02d2e05c47cc4b4254eed0e8ea86c1a81be27[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 19:31:46 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 19:31:46 2025 +0300
+
+    Стабильная работа цитат
+
+[33mcommit 338eb5cd708a9800ffceff93556f98f32972f206[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 18:34:09 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 18:34:09 2025 +0300
+
+    Стабильная версия. Все работает
+
+[33mcommit 1e4d22cd2e4b7c9f18d4df303c67fddb86da5f9b[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 11:38:50 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 11:38:50 2025 +0000
+
+    Исправил ппути, сделал их относительными
+
+[33mcommit bba6b16f723ad8869d11957f8773f0647c694f1e[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 13:58:25 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 13:58:25 2025 +0300
+
+    Стабильная верся Звериного профиля
+
+[33mcommit 16662ac22018f42fa9087d6ca05a7c2ca7a8bfba[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 13:30:15 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 13:30:15 2025 +0300
+
+    Звериный профиль Часть 3
+
+[33mcommit 6ec83273d01aed7dfbcabd93a1d4eca9982f0496[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 12:13:11 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 12:13:11 2025 +0300
+
+    Стабильная работа
+
+[33mcommit 0d3323cceb8405976a1eacaabfffd567caf62001[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 11:01:18 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 11:01:18 2025 +0300
+
+    Звериный профиль Часть 1 готово. Главное ничего не сломали, продолжаем работать
+
+[33mcommit 0c4aa5d37f18f882a33b537074ceb57290ac42a3[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 10:07:25 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 10:07:25 2025 +0300
+
+    Начинаем кодить Звериный профиль
+
+[33mcommit e7c5e384b15ae832f2ec5f1d99f98028534d20e4[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 03:29:04 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 03:32:40 2025 +0000
+
+    Add venv to gitignore
+
+[33mcommit 118c25fe84eebed83b4f8030ab27703ed6e5095c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 05:39:16 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 05:39:16 2025 +0300
+
+    Обновили ридми
+
+[33mcommit 1d0294068a8480498bccfe80cbe221265a55cafc[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 05:35:11 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 05:35:11 2025 +0300
+
+    Пофиксили перенос строк
+
+[33mcommit ef6e2c894ee9969aed306f76a0accb4bd88416f1[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 05:08:56 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 05:08:56 2025 +0300
+
+    Функционал добавляения картинок из буфера полностью работает
+
+[33mcommit da36f03cde190d1537fa884bc9069a792a29e3d4[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 05:04:41 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 05:04:41 2025 +0300
+
+    Добавили вставка картинки из буфера. В строке ввода работает тег. Ошибок нет. Но картинка в чате пока не показывается
+
+[33mcommit cce0ff61f8b46cbc088d2df49515e5887e398e41[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 04:53:15 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 04:53:15 2025 +0300
+
+    Добавили капитанскую рубку
+
+[33mcommit d3c6632d32c8c95cbc2b1c6ffa12b4c532fd26ea[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 03:55:10 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 03:55:10 2025 +0300
+
+    Добавили склеивание сообщений. Сделали возможным абзацы внутри сообщения
+
+[33mcommit 392eeeb78dd0624f6f1c1dc510c2959358efd619[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 03:32:22 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 03:32:22 2025 +0300
+
+    Сделали ссылки кликабельными. Добавили превью заголовка. Теперь можно писать сообщения в формате: текст+ссылка+текст. Так же исправили дублирование сообщений.
+
+[33mcommit f79bd5dc3b283411fa75faf72c542d69d0c0c0a9[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 03:24:10 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 03:24:10 2025 +0300
+
+    Сделали ссылки кликабельными
+
+[33mcommit cb84d2b0549531d73f27a9ba82410a7dd951855d[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Thu Dec 18 02:57:50 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Thu Dec 18 02:57:50 2025 +0300
+
+    Починили локальный сервер.
+
+[33mcommit bb8c0b69cd8c3dfc18afa3b80550a44c653645cd[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 14 02:12:49 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 14 02:12:49 2025 +0000
+
+    Добавили ytmusicapi
+
+[33mcommit 131dad308422cea57ee046f32c38b77a31e57889[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sun Dec 14 01:20:53 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sun Dec 14 01:20:53 2025 +0000
+
+    Мелкие правки CSS
+
+[33mcommit 81669b70a4e9b9965a04b0430c3ef7505f2687d0[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 16:23:36 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 16:23:36 2025 +0300
+
+    feat: полностью рабочий аудиоплеер с перемоткой и скачиванием
+    
+    - Play/Pause с SVG иконками (play.svg, pause.svg)
+    - Прогресс-бар с drag&drop перемоткой
+    - Обратный отсчёт времени: -04:19 при воспроизведении, 04:19 на паузе
+    - Цветовые индикаторы: Nimbus Medium на паузе → Iris при воспроизведении
+    - Кнопка hover: Wisteria → Iris
+    - Кнопка "Скачать" появляется при hover внизу справа
+    - Фиксированная высота 60px, iOS-скругление 16px
+    - Одновременное воспроизведение только одного трека
+    - Обновлён README с полной документацией плеера
+    
+    Технические детали:
+    - AudioPlayer class с drag handling
+    - AudioPlayerManager для управления множественными плеерами
+    - Inline SVG иконки в music.js
+    - overflow: hidden для маскировки прогресс-бара
+    - gap: 1px между исполнителем и треком
+
+[33mcommit c0f0315ca956d45cdf7373f0b001c458b21ae890[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 15:21:44 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 15:21:44 2025 +0300
+
+    feat: implement basic audio player functionality
+    
+    - Add AudioPlayer class with play/pause controls
+    - Create audio-player.css with player layout (360px width)
+    - Implement audio file mapping for test tracks
+    - Fix router.php to handle .mp3 files with spaces (urldecode)
+    - Add play button (32x32px, positioned outside player)
+    - Implement single active player management
+    - Add progress bar with time display
+    - Include 3 test tracks in assets/
+    
+    Working: music plays on button click, basic controls functional
+    TODO: SVG icons, full button visibility, progress bar interaction
+
+[33mcommit 8ff58210cdf5f612f0b3ffcaaed33a2a73013634[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 13:15:16 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 13:15:16 2025 +0300
+
+    Исправили пути в inline-input.js
+
+[33mcommit 7db5f3cdd1bcf96fce3fdcca2c2d5e06059d3ed2[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 11:01:38 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Sat Dec 13 11:01:38 2025 +0300
+
+    Delete ._.DS_Store
+
+[33mcommit 1a985b3c882434fface8e38a363ec1c84341ce2f[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 10:54:06 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 10:54:06 2025 +0300
+
+    Add NightShift mode with warm color overlay
+
+[33mcommit 01d77efe48484bd4c1a5f0c086768ca4e6102a03[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 10:28:27 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 10:28:27 2025 +0300
+
+    Add user name change on emoji click with fade animation
+
+[33mcommit c4d2641a38bb6d64d0fe6fd16fed3b2fbc814aae[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 09:23:43 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 09:23:43 2025 +0300
+
+    Add user header with emoji and label above title
+
+[33mcommit af15d012df0df6244d6206d151665617c6ef9c53[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 08:31:13 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 08:31:13 2025 +0300
+
+    Add track preview overlay with cyclic scrolling
+    
+    - New track-preview.js module shows 3 tracks before/after current
+    - Cyclic navigation through all tracks with mouse wheel
+    - Color gradient: nimbus-light → nimbus-dark → olive (current)
+    - Precise alignment: tracks positioned at green text location
+    - +4px horizontal, +16px vertical offset corrections
+    - Auto-hide on mouseout from cmd-suggestion span
+
+[33mcommit f70870d6b5ee172211f31d057ea56e9fcb50219c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 05:46:16 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 05:46:16 2025 +0300
+
+    Add wheel scroll navigation for inline music autocomplete
+
+[33mcommit edd368c69bf8ebbdb78b8cc8f21e044a99f237cd[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 04:52:48 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 04:52:48 2025 +0300
+
+    Fix: Send button visibility in command mode
+
+[33mcommit 6b2847d03ee0c263fca74f350e341a61745d4c03[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 04:20:21 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 04:20:21 2025 +0300
+
+    Add send button visibility logic: hide for commands until query present, purple for complete tracks
+
+[33mcommit e5ab2c8c22a6594bacd1f90bc7543a044a105bc0[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 03:58:44 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 03:58:44 2025 +0300
+
+    Complete inline music command: artist & track autocomplete with proper cursor logic
+
+[33mcommit 51535e52c475164ba232923b34096344f4842be1[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 03:10:03 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 03:10:03 2025 +0300
+
+    Complete inline command input: typing, hints, arrow-up autocomplete
+
+[33mcommit 96fc3af0fdc6f7e47b1f293c7727cfb069d34629[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Sat Dec 13 02:35:10 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Sat Dec 13 02:35:10 2025 +0300
+
+    Add inline command input: base structure, music autocomplete, mode switching
+
+[33mcommit 28ebe12edbd76c93cd55fd1edba4085790bf0d6b[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 07:00:16 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 07:00:16 2025 +0000
+
+    Добавили превью проектов Github
+
+[33mcommit 2e12ea8812647c9e523d7d07cc3251a2eeef12d5[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 06:06:05 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 06:06:05 2025 +0000
+
+    Refactor: split monolithic code into modular structure
+
+[33mcommit c67e425e646652e829f9ea9ee6633e57c3ab7166[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 05:15:05 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 05:15:05 2025 +0000
+
+    Add undo/redo and improve format menu
+
+[33mcommit c244598bc22a11aeba5698bdfe1ae8312c2202b4[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 03:32:42 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 04:53:37 2025 +0000
+
+    chore: ignore php-error.log
+
+[33mcommit 60f97482309a75fdd926a1538d11412a79fa9b6b[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 07:50:24 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 07:50:24 2025 +0300
+
+    Add markdown formatting with live preview and hotkeys
+
+[33mcommit 15690fb1a67e348b3faafe9fd0f03ecc9a2a5d6f[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 07:46:56 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 07:46:56 2025 +0300
+
+    Add markdown formatting with live preview and hotkeys
+
+[33mcommit dcb2d0921e050edd2e4be1d8e048b06102b7f211[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 07:08:10 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 07:08:10 2025 +0300
+
+    Fixed chat container scroll: header and input form now stay fixed
+
+[33mcommit abe18dd5253ee549033a263c3daa53e93d9956ca[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Fri Dec 12 06:31:06 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Fri Dec 12 06:31:06 2025 +0300
+
+    Fixed chat container scroll: header and input form now stay fixed
+
+[33mcommit 2978d86fcdf8537b1730eaece4d3050ad0e7e129[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 21:26:11 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 21:26:11 2025 +0300
+
+    feat: добавлено автоматическое превью изображений
+
+[33mcommit b4d5fe26b3d8c3a18bc38a99fe067b84d326c146[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 21:09:35 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 21:16:11 2025 +0300
+
+    chore: удалены .DS_Store и chat.sqlite из репозитория
+
+[33mcommit 2f5aa8fceb0686a3d4299fd077173396a38d46dc[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 21:04:37 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 21:14:47 2025 +0300
+
+    feat: добавлено автоматическое превью изображений в чате
+
+[33mcommit 38f2f690fdf0a970dec88e2c0ea45b716f573162[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 20:04:50 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 20:04:50 2025 +0300
+
+    Enhance chat with automatic image link rendering
+    
+    Added support for automatic image display from direct links in the chat application.
+
+[33mcommit d87639be7aef389d63afedce30370b00a5f3b742[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 20:03:45 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 20:03:45 2025 +0300
+
+    Delete public/.DS_Store
+
+[33mcommit 9c6d92547950e696a8e8d9881d37566a899c26e0[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 18:37:17 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 18:37:17 2025 +0300
+
+    Update README.md
+
+[33mcommit 34dc9fdc32ac2f95168a2d5762ce4025264d6a0c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 18:07:58 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 18:07:58 2025 +0300
+
+    Update README.md
+
+[33mcommit 298fa0383e3ce4891f38b24f2b399d828fe2e1d2[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 17:57:32 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 17:57:32 2025 +0300
+
+    docs: обновил README с актуальной документацией
+
+[33mcommit 1e1e0a20a845c14825fae03919c88dd6dbfddb45[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 17:54:49 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 17:54:49 2025 +0300
+
+    chore: игнорируем FETCH_HEAD
+
+[33mcommit 222d5123b0eb78293db8e3dbcfefcbac72c444ef[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 17:54:12 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 17:54:12 2025 +0300
+
+    chore: добавил .gitignore
+
+[33mcommit e782bcc8cce7fbd41a81cdece23f8c78885af32b[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 17:48:49 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 17:48:49 2025 +0300
+
+    feat: минималистичный анонимный чат
+    
+    - Рандомные имена с эмодзи из user_names.json
+    - Чистый дизайн: Georgia 18px, без рамок и скроллбаров
+    - Градиент сверху для растворения текста при скролле
+    - Плавное появление сообщений (fade-in animation)
+    - Динамическая кнопка [отправить] (появляется при вводе)
+    - Роутер для PHP dev server (router.php)
+    - Конфигурация путей для localhost и production
+    - Тестовый диалог команды разработчиков в seed_messages.php
+    - Адаптивная вертикальная компоновка с flex
+
+[33mcommit a57b77ca00cb935dea9f5107185820298987d046[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 14:12:21 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 14:12:21 2025 +0300
+
+    Rename uzver.json to user_names.json
+
+[33mcommit 70b83d75264a7722329a9d1defd89a6dcee639d5[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 14:07:09 2025 +0300
+Commit:     Teo <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 14:07:09 2025 +0300
+
+    Add users.json
+
+[33mcommit 683fb7ce92331b326d9c402c621a7d6452d347d2[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 12:03:31 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 12:03:31 2025 +0300
+
+    Update README.md
+
+[33mcommit 79d909e380db0d05049b06057c78027efe0d1d33[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 11:20:02 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 11:20:02 2025 +0300
+
+    Revise project structure in README.md
+    
+    Updated project structure in README.md with detailed descriptions for each directory and file.
+
+[33mcommit b9a6c22f881b927fdb0e863db62388efd623ed9c[m
+Author:     Teo <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 11:16:11 2025 +0300
+Commit:     GitHub <noreply@github.com>
+CommitDate: Wed Dec 10 11:16:11 2025 +0300
+
+    Update README.md
+
+[33mcommit aa5f414e7d2140d4ec45afb8faefea7947459a5b[m
+Author:     listeomin <214712079+listeomin@users.noreply.github.com>
+AuthorDate: Wed Dec 10 08:09:16 2025 +0000
+Commit:     listeomin <214712079+listeomin@users.noreply.github.com>
+CommitDate: Wed Dec 10 08:09:16 2025 +0000
+
+    Initial commit: pavilion chat full restructure

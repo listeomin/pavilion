@@ -366,6 +366,33 @@ function alignUserHeader() {
           delimiter: Delimiter,
           inlineCode: {
             class: InlineCode
+          },
+          image: {
+            class: window.ImageTool,
+            config: {
+              endpoints: {
+                byFile: CONFIG.BASE_PATH + '/api/upload_image.php'
+              },
+              field: 'image',
+              types: 'image/*',
+              captionPlaceholder: '',
+              buttonContent: 'Выберите файл',
+              uploader: {
+                uploadByFile: async (file) => {
+                  const formData = new FormData();
+                  formData.append('image', file);
+
+                  const response = await fetch(CONFIG.BASE_PATH + '/api/upload_image.php', {
+                    method: 'POST',
+                    body: formData
+                  });
+
+                  const result = await response.json();
+                  return result;
+                }
+              },
+              actions: []
+            }
           }
         },
         onChange: async () => {

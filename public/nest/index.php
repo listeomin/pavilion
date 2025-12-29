@@ -165,7 +165,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=4">
+<link rel="stylesheet" href="css/base.css?v=6">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
@@ -178,9 +178,9 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=2">
+<link rel="stylesheet" href="css/navigation.css?v=3">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=13">
+<link rel="stylesheet" href="css/nest.css?v=15">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 </head>
@@ -254,6 +254,7 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.5.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.3.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@1.4.0/dist/bundle.js"></script>
-<script type="module" src="js/nest.js?v=10"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
+<script type="module" src="js/nest.js?v=12"></script>
 </body>
 </html>

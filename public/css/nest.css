@@ -246,3 +246,13 @@ h3.ce-header {
 .cdx-quote__text a:hover {
   border-bottom-color: var(--color-iris);
 }
+
+/* Hide image caption */
+.cdx-input.image-tool__caption {
+  display: none !important;
+}
+
+/* Adjust toolbar actions position */
+.ce-toolbar__actions {
+  right: 103% !important;
+}

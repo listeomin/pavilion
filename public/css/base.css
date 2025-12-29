@@ -2,8 +2,8 @@ body {
   font-family: Georgia, serif;
   margin: 0;
   padding: 0;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-y: auto;
   background: #fff;
 }
 
@@ -11,8 +11,8 @@ body {
   margin: 0 auto;
   width: 100%;
   max-width: 720px;
-  height: 100vh;
-  padding: 120px 16px 64px;
+  min-height: 100vh;
+  padding: 40px 16px 64px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
