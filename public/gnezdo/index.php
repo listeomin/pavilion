@@ -27,7 +27,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/colors.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
-<link rel="stylesheet" href="css/navigation.css?v=4">
+<link rel="stylesheet" href="css/navigation.css?v=6">
 </head>
 <body>
 <nav class="main-nav">

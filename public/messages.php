@@ -36,7 +36,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=4">
+<link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
