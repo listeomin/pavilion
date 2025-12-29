@@ -90,11 +90,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
            data-username="${user.username}"
            data-first-name="${escapeHtml(user.firstName)}"
            data-emoji="${user.emoji}">
-        <div class="dm-user-emoji">${user.emoji}</div>
-        <div class="dm-user-info">
-          <div class="dm-user-name">${escapeHtml(user.firstName)}</div>
-          <div class="dm-user-username">@${escapeHtml(user.username)}</div>
-        </div>
+        ${user.emoji} ${escapeHtml(user.firstName)}
       </div>
     `).join('');
 

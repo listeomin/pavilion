@@ -216,6 +216,6 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/dm.js?v=3"></script>
+<script type="module" src="js/dm.js?v=4"></script>
 </body>
 </html>

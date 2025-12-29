@@ -4,6 +4,7 @@
 body.page-dm {
   height: 100vh;
   overflow: hidden;
+  background: var(--color-cloud-medium);
 }
 
 body.page-dm .wrap {
@@ -185,25 +186,21 @@ body.page-dm .wrap {
 /* Users sidebar (right side) - fixed position */
 .dm-users-sidebar {
   position: fixed;
-  top: calc(40px + 60px); /* nav height + margin */
-  right: 40px;
-  bottom: 40px;
+  top: calc(120px + 48px + 48px + 24px); /* Same as chat container/empty-state */
+  left: calc(80px + 640px + 16px); /* chat container left + max-width + gap */
+  bottom: 0;
   width: 280px;
-  background: var(--color-cloud);
-  border: 1px solid var(--color-nimbus);
-  border-radius: 8px;
-  box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.1);
+  background: transparent;
   display: flex;
   flex-direction: column;
 }
 
 .dm-users-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--color-nimbus);
+  padding: 0 8px 12px 8px;
   font-family: 'Ubuntu Sans', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-night);
+  color: var(--color-nimbus-dark);
 }
 
 .dm-users-list {
@@ -212,53 +209,29 @@ body.page-dm .wrap {
 }
 
 .dm-user-item {
-  padding: 16px 20px;
+  margin: 8px;
+  padding: 0 16px 0 12px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+  background: var(--color-cloud-light);
   cursor: pointer;
-  transition: background 0.2s ease;
-  border-bottom: 1px solid var(--color-nimbus);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
   user-select: none;
+  font-weight: normal;
 }
 
 .dm-user-item:hover {
-  background: var(--color-cloud-light);
+  border-color: var(--color-nimbus-light);
 }
 
 .dm-user-item.active {
-  background: rgba(124, 119, 238, 0.1);
-  border-left: 3px solid var(--color-iris);
-}
-
-.dm-user-emoji {
-  font-size: 28px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.dm-user-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.dm-user-name {
-  font-family: 'Ubuntu Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--color-night);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dm-user-username {
-  font-family: 'Ubuntu Mono', monospace;
-  font-size: 13px;
-  color: var(--color-nimbus-dark);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-color: var(--color-olive);
 }
 
 /* Empty state text override for DM page */
