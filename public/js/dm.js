@@ -12,6 +12,12 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
 
+  // Resident (AI agent) user IDs
+  const RESIDENT_USER_IDS = [5]; // owl_ai
+
+  // Helper function to check if user is a resident
+  const isResident = (userId) => RESIDENT_USER_IDS.includes(parseInt(userId));
+
   // Initialize NightShift
   NightShift.init();
 
@@ -194,11 +200,19 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     const container = document.getElementById('dm-messages');
     if (!container) return;
 
+    // Remove typing indicator if exists
+    const typingIndicator = container.querySelector('.typing-indicator');
+    if (typingIndicator) {
+      typingIndicator.remove();
+    }
+
     container.innerHTML = messages.map(msg => {
       const time = formatTime(msg.createdAt);
       const content = renderMessageContent(msg.text, msg.metadata);
+      const isFromResident = !msg.fromMe && isResident(msg.fromUserId);
+      const messageClass = msg.fromMe ? 'from-me' : (isFromResident ? 'from-resident' : 'from-them');
       return `
-        <div class="dm-message ${msg.fromMe ? 'from-me' : 'from-them'}">
+        <div class="dm-message ${messageClass}">
           <div class="dm-message-bubble">${content}</div>
           <div class="dm-message-time">${time}</div>
         </div>
@@ -269,6 +283,15 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
       if (!text && images.length === 0) return;
       if (!dmConfig.recipientUserId) return;
 
+      // Check if sending to a resident
+      const sendingToResident = isResident(dmConfig.recipientUserId);
+
+      // If sending to resident, clear input and show typing indicator immediately
+      if (sendingToResident) {
+        inputEl.innerHTML = '';
+        showTypingIndicator();
+      }
+
       // Disable input
       inputEl.contentEditable = 'false';
       sendBtn.disabled = true;
@@ -298,14 +321,22 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
         if (data.success) {
           // Add message to UI
           addMessage(data.message);
-          inputEl.innerHTML = '';
+          if (!sendingToResident) {
+            inputEl.innerHTML = '';
+          }
         } else {
           console.error('[DM] Send error:', data.error);
           alert('Ошибка отправки сообщения');
+          if (sendingToResident) {
+            removeTypingIndicator();
+          }
         }
       } catch (e) {
         console.error('[DM] Send error:', e);
         alert('Ошибка отправки сообщения');
+        if (sendingToResident) {
+          removeTypingIndicator();
+        }
       } finally {
         inputEl.contentEditable = 'true';
         sendBtn.disabled = false;
@@ -327,6 +358,35 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     attachSendHandler();
   }
 
+  // Show typing indicator
+  const showTypingIndicator = () => {
+    const container = document.getElementById('dm-messages');
+    if (!container) return;
+
+    // Remove existing typing indicator if any
+    const existing = container.querySelector('.typing-indicator');
+    if (existing) return;
+
+    const div = document.createElement('div');
+    div.className = 'dm-message typing-indicator';
+    div.innerHTML = `
+      <div class="dm-message-bubble">Печатает...</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  };
+
+  // Remove typing indicator
+  const removeTypingIndicator = () => {
+    const container = document.getElementById('dm-messages');
+    if (!container) return;
+
+    const indicator = container.querySelector('.typing-indicator');
+    if (indicator) {
+      indicator.remove();
+    }
+  };
+
   // Add message to UI
   const addMessage = (msg) => {
     const container = document.getElementById('dm-messages');
@@ -334,8 +394,10 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
     const time = formatTime(msg.createdAt);
     const content = renderMessageContent(msg.text, msg.metadata);
+    const isFromResident = !msg.fromMe && isResident(msg.fromUserId);
+    const messageClass = msg.fromMe ? 'from-me' : (isFromResident ? 'from-resident' : 'from-them');
     const div = document.createElement('div');
-    div.className = `dm-message ${msg.fromMe ? 'from-me' : 'from-them'}`;
+    div.className = `dm-message ${messageClass}`;
     div.innerHTML = `
       <div class="dm-message-bubble">${content}</div>
       <div class="dm-message-time">${time}</div>
@@ -455,10 +517,11 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
         if (data.success) {
           const container = document.getElementById('dm-messages');
-          const currentCount = container.querySelectorAll('.dm-message').length;
+          // Exclude typing indicator from count
+          const currentCount = container.querySelectorAll('.dm-message:not(.typing-indicator)').length;
 
           if (data.messages.length > currentCount) {
-            // New messages - render all
+            // New messages - render all (this will also remove typing indicator)
             renderMessages(data.messages);
           }
         }

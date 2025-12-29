@@ -101,6 +101,23 @@ body.page-dm .wrap {
   color: var(--color-night);
 }
 
+/* Messages from residents (AI agents) */
+.dm-message.from-resident .dm-message-bubble {
+  background: rgba(189, 188, 228, 0.3); /* wisteria with 30% opacity */
+  color: var(--color-night);
+}
+
+/* Typing indicator */
+.dm-message.typing-indicator {
+  align-self: flex-start;
+}
+
+.dm-message.typing-indicator .dm-message-bubble {
+  background: rgba(189, 188, 228, 0.3);
+  color: var(--color-nimbus-dark);
+  font-style: italic;
+}
+
 .dm-message-time {
   display: none;
 }
