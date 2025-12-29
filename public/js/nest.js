@@ -9,6 +9,15 @@ import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=2';
 import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
+// Remove no-js class immediately (JavaScript is available)
+document.body.classList.remove('no-js');
+
+// Hide static content (for SEO/Instant View only)
+const staticContent = document.getElementById('nest-static-content');
+if (staticContent) {
+  staticContent.style.display = 'none';
+}
+
 // Function to hide skeleton loading screen
 function hideSkeleton() {
   const skeletonContainer = document.getElementById('skeleton-content');
@@ -546,6 +555,23 @@ function alignUserHeader() {
     };
 
     // Load content from server
+    // Fix image paths for murmuration.monster domain
+    const fixImagePaths = (editorData) => {
+      if (!editorData || !editorData.blocks) return editorData;
+
+      // Only fix paths on murmuration.monster (BASE_PATH is empty)
+      if (CONFIG.BASE_PATH !== '') return editorData;
+
+      editorData.blocks.forEach(block => {
+        if (block.type === 'image' && block.data && block.data.file && block.data.file.url) {
+          // Remove /pavilion prefix from image URLs
+          block.data.file.url = block.data.file.url.replace(/^\/pavilion\//, '/');
+        }
+      });
+
+      return editorData;
+    };
+
     const loadContent = async () => {
       try {
         const url = nestConfig.urlUsername
@@ -564,6 +590,9 @@ function alignUserHeader() {
             editorData = convertQuillToEditorJS(result.content);
             console.log('[Nest] Converted Quill → Editor.js:', editorData);
           }
+
+          // Fix image paths for murmuration.monster
+          editorData = fixImagePaths(editorData);
 
           await initEditor(editorData);
         } else {

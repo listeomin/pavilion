@@ -1,5 +1,23 @@
 /* nest.css - стили для страницы Гнездо */
 
+/* Static content for SEO/Instant View - hidden by default, shown for bots */
+.nest-static-content {
+  display: none;
+}
+
+/* Show static content for bots (no JavaScript) */
+.no-js .nest-static-content {
+  display: block;
+  max-width: 980px;
+  margin: 20px 0;
+}
+
+/* Hide editor and skeleton for bots */
+.no-js #nest-editor-container,
+.no-js #skeleton-content {
+  display: none;
+}
+
 /* Reduce spacing between title and content on Nest page */
 #header-container {
   margin-bottom: 12px;

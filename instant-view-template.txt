@@ -1,0 +1,84 @@
+# Telegram Instant View Template for Murmuration Nest Pages
+# Domain: murmuration.monster/nest/*
+# Author: Claude Code
+# Last update: 2025-12-29
+
+# ===== VERSION =====
+~version: "2.1"
+
+# ===== CHANNEL =====
+# Optional: set your Telegram channel here
+# channel: @your_channel
+
+# ===== TITLE =====
+# Extract title from Open Graph meta tag
+?exists: $@/meta[@property="og:title"]
+title: $@/meta[@property="og:title"]/@content
+
+# ===== COVER =====
+# Extract cover image if present
+?exists: $@/meta[@property="og:image"]
+cover: $@/meta[@property="og:image"]/@content
+
+# ===== DESCRIPTION =====
+# Extract description from Open Graph
+?exists: $@/meta[@property="og:description"]
+description: $@/meta[@property="og:description"]/@content
+
+# ===== AUTHOR =====
+# Extract author from page heading if present
+?exists: $body//h1
+author: $body//h1
+
+# ===== PUBLISHED DATE =====
+# Not available on static pages, skip
+
+# ===== BODY =====
+# Main content is in <article id="nest-static-content">
+body: $body//article[@id="nest-static-content"]
+
+# ==== CLEAN UP NAVIGATION ====
+@remove: $body//nav[@class="main-nav"]
+@remove: $body//button
+@remove: $body//div[@id="telegram-auth-container"]
+@remove: $body//div[@id="toc-container"]
+@remove: $body//div[@id="skeleton-content"]
+@remove: $body//div[@id="nest-editor-container"]
+@remove: $body//script
+@remove: $body//style
+
+# ==== FORMAT HEADERS ====
+# Headers are already in correct format (h1, h2, h3)
+<h1>: $body//h1
+<h2>: $body//h2
+<h3>: $body//h3
+
+# ==== FORMAT PARAGRAPHS ====
+<p>: $body//p
+
+# ==== FORMAT LISTS ====
+<ul>: $body//ul
+<ol>: $body//ol
+
+# ==== FORMAT QUOTES ====
+<blockquote>: $body//blockquote
+
+# ==== FORMAT LINKS ====
+# Links are already in correct format
+
+# ==== FORMAT IMAGES ====
+<figure>: $body//figure
+<img>: $body//figure/img
+
+# ==== FORMAT HORIZONTAL RULES ====
+<hr>: $body//hr
+
+# ==== FORMAT CODE ====
+<code>: $body//code
+
+# ==== FINAL CLEANUP ====
+# Remove empty paragraphs
+@remove: $body//p[not(node())]
+
+# Remove inline styles (optional)
+@remove: $body//*/@style

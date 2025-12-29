@@ -168,6 +168,8 @@ class ApiHandler {
 
         // Check if message mentions @сова (Owl AI agent)
         $owlMentioned = preg_match('/@сова/ui', $text);
+        file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Text: " . $text . "\n", FILE_APPEND);
+        file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Owl mentioned: " . ($owlMentioned ? 'YES' : 'NO') . "\n", FILE_APPEND);
         if ($owlMentioned) {
             try {
                 $aiConfig = require __DIR__ . '/ai_agent_config.php';
@@ -177,22 +179,42 @@ class ApiHandler {
                     $aiPrompt = trim($aiPrompt);
 
                     if (!empty($aiPrompt)) {
-                        // Check for license/agreement keywords
-                        $isLicenseRequest = preg_match('/лицензи|соглашени/ui', $aiPrompt);
+                        // Check for license/agreement keywords (various spellings)
+                        $isLicenseRequest = preg_match('/лиценз|согла[шщ]ен|покаж.*лиц/ui', $aiPrompt);
+                        file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - AI Prompt: " . $aiPrompt . "\n", FILE_APPEND);
+                        file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Is license: " . ($isLicenseRequest ? 'YES' : 'NO') . "\n", FILE_APPEND);
 
                         if ($isLicenseRequest) {
-                            // Respond with link to license agreement
-                            $basePath = (strpos($_SERVER['REQUEST_URI'] ?? '', '/pavilion/') === 0) ? '/pavilion' : '';
-                            $licenseUrl = 'https://hhrrr.ru' . $basePath . '/doc/';
-                            $owlResponse = "Конечно! Лицензионное соглашение доступно здесь:\n[Лицензионное соглашение]({$licenseUrl})\n\nВы можете ознакомиться с условиями использования нашего продукта и скачать документ в формате PDF.";
+                            file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Sending license response\n", FILE_APPEND);
+                            try {
+                                // Respond with link to license agreement
+                                $basePath = (strpos($_SERVER['REQUEST_URI'] ?? '', '/pavilion/') === 0) ? '/pavilion' : '';
 
-                            $owlMessage = $this->msgRepo->add(
-                                'owl_ai_session',
-                                '🦉 сова',
-                                $owlResponse,
-                                null
-                            );
-                            $this->broadcastService->messageNew($owlMessage);
+                                // Detect domain from HTTP_HOST
+                                $host = $_SERVER['HTTP_HOST'] ?? 'hhrrr.ru';
+                                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                                $licenseUrl = $protocol . '://' . $host . $basePath . '/doc/';
+
+                                $owlResponse = "Конечно! Лицензионное соглашение доступно здесь:\n[Лицензионное соглашение]({$licenseUrl})\n\nВы можете ознакомиться с условиями использования нашего продукта и скачать документ в формате PDF.";
+
+                                file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Calling msgRepo->add\n", FILE_APPEND);
+                                $owlMessage = $this->msgRepo->add(
+                                    $session_id,  // Use current session, not 'owl_ai_session'
+                                    '🦉 сова',
+                                    $owlResponse,
+                                    null
+                                );
+                                file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Message created: " . json_encode($owlMessage) . "\n", FILE_APPEND);
+
+                                $this->broadcastService->messageNew($owlMessage);
+                                file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - Broadcast sent\n", FILE_APPEND);
+
+                                // Return success without calling TimeWeb API
+                                return $this->json(['success' => true, 'message' => 'License info sent']);
+                            } catch (Exception $e) {
+                                file_put_contents('/tmp/owl_debug.log', date('Y-m-d H:i:s') . " - ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
+                                // Continue to regular AI if license sending failed
+                            }
                         } else {
                             // Regular AI request
                             $ch = curl_init();

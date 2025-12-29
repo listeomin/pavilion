@@ -114,6 +114,23 @@ if ($urlUsername) {
     }
 }
 
+// Load nest content for SEO/Instant View (if viewing someone's nest)
+$nestContentHtml = '';
+$nestContentText = '';
+if ($actualUserId) {
+    require_once __DIR__ . '/../../server/EditorJsRenderer.php';
+
+    // Get nest content from database
+    $stmt = $db->prepare('SELECT content FROM nest_content WHERE user_id = :user_id');
+    $stmt->execute([':user_id' => $actualUserId]);
+    $nestRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($nestRow && $nestRow['content']) {
+        $nestContentHtml = EditorJsRenderer::render($nestRow['content']);
+        $nestContentText = EditorJsRenderer::extractText($nestRow['content'], 200);
+    }
+}
+
 // Logic for redirects:
 // If authorized user visits /nest → redirect to /nest/{username} or /nest/{telegram_id}
 if ($telegramUserId && !$urlUsername) {
@@ -156,6 +173,27 @@ if ($telegramUserId && $urlUsername) {
     echo "Гнездо";
   }
 ?></title>
+<?php if ($urlUsername): ?>
+<!-- Open Graph meta tags for social sharing and Instant View -->
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Мурмурация" />
+<meta property="og:title" content="<?php
+  if ($urlUsername === 'developer') {
+    echo '🍃 Гнездо разработчика';
+  } elseif ($profileOwnerFirstName) {
+    echo $profileOwnerEmoji ? htmlspecialchars($profileOwnerEmoji) . ' ' . htmlspecialchars($profileOwnerFirstName) : htmlspecialchars($profileOwnerFirstName);
+  } else {
+    echo 'Гнездо';
+  }
+?>" />
+<?php if ($nestContentText): ?>
+<meta property="og:description" content="<?php echo htmlspecialchars($nestContentText); ?>" />
+<?php endif; ?>
+<meta property="og:url" content="https://murmuration.monster/nest/<?php echo htmlspecialchars($urlUsername); ?>" />
+<link rel="canonical" href="https://murmuration.monster/nest/<?php echo htmlspecialchars($urlUsername); ?>" />
+<!-- Instant View hint -->
+<meta property="al:web:url" content="https://murmuration.monster/nest/<?php echo htmlspecialchars($urlUsername); ?>" />
+<?php endif; ?>
 <script>
   // Pass PHP variables to JavaScript
   window.NEST_CONFIG = {
@@ -185,7 +223,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=24">
+<link rel="stylesheet" href="css/nest.css?v=25">
 <link rel="stylesheet" href="css/nest-layout.css?v=1">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- tocbot CSS -->
@@ -196,10 +234,10 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=3">
 </head>
 <body<?php
-  $classes = [];
+  $classes = ['no-js']; // Remove via JavaScript when loaded
   if ($urlUsername) $classes[] = 'skeleton-active';
   if ($urlUsername === 'developer') $classes[] = 'developer-page';
-  if (!empty($classes)) echo ' class="' . implode(' ', $classes) . '"';
+  echo ' class="' . implode(' ', $classes) . '"';
 ?>>
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
@@ -272,6 +310,12 @@ if ($telegramUserId && $urlUsername) {
       <div class="skeleton skeleton-paragraph"></div>
     </div>
   </div>
+  <!-- Static HTML content for SEO and Instant View (hidden by JavaScript) -->
+  <?php if ($nestContentHtml): ?>
+  <article id="nest-static-content" class="nest-static-content">
+    <?php echo $nestContentHtml; ?>
+  </article>
+  <?php endif; ?>
   <!-- Content editor (only on personal pages) -->
   <div id="nest-editor-container">
     <div id="nest-editor"></div>
@@ -308,6 +352,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
 <!-- tocbot JS -->
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
-<script type="module" src="js/nest.js?v=30"></script>
+<script type="module" src="js/nest.js?v=32"></script>
 </body>
 </html>
