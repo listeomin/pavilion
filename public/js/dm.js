@@ -442,6 +442,7 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
   await loadUsers();
   if (dmConfig.recipientUserId) {
     await loadMessages();
+    const inputEl = document.getElementById('dm-input');
     if (inputEl) inputEl.focus();
   }
 
