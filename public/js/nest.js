@@ -7,6 +7,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
 import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=2';
+import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
 // Function to hide skeleton loading screen
 function hideSkeleton() {
@@ -532,6 +533,15 @@ function alignUserHeader() {
       // Convert YouTube links to players in read-only mode
       if (!nestConfig.isOwnNest) {
         processYouTubeLinksInEditor();
+
+        // Enable image zoom in read-only mode
+        initImageZoom();
+        const editorImages = document.querySelectorAll('#nest-editor img');
+        editorImages.forEach(img => {
+          if (!img.classList.contains('zoomable-image')) {
+            makeImageZoomable(img);
+          }
+        });
       }
     };
 
@@ -583,7 +593,10 @@ function alignUserHeader() {
         const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: savedData })
+          body: JSON.stringify({
+            content: savedData,
+            target_username: nestConfig.urlUsername
+          })
         });
 
         const result = await response.json();

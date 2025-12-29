@@ -133,6 +133,11 @@ if ($telegramUserId && $urlUsername) {
     // Check by username OR by telegram_id
     $isOwnNest = ($telegramUsername && $telegramUsername == $urlUsername)
               || (!$telegramUsername && $urlUsername == $telegramUserTelegramId);
+
+    // Special case: listeomin can edit developer nest
+    if ($telegramUsername == 'listeomin' && $urlUsername == 'developer') {
+        $isOwnNest = true;
+    }
 }
 
 // If user is on their own page - good!
@@ -182,6 +187,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=23">
 <link rel="stylesheet" href="css/nest-layout.css?v=1">
+<link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- tocbot CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.css">
 <!-- Editor.js -->
@@ -302,6 +308,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
 <!-- tocbot JS -->
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
-<script type="module" src="js/nest.js?v=28"></script>
+<script type="module" src="js/nest.js?v=30"></script>
 </body>
 </html>

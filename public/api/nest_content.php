@@ -65,14 +65,37 @@ try {
             exit;
         }
 
-        $userId = $_SESSION['telegram_user']['user_id'];
+        $currentUserId = $_SESSION['telegram_user']['user_id'];
+        $currentUsername = $_SESSION['telegram_user']['telegram_username'] ?? null;
 
         // Get content from POST body
         $input = json_decode(file_get_contents('php://input'), true);
         $content = $input['content'] ?? null;
+        $targetUsername = $input['target_username'] ?? null;
 
         if ($content === null) {
             echo json_encode(['success' => false, 'error' => 'No content provided']);
+            exit;
+        }
+
+        // Determine which user's content to save
+        $userId = $currentUserId;
+
+        // Special case: listeomin can edit developer nest
+        if ($currentUsername == 'listeomin' && $targetUsername == 'developer') {
+            // Get developer user ID
+            $stmt = $db->prepare('SELECT id FROM users WHERE telegram_username = :username LIMIT 1');
+            $stmt->execute([':username' => 'developer']);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($user) {
+                $userId = $user['id'];
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Target user not found']);
+                exit;
+            }
+        } elseif ($targetUsername && $targetUsername != $currentUsername) {
+            // User trying to edit someone else's nest (not allowed)
+            echo json_encode(['success' => false, 'error' => 'Not allowed to edit this nest']);
             exit;
         }
 

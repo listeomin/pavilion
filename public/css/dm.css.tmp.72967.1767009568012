@@ -101,18 +101,7 @@ body.page-dm .wrap {
 }
 
 .dm-message-time {
-  font-size: 11px;
-  color: var(--color-nimbus-dark);
-  margin-top: 4px;
-  padding: 0 8px;
-}
-
-.dm-message.from-me .dm-message-time {
-  text-align: right;
-}
-
-.dm-message.from-them .dm-message-time {
-  text-align: left;
+  display: none;
 }
 
 /* Input area */
