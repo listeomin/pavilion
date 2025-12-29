@@ -30,3 +30,12 @@
   display: block;
   filter: brightness(0) invert(1);
 }
+
+/* Developer page background sticker */
+body.developer-page {
+  background-image: url('../assets/stickers/sticker_01.png');
+  background-repeat: no-repeat;
+  background-position: bottom 24px right 24px;
+  background-size: 320px auto;
+  background-attachment: fixed;
+}

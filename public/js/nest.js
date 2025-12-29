@@ -5,6 +5,8 @@ import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { TelegramAuth } from './telegramAuth.js?v=2';
 import { renderGitHubPreview } from './github.js?v=5';
+import { parseYouTubeUrl } from './youtube.js?v=2';
+import { renderMusicPlayer } from './music.js?v=2';
 
 // Function to hide skeleton loading screen
 function hideSkeleton() {
@@ -371,6 +373,34 @@ function alignUserHeader() {
     let saveTimeout = null;
     let isSaving = false;
 
+    // Process YouTube links in Editor.js paragraphs
+    const processYouTubeLinksInEditor = () => {
+      // Find all paragraph elements in the editor
+      const paragraphs = document.querySelectorAll('#nest-editor .ce-paragraph');
+
+      paragraphs.forEach(p => {
+        const text = p.textContent.trim();
+        const videoId = parseYouTubeUrl(text);
+
+        if (videoId && text === text.match(/https?:\/\/[^\s]+/)?.[0]) {
+          // This paragraph contains only a YouTube URL
+          const metadata = {
+            type: 'music',
+            artist: 'YouTube',
+            track: 'Загружается...',
+            audioUrl: `${CONFIG.BASE_PATH}/api/music/youtube-stream.php?v=${videoId}`,
+            youtube_id: videoId,
+            duration: 0
+          };
+
+          // Replace paragraph content with music player
+          const playerHtml = renderMusicPlayer(metadata);
+          p.innerHTML = playerHtml;
+          p.style.cssText = ''; // Remove paragraph styles
+        }
+      });
+    };
+
     // Configure Editor.js
     const initEditor = async (initialData = null) => {
       editor = new EditorJS({
@@ -453,6 +483,11 @@ function alignUserHeader() {
 
       await editor.isReady;
       console.log('[Nest] Editor.js ready!');
+
+      // Convert YouTube links to players in read-only mode
+      if (!nestConfig.isOwnNest) {
+        processYouTubeLinksInEditor();
+      }
     };
 
     // Load content from server

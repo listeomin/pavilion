@@ -313,7 +313,7 @@ h3.ce-header {
 }
 
 .toc a:hover {
-  color: var(--color-iris);
+  color: var(--color-olive);
 }
 
 /* Remove bullet points from toc-link */
@@ -323,7 +323,7 @@ h3.ce-header {
 
 /* Active TOC item */
 .toc .is-active-link {
-  color: var(--color-iris);
+  color: var(--color-olive);
   font-weight: 500;
 }
 

@@ -180,15 +180,20 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=3">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=22">
+<link rel="stylesheet" href="css/nest.css?v=23">
 <!-- tocbot CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.css">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=2">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=3">
 </head>
-<body<?php if ($urlUsername) echo ' class="skeleton-active"'; ?>>
+<body<?php
+  $classes = [];
+  if ($urlUsername) $classes[] = 'skeleton-active';
+  if ($urlUsername === 'developer') $classes[] = 'developer-page';
+  if (!empty($classes)) echo ' class="' . implode(' ', $classes) . '"';
+?>>
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -276,9 +281,11 @@ if ($telegramUserId && $urlUsername) {
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
+<?php if ($urlUsername !== 'developer'): ?>
 <a id="dev-nest-btn" href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
+<?php endif; ?>
 <?php if (!$urlUsername): ?>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
@@ -294,6 +301,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
 <!-- tocbot JS -->
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
-<script type="module" src="js/nest.js?v=25"></script>
+<script type="module" src="js/nest.js?v=27"></script>
 </body>
 </html>
