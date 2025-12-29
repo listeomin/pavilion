@@ -80,3 +80,14 @@ strong {
 em {
   font-style: italic;
 }
+
+/* Chat page specific: disable body scroll, only chat-log scrolls */
+body.page-chat {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body.page-chat .wrap {
+  height: 100vh;
+  min-height: auto;
+}
