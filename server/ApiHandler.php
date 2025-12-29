@@ -157,6 +157,60 @@ class ApiHandler {
 
         $message = $this->msgRepo->add($session_id, $session['name'], $text, $metadata);
         $this->broadcastService->messageNew($message);
+
+        // Check if message mentions @сова (Owl AI agent)
+        if (preg_match('/@сова/ui', $text)) {
+            try {
+                $aiConfig = require __DIR__ . '/ai_agent_config.php';
+                if ($aiConfig['enabled']) {
+                    // Extract the message text for the AI
+                    $aiPrompt = preg_replace('/@сова,?\s*/ui', '', $text);
+                    $aiPrompt = trim($aiPrompt);
+
+                    if (!empty($aiPrompt)) {
+                        $ch = curl_init();
+                        curl_setopt_array($ch, [
+                            CURLOPT_URL => $aiConfig['api_endpoint'],
+                            CURLOPT_RETURNTRANSFER => true,
+                            CURLOPT_POST => true,
+                            CURLOPT_HTTPHEADER => [
+                                'Authorization: Bearer ' . $aiConfig['api_token'],
+                                'Content-Type: application/json'
+                            ],
+                            CURLOPT_POSTFIELDS => json_encode([
+                                'model' => 'agent-' . $aiConfig['agent_id'],
+                                'messages' => [
+                                    ['role' => 'user', 'content' => $aiPrompt]
+                                ]
+                            ])
+                        ]);
+
+                        $response = curl_exec($ch);
+                        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                        curl_close($ch);
+
+                        if ($httpCode === 200 && $response) {
+                            $responseData = json_decode($response, true);
+                            $aiResponse = $responseData['choices'][0]['message']['content'] ?? null;
+
+                            if ($aiResponse) {
+                                // Add AI response as message from Owl
+                                $owlMessage = $this->msgRepo->add(
+                                    'owl_ai_session',
+                                    '🦉 сова',
+                                    $aiResponse,
+                                    null
+                                );
+                                $this->broadcastService->messageNew($owlMessage);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('[AI Agent @mention] Error: ' . $e->getMessage());
+            }
+        }
+
         return $message;
     }
 

@@ -148,3 +148,9 @@
 .quote-author[data-target-message]:hover {
   color: rgba(0, 0, 0, 0.8);
 }
+
+/* AI Agent mention (@сова) styling */
+.ai-mention {
+  color: var(--color-olive);
+  font-weight: 500;
+}

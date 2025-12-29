@@ -11,6 +11,13 @@ import { CONFIG } from './config.js?v=6';
 
 let spinnerInterval = null;
 
+// Helper to highlight @сова mentions in green
+function highlightOwlMentions(html) {
+  // Replace @сова with styled span
+  // Use a regex that won't match inside HTML tags
+  return html.replace(/@сова/gi, '<span class="ai-mention">@сова</span>');
+}
+
 // Helper to process YouTube URLs and convert to music player
 function processYouTubeUrls(text) {
   // Find all URLs in text
@@ -248,6 +255,9 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
       }
     }
     
+    // Highlight @сова mentions
+    content = highlightOwlMentions(content);
+
     text.innerHTML = ' ' + content;
     div.appendChild(text);
     frag.appendChild(div);
