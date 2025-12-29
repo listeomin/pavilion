@@ -15,7 +15,7 @@ import { ContextMenu } from './contextMenu.js?v=1';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
 import { CommandNavigator } from './command-navigator.js?v=1';
-import { initImageZoom } from './image-zoom.js?v=1';
+import { initImageZoom } from './image-zoom.js?v=2';
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {

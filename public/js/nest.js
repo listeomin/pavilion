@@ -540,6 +540,137 @@ function alignUserHeader() {
     // Make editor globally accessible
     window.nestEditor = () => editor;
 
+    // Add IDs to headings for tocbot
+    const addHeadingIds = () => {
+      const headings = document.querySelectorAll('#nest-editor h1.ce-header, #nest-editor h2.ce-header, #nest-editor h3.ce-header');
+      headings.forEach((heading, index) => {
+        if (!heading.id) {
+          // Create ID from text content
+          const text = heading.textContent.trim();
+          const id = text
+            .toLowerCase()
+            .replace(/[^а-яёa-z0-9]+/gi, '-')
+            .replace(/^-+|-+$/g, '')
+            || `heading-${index}`;
+          heading.id = id;
+        }
+      });
+    };
+
+    // Update active TOC item based on scroll position
+    const updateActiveTocItem = () => {
+      const headings = Array.from(document.querySelectorAll('#nest-editor h1.ce-header, #nest-editor h2.ce-header, #nest-editor h3.ce-header'));
+
+      if (headings.length === 0) return;
+
+      const topThreshold = 150; // Heading must be above this line to be considered active
+
+      // Find all headings that are above the threshold
+      const headingsAbove = headings.filter(h => {
+        const rect = h.getBoundingClientRect();
+        return rect.top <= topThreshold;
+      });
+
+      // Get the last heading above threshold (closest to threshold from above)
+      // If none above, get the first heading
+      const activeHeading = headingsAbove.length > 0
+        ? headingsAbove[headingsAbove.length - 1]
+        : headings[0];
+
+      // Update active class
+      document.querySelectorAll('.toc a').forEach(link => {
+        link.classList.remove('is-active-link');
+      });
+
+      if (activeHeading && activeHeading.id) {
+        const activeLink = document.querySelector(`.toc a[href="#${activeHeading.id}"]`);
+        if (activeLink) {
+          activeLink.classList.add('is-active-link');
+        }
+      }
+    };
+
+    // Initialize tocbot after editor loads
+    const initTocbot = () => {
+      if (typeof tocbot !== 'undefined') {
+        // First add IDs to headings
+        addHeadingIds();
+
+        tocbot.init({
+          tocSelector: '.toc',
+          contentSelector: '#nest-editor',
+          headingSelector: 'h1.ce-header, h2.ce-header, h3.ce-header',
+          hasInnerContainers: true,
+          headingsOffset: 80,
+          scrollSmoothOffset: -80,
+          collapseDepth: 6,
+          scrollSmooth: true,
+          scrollSmoothDuration: 420,
+          onClick: function(e) {
+            e.preventDefault();
+
+            // Get target ID from href
+            const href = e.target.getAttribute('href');
+            if (!href) return;
+
+            const targetId = href.replace('#', '');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+              // Smooth scroll to element
+              targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+
+              // Wait for scroll to finish, then update active item
+              setTimeout(() => {
+                if (typeof updateActiveTocItem === 'function') {
+                  updateActiveTocItem();
+                }
+              }, 500);
+            }
+          }
+        });
+      }
+    };
+
+    // Re-initialize tocbot after content changes (debounced)
+    let tocbotTimeout = null;
+    const updateTocbot = () => {
+      if (tocbotTimeout) {
+        clearTimeout(tocbotTimeout);
+      }
+      tocbotTimeout = setTimeout(() => {
+        if (typeof tocbot !== 'undefined') {
+          tocbot.refresh();
+        }
+      }, 1000);
+    };
+
+    // Initialize tocbot after editor is ready
+    setTimeout(() => {
+      initTocbot();
+      // Update TOC when editor changes
+      if (editor) {
+        editor.isReady.then(() => {
+          setTimeout(initTocbot, 500);
+        });
+      }
+
+      // Listen to scroll events to update active item
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        if (scrollTimeout) {
+          clearTimeout(scrollTimeout);
+        }
+        scrollTimeout = setTimeout(updateActiveTocItem, 50);
+      });
+
+      // Initial update
+      updateActiveTocItem();
+    }, 1500);
+
     // Markdown shortcuts for headings
     if (nestConfig.isOwnNest && editor) {
       document.addEventListener('keydown', async (e) => {

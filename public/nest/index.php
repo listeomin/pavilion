@@ -180,7 +180,9 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=3">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=15">
+<link rel="stylesheet" href="css/nest.css?v=21">
+<!-- tocbot CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.css">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
 </head>
@@ -234,6 +236,10 @@ if ($telegramUserId && $urlUsername) {
   <div id="nest-editor-container">
     <div id="nest-editor"></div>
   </div>
+  <!-- Table of Contents (only on personal pages) -->
+  <div id="toc-container">
+    <div class="toc"></div>
+  </div>
   <?php endif; ?>
 </div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
@@ -255,6 +261,8 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.3.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@1.4.0/dist/bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
-<script type="module" src="js/nest.js?v=12"></script>
+<!-- tocbot JS -->
+<script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
+<script type="module" src="js/nest.js?v=19"></script>
 </body>
 </html>

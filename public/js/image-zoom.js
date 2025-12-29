@@ -92,10 +92,16 @@ export class ImageZoom {
     this.isOpen = true;
     const content = this.overlay.querySelector('.image-zoom-content');
     content.src = imageSrc;
-    
-    // Prevent body scroll
+
+    // Calculate scrollbar width before hiding it
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    // Prevent body scroll and compensate for scrollbar width
     document.body.style.overflow = 'hidden';
-    
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
     this.overlay.classList.add('active');
     
     // If we have original image, animate from its position
@@ -174,9 +180,10 @@ export class ImageZoom {
       zoomedImage.style.transform = '';
       zoomedImage.style.opacity = '';
       
-      // Restore body scroll
+      // Restore body scroll and remove padding compensation
       document.body.style.overflow = '';
-      
+      document.body.style.paddingRight = '';
+
       this.originalImage = null;
     }, 300);
   }

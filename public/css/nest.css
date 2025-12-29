@@ -256,3 +256,92 @@ h3.ce-header {
 .ce-toolbar__actions {
   right: 103% !important;
 }
+
+/* Table of Contents (Minimap) */
+#toc-container {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+}
+
+/* Hide TOC on smaller screens */
+@media (max-width: 1280px) {
+  #toc-container {
+    display: none;
+  }
+}
+
+/* TOC links */
+.toc {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  min-width: 200px;
+}
+
+.toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc li {
+  margin: 0;
+  padding: 0;
+}
+
+.toc a {
+  display: block;
+  padding: 4px 0;
+  color: var(--color-nimbus-dark);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc a:hover {
+  color: var(--color-iris);
+}
+
+/* Remove bullet points from toc-link */
+.toc-link::before {
+  content: none !important;
+}
+
+/* Active TOC item */
+.toc .is-active-link {
+  color: var(--color-iris);
+  font-weight: 500;
+}
+
+/* TOC nesting levels */
+.toc .toc-list {
+  padding-left: 0;
+}
+
+.toc .toc-list .toc-list {
+  padding-left: 12px;
+  margin-top: 2px;
+}
+
+.toc .toc-list .toc-list .toc-list {
+  padding-left: 12px;
+}
+
+/* Hide empty TOC */
+.toc:empty {
+  display: none;
+}
+
+#toc-container:has(.toc:empty) {
+  display: none;
+}
