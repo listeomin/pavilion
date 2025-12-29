@@ -121,11 +121,12 @@ class ApiHandler {
         $session_id = $input['session_id'] ?? null;
         $text = trim($input['text'] ?? '');
         $clientMetadata = $input['metadata'] ?? null;
+        $pageContext = $input['page'] ?? null;
 
         if (!$session_id) {
             throw new InvalidArgumentException('session_id required');
         }
-        
+
         if ($text === '' && !$clientMetadata) {
             throw new InvalidArgumentException('text or metadata required');
         }
@@ -134,6 +135,13 @@ class ApiHandler {
         if (!$session) {
             throw new RuntimeException('invalid session');
         }
+
+        // Check if this is the first message from this session (for owl greeting)
+        $db = get_db();
+        $stmt = $db->prepare('SELECT COUNT(*) as count FROM messages WHERE session_id = :session_id');
+        $stmt->execute([':session_id' => $session_id]);
+        $messageCount = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        $isFirstMessage = ($messageCount == 0);
 
         // Priority: client metadata > Pinterest > Nest > GitHub > generic link preview
         // NOTE: YouTube enrichment is disabled - handled by frontend for instant sending
@@ -159,7 +167,8 @@ class ApiHandler {
         $this->broadcastService->messageNew($message);
 
         // Check if message mentions @сова (Owl AI agent)
-        if (preg_match('/@сова/ui', $text)) {
+        $owlMentioned = preg_match('/@сова/ui', $text);
+        if ($owlMentioned) {
             try {
                 $aiConfig = require __DIR__ . '/ai_agent_config.php';
                 if ($aiConfig['enabled']) {
@@ -208,6 +217,66 @@ class ApiHandler {
                 }
             } catch (Exception $e) {
                 error_log('[AI Agent @mention] Error: ' . $e->getMessage());
+            }
+        }
+
+        // Greet new users on main page (only if not already mentioned @сова)
+        // Check if this is main page (index.php)
+        $isMainPage = ($pageContext === 'main') ||
+                      (isset($_SERVER['HTTP_REFERER']) &&
+                       (strpos($_SERVER['HTTP_REFERER'], '/pavilion/') !== false &&
+                        strpos($_SERVER['HTTP_REFERER'], '/pavilion/index.php') !== false ||
+                        preg_match('#/pavilion/?$#', $_SERVER['HTTP_REFERER'])));
+
+        if ($isFirstMessage && $isMainPage && !$owlMentioned) {
+            try {
+                $aiConfig = require __DIR__ . '/ai_agent_config.php';
+                if ($aiConfig['enabled']) {
+                    // Greet the new user
+                    $greetingPrompt = "Новый участник с именем \"{$session['name']}\" только что присоединился к чату и написал: \"{$text}\". Поприветствуй его дружелюбно и кратко (1-2 предложения).";
+
+                    $ch = curl_init();
+                    curl_setopt_array($ch, [
+                        CURLOPT_URL => $aiConfig['api_endpoint'],
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST => true,
+                        CURLOPT_HTTPHEADER => [
+                            'Authorization: Bearer ' . $aiConfig['api_token'],
+                            'Content-Type: application/json'
+                        ],
+                        CURLOPT_POSTFIELDS => json_encode([
+                            'model' => 'agent-' . $aiConfig['agent_id'],
+                            'messages' => [
+                                ['role' => 'user', 'content' => $greetingPrompt]
+                            ]
+                        ])
+                    ]);
+
+                    $response = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+
+                    if ($httpCode === 200 && $response) {
+                        $responseData = json_decode($response, true);
+                        $aiResponse = $responseData['choices'][0]['message']['content'] ?? null;
+
+                        if ($aiResponse) {
+                            // Add the reminder about @сова
+                            $greetingWithReminder = $aiResponse . "\n\nВы можете позвать меня через @сова, что бы я вам ответила";
+
+                            // Add greeting as message from Owl
+                            $owlMessage = $this->msgRepo->add(
+                                'owl_ai_session',
+                                '🦉 сова',
+                                $greetingWithReminder,
+                                null
+                            );
+                            $this->broadcastService->messageNew($owlMessage);
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('[AI Agent greeting] Error: ' . $e->getMessage());
             }
         }
 

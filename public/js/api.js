@@ -26,9 +26,10 @@ export async function apiInit(API, sessionId, COOKIE_NAME) {
   return data;
 }
 
-export async function apiSend(API, sessionId, text, metadata = null) {
+export async function apiSend(API, sessionId, text, metadata = null, pageContext = null) {
   const payload = { session_id: sessionId, text: text };
   if (metadata) payload.metadata = metadata;
+  if (pageContext) payload.page = pageContext;
   const res = await fetch(API + '?action=send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

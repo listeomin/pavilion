@@ -152,7 +152,7 @@ function alignUserHeader() {
 
       try {
         // Send user's phrase first
-        await apiSend(API, sessionId, versionPhrase);
+        await apiSend(API, sessionId, versionPhrase, null, 'main');
 
         // Then request version from server (will send system message)
         await apiVersion(API);
@@ -251,8 +251,8 @@ function alignUserHeader() {
         result = await apiUpdateMessage(API, sessionId, messageId, text, metadata);
         messageHistory.clearEditing();
       } else {
-        result = await apiSend(API, sessionId, text, metadata);
-       
+        result = await apiSend(API, sessionId, text, metadata, 'main');
+
         if (result) {
           // Add new message to history
           messageHistory.addMessage(text, myName, metadata, result.id);
