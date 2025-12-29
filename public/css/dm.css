@@ -1,5 +1,17 @@
 /* dm.css - Direct Messages styling */
 
+/* Disable body scroll on DM page */
+body.page-dm {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body.page-dm .wrap {
+  height: 100vh;
+  min-height: auto;
+  overflow: hidden;
+}
+
 /* Chat container when user is selected */
 .dm-chat-container {
   position: absolute;
@@ -206,9 +218,8 @@
   gap: 12px;
   cursor: pointer;
   transition: background 0.2s ease;
-  text-decoration: none;
-  color: inherit;
   border-bottom: 1px solid var(--color-nimbus);
+  user-select: none;
 }
 
 .dm-user-item:hover {

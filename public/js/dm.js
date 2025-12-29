@@ -85,15 +85,95 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     if (!listEl) return;
 
     listEl.innerHTML = users.map(user => `
-      <a href="${CONFIG.BASE_PATH}/messages/${user.username}"
-         class="dm-user-item ${user.username === dmConfig.recipientUsername ? 'active' : ''}">
+      <div class="dm-user-item ${user.username === dmConfig.recipientUsername ? 'active' : ''}"
+           data-user-id="${user.id}"
+           data-username="${user.username}"
+           data-first-name="${escapeHtml(user.firstName)}"
+           data-emoji="${user.emoji}">
         <div class="dm-user-emoji">${user.emoji}</div>
         <div class="dm-user-info">
           <div class="dm-user-name">${escapeHtml(user.firstName)}</div>
           <div class="dm-user-username">@${escapeHtml(user.username)}</div>
         </div>
-      </a>
+      </div>
     `).join('');
+
+    // Add click handlers to user items
+    listEl.querySelectorAll('.dm-user-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const userId = item.dataset.userId;
+        const username = item.dataset.username;
+        const firstName = item.dataset.firstName;
+        const emoji = item.dataset.emoji;
+
+        openChat(userId, username, firstName, emoji);
+      });
+    });
+  };
+
+  // Open chat with specific user
+  const openChat = async (userId, username, firstName, emoji) => {
+    // Update active user in list
+    document.querySelectorAll('.dm-user-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    document.querySelector(`[data-user-id="${userId}"]`)?.classList.add('active');
+
+    // Update dmConfig
+    dmConfig.recipientUserId = userId;
+    dmConfig.recipientUsername = username;
+    dmConfig.recipientFirstName = firstName;
+    dmConfig.recipientEmoji = emoji;
+
+    // Update URL without reload
+    const newUrl = `${CONFIG.BASE_PATH}/messages/${username}`;
+    history.pushState({ userId, username, firstName, emoji }, '', newUrl);
+
+    // Hide empty state, show chat container
+    const emptyState = document.querySelector('.empty-state');
+    let chatContainer = document.querySelector('.dm-chat-container');
+
+    if (emptyState) {
+      emptyState.style.display = 'none';
+    }
+
+    if (!chatContainer) {
+      // Create chat container if it doesn't exist
+      const wrap = document.querySelector('.wrap');
+      chatContainer = document.createElement('div');
+      chatContainer.className = 'dm-chat-container';
+      chatContainer.innerHTML = `
+        <div class="dm-chat-header">
+          <span class="dm-recipient-emoji">${emoji}</span>
+          <span class="dm-recipient-name">${escapeHtml(firstName)}</span>
+        </div>
+        <div id="dm-messages" class="dm-messages"></div>
+        <div class="dm-input-wrapper">
+          <form id="dm-send-form" class="dm-send-form">
+            <div id="dm-input" class="dm-input" contenteditable="true" data-placeholder="Написать послание..."></div>
+            <button type="submit" id="dm-send-btn" class="dm-send-btn">
+              <img src="assets/paw.svg" alt="Send">
+            </button>
+          </form>
+        </div>
+      `;
+      wrap.appendChild(chatContainer);
+
+      // Attach send handler
+      attachSendHandler();
+    } else {
+      // Update existing chat header
+      chatContainer.querySelector('.dm-recipient-emoji').textContent = emoji;
+      chatContainer.querySelector('.dm-recipient-name').textContent = firstName;
+      chatContainer.style.display = 'flex';
+    }
+
+    // Load messages
+    await loadMessages();
+
+    // Focus input
+    const inputEl = document.getElementById('dm-input');
+    if (inputEl) inputEl.focus();
   };
 
   // Load messages for current chat
@@ -131,12 +211,14 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     container.scrollTop = container.scrollHeight;
   };
 
-  // Send message
-  const sendForm = document.getElementById('dm-send-form');
-  const inputEl = document.getElementById('dm-input');
-  const sendBtn = document.getElementById('dm-send-btn');
+  // Attach send handler to form
+  const attachSendHandler = () => {
+    const sendForm = document.getElementById('dm-send-form');
+    const inputEl = document.getElementById('dm-input');
+    const sendBtn = document.getElementById('dm-send-btn');
 
-  if (sendForm && inputEl && sendBtn) {
+    if (!sendForm || !inputEl || !sendBtn) return;
+
     sendForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -184,6 +266,11 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
         sendForm.dispatchEvent(new Event('submit'));
       }
     });
+  };
+
+  // Initialize send handler if chat is already open
+  if (dmConfig.recipientUserId) {
+    attachSendHandler();
   }
 
   // Add message to UI
