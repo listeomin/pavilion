@@ -38,8 +38,10 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
+<link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
-<body class="page-chat">
+<body class="page-chat skeleton-active">
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -57,6 +59,13 @@ $basePath = get_base_path();
     </div>
     <h1>Ветки</h1>
   </div>
+  <div id="skeleton-ui" class="skeleton-container">
+    <div class="skeleton-header">
+      <div class="skeleton skeleton-user-header"></div>
+      <div class="skeleton skeleton-title"></div>
+    </div>
+    <div class="skeleton skeleton-chat-area"></div>
+  </div>
   <div class="empty-state">
     <img src="assets/empty-brnch.png" alt="Пусто">
     <div class="empty-state-text">Здесь пока пусто</div>
@@ -69,6 +78,9 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/branches.js?v=2"></script>
+<a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
+  <img src="assets/leaf.svg" alt="Developer Nest">
+</a>
+<script type="module" src="js/branches.js?v=4"></script>
 </body>
 </html>

@@ -17,16 +17,33 @@ import { MessageHistory } from './message-history.js?v=1';
 import { CommandNavigator } from './command-navigator.js?v=1';
 import { initImageZoom } from './image-zoom.js?v=2';
 
+// Function to hide skeleton loading screen
+function hideSkeleton() {
+  const skeletonContainer = document.getElementById('skeleton-ui');
+  if (!skeletonContainer) return;
+
+  // Fade out skeleton
+  skeletonContainer.classList.add('fade-out');
+
+  // Remove skeleton-active class and delete skeleton after animation
+  setTimeout(() => {
+    document.body.classList.remove('skeleton-active');
+    if (skeletonContainer.parentNode) {
+      skeletonContainer.parentNode.removeChild(skeletonContainer);
+    }
+  }, 300);
+}
+
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
   const h1 = document.querySelector('h1');
   const userHeader = document.getElementById('user-header');
-  
+
   if (h1 && userHeader) {
     const h1Rect = h1.getBoundingClientRect();
     const containerRect = h1.parentElement.getBoundingClientRect();
     const rightOffset = h1Rect.right - containerRect.left;
-    
+
     userHeader.style.marginLeft = rightOffset - userHeader.offsetWidth + 'px';
   }
 }
@@ -420,6 +437,10 @@ function alignUserHeader() {
     // Render all messages as regular messages (not system messages)
     // Only rebase/seed operations should show messages as system messages
     renderMessages(chatLog, data.messages || [], lastIdRef);
+
+    // Hide skeleton after messages are rendered
+    hideSkeleton();
+
     setupWebSocket();
     inputEl.focus();
 

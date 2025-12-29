@@ -39,8 +39,10 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/navigation.css?v=2">
 <link rel="stylesheet" href="css/image-zoom.css?v=1">
 <link rel="stylesheet" href="css/nest-preview.css?v=4">
+<link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
-<body class="page-chat">
+<body class="page-chat skeleton-active">
 <nav class="main-nav">
   <a href="./" class="nav-item active">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -57,6 +59,17 @@ $basePath = get_base_path();
       <span id="user-label-header">– это вы!</span>
     </div>
     <h1>Мурмурация</h1>
+  </div>
+  <div id="skeleton-ui" class="skeleton-container">
+    <div class="skeleton-header">
+      <div class="skeleton skeleton-user-header"></div>
+      <div class="skeleton skeleton-title"></div>
+    </div>
+    <div class="skeleton skeleton-chat-area"></div>
+    <div class="skeleton-input-area">
+      <div class="skeleton skeleton-input-field"></div>
+      <div class="skeleton skeleton-send-button"></div>
+    </div>
   </div>
   <div id="chat-log" aria-live="polite"></div>
   <div id="format-menu">
@@ -82,6 +95,9 @@ $basePath = get_base_path();
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
-<script type="module" src="js/main.js?v=9"></script>
+<a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
+  <img src="assets/leaf.svg" alt="Developer Nest">
+</a>
+<script type="module" src="js/main.js?v=11"></script>
 </body>
 </html>

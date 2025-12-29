@@ -4,6 +4,25 @@ import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { TelegramAuth } from './telegramAuth.js?v=2';
+import { renderGitHubPreview } from './github.js?v=5';
+
+// Function to hide skeleton loading screen
+function hideSkeleton() {
+  const skeletonContainer = document.getElementById('skeleton-content');
+  if (!skeletonContainer) return;
+
+  // Fade out skeleton
+  const skeletonBlocks = skeletonContainer.querySelectorAll('.skeleton-content-block');
+  skeletonBlocks.forEach(block => block.classList.add('fade-out'));
+
+  // Remove skeleton-active class and delete skeleton after animation
+  setTimeout(() => {
+    document.body.classList.remove('skeleton-active');
+    if (skeletonContainer.parentNode) {
+      skeletonContainer.parentNode.removeChild(skeletonContainer);
+    }
+  }, 300);
+}
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
@@ -438,9 +457,14 @@ function alignUserHeader() {
           console.log('[Nest] No content found, starting with empty editor');
           await initEditor();
         }
+
+        // Hide skeleton after editor is initialized
+        hideSkeleton();
       } catch (err) {
         console.error('[Nest] Error loading content:', err);
         await initEditor();
+        // Hide skeleton even on error
+        hideSkeleton();
       }
     };
 
@@ -1061,5 +1085,42 @@ function alignUserHeader() {
         return;
       }
     });
+  }
+
+  // Render GitHub preview for developer page
+  const githubPreviewContainer = document.getElementById('github-preview-container');
+  if (githubPreviewContainer) {
+    const url = githubPreviewContainer.dataset.url;
+    if (url) {
+      // Parse owner/repo from URL
+      const match = url.match(/github\.com\/([^\/]+)\/([^\/\s?#]+)/i);
+      if (match) {
+        const owner = match[1];
+        const repo = match[2];
+
+        // Fetch GitHub repo metadata
+        fetch(`https://api.github.com/repos/${owner}/${repo}`)
+          .then(res => res.json())
+          .then(data => {
+            const metadata = {
+              type: 'github',
+              owner: data.owner.login,
+              repo: data.name,
+              description: data.description,
+              language: data.language,
+              stars: data.stargazers_count,
+              forks: data.forks_count,
+              avatar: data.owner.avatar_url,
+              url: data.html_url
+            };
+
+            githubPreviewContainer.innerHTML = renderGitHubPreview(metadata);
+          })
+          .catch(err => {
+            console.error('[Nest] Error loading GitHub preview:', err);
+            githubPreviewContainer.innerHTML = `<a href="${url}" target="_blank" style="color: var(--color-iris);">${url}</a>`;
+          });
+      }
+    }
   }
 })();

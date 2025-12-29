@@ -141,6 +141,10 @@ h3.ce-header {
   line-height: 1.6;
 }
 
+.cdx-list__item::marker {
+  color: var(--color-olive);
+}
+
 /* Quote */
 .cdx-quote {
   margin: 1.5em 0;

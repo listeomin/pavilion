@@ -180,13 +180,15 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=3">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=21">
+<link rel="stylesheet" href="css/nest.css?v=22">
 <!-- tocbot CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.css">
 <!-- Editor.js -->
 <link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=2">
 </head>
-<body>
+<body<?php if ($urlUsername) echo ' class="skeleton-active"'; ?>>
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -205,7 +207,9 @@ if ($telegramUserId && $urlUsername) {
     </div>
     <?php endif; ?>
     <h1><?php
-      if ($profileOwnerFirstName) {
+      if ($urlUsername === 'developer') {
+        echo '🍃 Гнездо разработчика';
+      } elseif ($profileOwnerFirstName) {
         echo $profileOwnerEmoji ? htmlspecialchars($profileOwnerEmoji) . ' ' . htmlspecialchars($profileOwnerFirstName) : htmlspecialchars($profileOwnerFirstName);
       } else {
         echo 'Гнездо';
@@ -223,8 +227,12 @@ if ($telegramUserId && $urlUsername) {
 
   <?php if ($urlUsername && !$isOwnNest): ?>
   <div class="nest-description">
-    <p style="font-style: italic; color: var(--color-nimbus-dark);">Рад встрече!</p>
-    <p style="font-style: italic; color: var(--color-nimbus-dark);">Что ты думаешь обо мне?</p>
+    <?php if ($urlUsername === 'developer'): ?>
+      <div id="github-preview-container" data-url="https://github.com/listeomin/pavilion"></div>
+    <?php else: ?>
+      <p style="font-style: italic; color: var(--color-nimbus-dark);">Рад встрече!</p>
+      <p style="font-style: italic; color: var(--color-nimbus-dark);">Что ты думаешь обо мне?</p>
+    <?php endif; ?>
   </div>
   <?php endif; ?>
   <?php if (!$isOwnNest): ?>
@@ -232,6 +240,26 @@ if ($telegramUserId && $urlUsername) {
   <?php endif; ?>
 
   <?php if ($urlUsername): ?>
+  <!-- Skeleton loading (only on personal pages) -->
+  <div id="skeleton-content" class="skeleton-container">
+    <div class="skeleton-content-block">
+      <div class="skeleton skeleton-heading"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+    </div>
+    <div class="skeleton-content-block">
+      <div class="skeleton skeleton-heading"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+    </div>
+    <div class="skeleton-content-block">
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+      <div class="skeleton skeleton-paragraph"></div>
+    </div>
+  </div>
   <!-- Content editor (only on personal pages) -->
   <div id="nest-editor-container">
     <div id="nest-editor"></div>
@@ -248,6 +276,9 @@ if ($telegramUserId && $urlUsername) {
 <button id="nightshift-toggle">
   <img src="assets/moon.svg" alt="Night Shift">
 </button>
+<a id="dev-nest-btn" href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
+  <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
+</a>
 <?php if (!$urlUsername): ?>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
@@ -263,6 +294,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
 <!-- tocbot JS -->
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
-<script type="module" src="js/nest.js?v=19"></script>
+<script type="module" src="js/nest.js?v=21"></script>
 </body>
 </html>

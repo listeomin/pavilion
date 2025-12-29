@@ -4,6 +4,23 @@ import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 
+// Function to hide skeleton loading screen
+function hideSkeleton() {
+  const skeletonContainer = document.getElementById('skeleton-ui');
+  if (!skeletonContainer) return;
+
+  // Fade out skeleton
+  skeletonContainer.classList.add('fade-out');
+
+  // Remove skeleton-active class and delete skeleton after animation
+  setTimeout(() => {
+    document.body.classList.remove('skeleton-active');
+    if (skeletonContainer.parentNode) {
+      skeletonContainer.parentNode.removeChild(skeletonContainer);
+    }
+  }, 300);
+}
+
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
   const h1 = document.querySelector('h1');
@@ -33,7 +50,10 @@ function alignUserHeader() {
   const myName = data.name;
   const emoji = myName.split(' ')[0];
   userEmojiEl.textContent = emoji;
-  
+
+  // Hide skeleton after initialization
+  hideSkeleton();
+
   // Align user header after content loads
   setTimeout(alignUserHeader, 0);
   window.addEventListener('resize', alignUserHeader);
