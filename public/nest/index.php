@@ -301,6 +301,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
 <!-- tocbot JS -->
 <script src="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.min.js"></script>
-<script type="module" src="js/nest.js?v=27"></script>
+<script type="module" src="js/nest.js?v=28"></script>
 </body>
 </html>

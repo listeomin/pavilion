@@ -450,9 +450,11 @@ function alignUserHeader() {
     // Initialize image zoom for existing images
     initImageZoom();
 
-    // Align user header after content loads
-    setTimeout(alignUserHeader, 0);
-    window.addEventListener('resize', alignUserHeader);
+    // Set fixed margin for user header (Мурмурация)
+    const userHeader = document.getElementById('user-header');
+    if (userHeader) {
+      userHeader.style.marginLeft = '184.734px';
+    }
    
     // Animal profile button
     const profileBtn = document.getElementById('animal-profile-btn');

@@ -23,8 +23,10 @@ function hideSkeleton() {
     if (skeletonContainer.parentNode) {
       skeletonContainer.parentNode.removeChild(skeletonContainer);
     }
-    // Realign user header after skeleton is removed
-    setTimeout(alignUserHeader, 50);
+    // Realign user header after skeleton is removed and layout has settled
+    requestAnimationFrame(() => {
+      setTimeout(alignUserHeader, 100);
+    });
   }, 300);
 }
 
@@ -33,17 +35,30 @@ function alignUserHeader() {
   const h1 = document.querySelector('h1');
   const userHeader = document.getElementById('user-header');
 
-  if (h1 && userHeader) {
-    // Force a reflow to ensure layout is calculated
-    h1.offsetHeight;
-
-    const h1Rect = h1.getBoundingClientRect();
-    const containerRect = h1.parentElement.getBoundingClientRect();
-    const rightOffset = h1Rect.right - containerRect.left;
-
-    userHeader.style.marginLeft = (rightOffset - userHeader.offsetWidth) + 'px';
-    console.log('[Nest] Aligned user header:', { rightOffset, userHeaderWidth: userHeader.offsetWidth, marginLeft: userHeader.style.marginLeft });
+  if (!h1 || !userHeader) {
+    console.log('[Nest] alignUserHeader: elements not found', { h1: !!h1, userHeader: !!userHeader });
+    return;
   }
+
+  // Force a reflow to ensure layout is calculated
+  h1.offsetHeight;
+
+  const h1Rect = h1.getBoundingClientRect();
+  const containerRect = h1.parentElement.getBoundingClientRect();
+  const rightOffset = h1Rect.right - containerRect.left;
+  const marginLeft = rightOffset - userHeader.offsetWidth;
+
+  userHeader.style.marginLeft = marginLeft + 'px';
+
+  console.log('[Nest] Aligned user header:', {
+    h1Width: h1Rect.width,
+    h1Right: h1Rect.right,
+    containerLeft: containerRect.left,
+    rightOffset,
+    userHeaderWidth: userHeader.offsetWidth,
+    calculatedMargin: marginLeft,
+    appliedMargin: userHeader.style.marginLeft
+  });
 }
 
 (async function () {
@@ -69,20 +84,50 @@ function alignUserHeader() {
   // Use multiple strategies to ensure alignment happens after layout is stable
   const doAlign = () => {
     requestAnimationFrame(() => {
-      setTimeout(alignUserHeader, 0);
+      alignUserHeader();
     });
   };
 
-  // Try after fonts load (most reliable)
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => {
-      // Give extra time for layout to settle
+  // Check if skeleton is active - if yes, wait for it to be removed
+  const hasSkeleton = document.body.classList.contains('skeleton-active');
+
+  if (!hasSkeleton) {
+    // No skeleton - use multiple strategies to ensure alignment
+    console.log('[Nest] Scheduling alignment (no skeleton)');
+
+    // Strategy 1: After fonts load
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        console.log('[Nest] Fonts ready, aligning...');
+        setTimeout(doAlign, 150);
+      });
+    }
+
+    // Strategy 2: After DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('[Nest] DOM ready, aligning...');
+        setTimeout(doAlign, 200);
+      });
+    } else {
+      setTimeout(doAlign, 200);
+    }
+
+    // Strategy 3: After window load (images, etc.)
+    window.addEventListener('load', () => {
+      console.log('[Nest] Window loaded, aligning...');
       setTimeout(doAlign, 100);
     });
+
+    // Strategy 4: Fallback with longer delay
+    setTimeout(() => {
+      console.log('[Nest] Fallback alignment');
+      doAlign();
+    }, 500);
   } else {
-    // Fallback if fonts API not available
-    setTimeout(doAlign, 500);
+    console.log('[Nest] Skeleton active, will align after removal');
   }
+  // If skeleton is active, alignment will happen in hideSkeleton()
 
   window.addEventListener('resize', alignUserHeader);
 

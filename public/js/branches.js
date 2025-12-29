@@ -3,6 +3,7 @@ import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
+import { TelegramAuth } from './telegramAuth.js?v=2';
 
 // Function to hide skeleton loading screen
 function hideSkeleton() {
@@ -47,16 +48,9 @@ function alignUserHeader() {
   // Инициализация API чтобы получить session_id и emoji
   const data = await apiInit(API, sessionId, COOKIE_NAME);
   sessionId = data.session_id;
-  const myName = data.name;
-  const emoji = myName.split(' ')[0];
-  userEmojiEl.textContent = emoji;
-
-  // Hide skeleton after initialization
-  hideSkeleton();
-
-  // Align user header after content loads
-  setTimeout(alignUserHeader, 0);
-  window.addEventListener('resize', alignUserHeader);
+  let myName = data.name; // Changed to let for potential profile override
+  const initialEmoji = myName.split(' ')[0];
+  userEmojiEl.textContent = initialEmoji;
 
   // Handle emoji click for changing animal
   userEmojiEl.addEventListener('click', async () => {
@@ -92,11 +86,45 @@ function alignUserHeader() {
   });
 
   // Инициализация AnimalProfile
-  const animalProfile = new AnimalProfile(sessionId, emoji, (newName) => {
+  const animalProfile = new AnimalProfile(sessionId, initialEmoji, (newName) => {
+    myName = newName;
     const newEmoji = newName.split(' ')[0];
     userEmojiEl.textContent = newEmoji;
   });
   await animalProfile.init();
+
+  // Проверяем авторизацию Telegram и загружаем профиль
+  const telegramAuth = new TelegramAuth();
+  const authData = await telegramAuth.checkAuth();
+
+  if (authData && authData.user_id) {
+    console.log('[Branches] User already authorized, loading profile...');
+    const savedProfile = await animalProfile.loadAndApplyUserProfile();
+
+    if (savedProfile) {
+      console.log('[Branches] Using saved profile:', savedProfile);
+      myName = savedProfile.name;
+      userEmojiEl.textContent = savedProfile.emoji;
+    } else {
+      console.log('[Branches] No saved profile, using session name');
+    }
+
+    // Показываем кнопку "Уйти" для авторизованных пользователей
+    animalProfile.showLogoutButton();
+  } else {
+    console.log('[Branches] Not authorized, using session name');
+  }
+
+  console.log('[Branches] Final myName:', myName);
+
+  // Hide skeleton after initialization
+  hideSkeleton();
+
+  // Set fixed margin for user header (Ветки)
+  const userHeader = document.getElementById('user-header');
+  if (userHeader) {
+    userHeader.style.marginLeft = '28.0312px';
+  }
 
   // Кнопка профиля
   const profileBtn = document.getElementById('animal-profile-btn');
