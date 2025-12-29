@@ -1,0 +1,6 @@
+/* nest-layout.css - Layout overrides for nest pages */
+
+/* Max width for nest pages */
+.wrap {
+  max-width: 980px !important;
+}

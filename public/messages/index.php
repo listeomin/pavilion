@@ -132,7 +132,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=7">
+<link rel="stylesheet" href="css/base.css?v=8">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
@@ -145,8 +145,9 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=3">
+<link rel="stylesheet" href="css/navigation.css?v=4">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/empty-state.css?v=1">
 <link rel="stylesheet" href="css/dm.css?v=1">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
@@ -159,6 +160,16 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <span class="nav-separator">|</span>
   <a href="nest" class="nav-item">Гнездо</a>
 </nav>
+
+<div class="wrap">
+  <div id="header-container">
+    <div id="user-header">
+      <span id="user-emoji" class="user-emoji-clickable"></span>
+      <span id="user-label-header">– это вы!</span>
+    </div>
+    <h1>Послания</h1>
+  </div>
+</div>
 
 <div class="dm-container">
   <!-- Chat area (left) -->
@@ -184,9 +195,9 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
       </div>
     <?php else: ?>
       <!-- Empty state - no chat selected -->
-      <div class="dm-empty-state">
-        <div class="dm-empty-icon">💌</div>
-        <div class="dm-empty-text">Выберите пользователя из списка справа</div>
+      <div class="empty-state">
+        <img src="assets/empty-brnch.png" alt="Пусто">
+        <div class="empty-state-text">Выберите пользователя из списка справа</div>
       </div>
     <?php endif; ?>
   </div>
@@ -208,6 +219,6 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/dm.js?v=1"></script>
+<script type="module" src="js/dm.js?v=2"></script>
 </body>
 </html>

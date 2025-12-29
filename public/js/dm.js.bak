@@ -68,7 +68,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
   // Load users list
   const loadUsers = async () => {
     try {
-      const res = await fetch(`${DM_API}?action=get_users`);
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_users`);
       const data = await res.json();
 
       if (data.success) {
@@ -101,7 +101,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     if (!dmConfig.recipientUserId) return;
 
     try {
-      const res = await fetch(`${DM_API}?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
+      const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
       const data = await res.json();
 
       if (data.success) {
@@ -148,7 +148,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
       sendBtn.disabled = true;
 
       try {
-        const res = await fetch(`${DM_API}?action=send`, {
+        const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -239,7 +239,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
   if (dmConfig.recipientUserId) {
     setInterval(async () => {
       try {
-        const res = await fetch(`${DM_API}?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
+        const res = await fetch(`${CONFIG.BASE_PATH}/api/dm.php?action=get_messages&recipient_id=${dmConfig.recipientUserId}`);
         const data = await res.json();
 
         if (data.success) {

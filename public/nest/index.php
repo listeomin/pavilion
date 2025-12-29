@@ -178,9 +178,10 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=3">
+<link rel="stylesheet" href="css/navigation.css?v=4">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=23">
+<link rel="stylesheet" href="css/nest-layout.css?v=1">
 <!-- tocbot CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tocbot@4.25.0/dist/tocbot.css">
 <!-- Editor.js -->

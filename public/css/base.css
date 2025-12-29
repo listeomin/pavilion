@@ -8,7 +8,7 @@ body {
 }
 
 .wrap {
-  margin: 0 auto;
+  margin: 0 0 0 80px;
   width: 100%;
   max-width: 720px;
   min-height: 100vh;
