@@ -194,7 +194,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <?php else: ?>
     <!-- Empty state - no chat selected -->
     <div class="empty-state">
-      <img src="assets/empty-brnch.png" alt="Пусто">
+      <img src="assets/empty-msg.png" alt="Пусто">
       <div class="empty-state-text">Выберите пользователя из списка справа</div>
     </div>
   <?php endif; ?>
