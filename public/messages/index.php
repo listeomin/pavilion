@@ -149,6 +149,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
 <link rel="stylesheet" href="css/dm.css?v=2">
+<link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
 <nav class="main-nav">
@@ -216,6 +217,6 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/dm.js?v=5"></script>
+<script type="module" src="js/dm.js?v=7"></script>
 </body>
 </html>

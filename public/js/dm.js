@@ -4,6 +4,7 @@ import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { getCookie, apiInit } from './api.js?v=7';
 import { TelegramAuth } from './telegramAuth.js?v=2';
+import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
 (async function () {
   const API = CONFIG.API_PATH;
@@ -204,6 +205,14 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
       `;
     }).join('');
 
+    // Make images zoomable
+    initImageZoom();
+    container.querySelectorAll('img').forEach(img => {
+      if (!img.classList.contains('zoomable-image')) {
+        makeImageZoomable(img);
+      }
+    });
+
     // Scroll to bottom
     container.scrollTop = container.scrollHeight;
   };
@@ -332,6 +341,14 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
       <div class="dm-message-time">${time}</div>
     `;
     container.appendChild(div);
+
+    // Make images in new message zoomable
+    div.querySelectorAll('img').forEach(img => {
+      if (!img.classList.contains('zoomable-image')) {
+        makeImageZoomable(img);
+      }
+    });
+
     container.scrollTop = container.scrollHeight;
   };
 
@@ -387,8 +404,7 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
     imgTag.dataset.id = tempId;
     imgTag.dataset.loaded = 'false';
     imgTag.contentEditable = 'false';
-    imgTag.textContent = '📎 Загрузка...';
-    imgTag.style.cssText = 'display: inline-block; padding: 4px 8px; margin: 0 4px; background: var(--color-nimbus); border-radius: 4px; font-size: 13px;';
+    imgTag.textContent = '[картинка]';
 
     // Insert into input
     inputEl.appendChild(imgTag);
@@ -410,18 +426,15 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
         // Update tag with success
         imgTag.dataset.loaded = 'true';
         imgTag.dataset.url = result.file.url;
-        imgTag.textContent = '📎 Изображение';
-        imgTag.style.background = 'var(--color-olive)';
-        imgTag.style.color = 'var(--color-cloud-light)';
       } else {
-        // Upload failed
-        imgTag.textContent = '❌ Ошибка';
-        imgTag.style.background = 'var(--color-rust)';
+        // Upload failed - remove tag
+        imgTag.remove();
+        alert('Ошибка загрузки изображения');
       }
     } catch (error) {
       console.error('[DM] Image upload error:', error);
-      imgTag.textContent = '❌ Ошибка';
-      imgTag.style.background = 'var(--color-rust)';
+      imgTag.remove();
+      alert('Ошибка загрузки изображения');
     }
   };
 
