@@ -245,7 +245,7 @@ class ApiHandler {
                             if ($aiResponse) {
                                 // Add AI response as message from Owl
                                 $owlMessage = $this->msgRepo->add(
-                                    'owl_ai_session',
+                                    $session_id,  // Use current session, not 'owl_ai_session'
                                     '🦉 сова',
                                     $aiResponse,
                                     null
@@ -307,7 +307,7 @@ class ApiHandler {
 
                             // Add greeting as message from Owl
                             $owlMessage = $this->msgRepo->add(
-                                'owl_ai_session',
+                                $session_id,  // Use current session, not 'owl_ai_session'
                                 '🦉 сова',
                                 $greetingWithReminder,
                                 null

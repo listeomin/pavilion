@@ -11,12 +11,74 @@ export class Editor {
     this.historyIndex = 0;
     this.maxHistory = maxHistory;
     this.paused = false;
-    
+    this.isDragging = false;
+
     // Handle paste to preserve line breaks and images
     this.inputEl.addEventListener('paste', (e) => this.handlePaste(e));
-    
+
     // Handle backspace to delete image tags
     this.inputEl.addEventListener('keydown', (e) => this.handleKeydown(e));
+
+    // Handle drag and drop
+    this.setupDragAndDrop();
+  }
+
+  setupDragAndDrop() {
+    // Prevent default drag behavior on the whole document
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    // Highlight drop zone on drag over
+    document.addEventListener('dragenter', (e) => {
+      if (this.hasFiles(e)) {
+        this.isDragging = true;
+        document.body.classList.add('dragging-file');
+      }
+    });
+
+    document.addEventListener('dragleave', (e) => {
+      // Remove overlay when dragging out of the window
+      // relatedTarget is null when leaving the window entirely
+      if (!e.relatedTarget || e.relatedTarget.nodeName === 'HTML') {
+        this.isDragging = false;
+        document.body.classList.remove('dragging-file');
+      }
+    });
+
+    // Handle drop
+    document.addEventListener('drop', async (e) => {
+      this.isDragging = false;
+      document.body.classList.remove('dragging-file');
+
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        const imageFiles = Array.from(files).filter(file =>
+          file.type.startsWith('image/')
+        );
+
+        if (imageFiles.length > 0) {
+          console.log('[Drop] Uploading', imageFiles.length, 'images');
+
+          for (const file of imageFiles) {
+            await this.insertImageTag(file);
+          }
+
+          // Focus input after upload
+          this.inputEl.focus();
+        }
+      }
+    });
+  }
+
+  hasFiles(e) {
+    if (e.dataTransfer?.types) {
+      return Array.from(e.dataTransfer.types).includes('Files');
+    }
+    return false;
   }
 
   async handlePaste(e) {

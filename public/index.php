@@ -23,7 +23,7 @@ $basePath = get_base_path();
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=8">
+<link rel="stylesheet" href="css/base.css?v=9">
 <link rel="stylesheet" href="css/chat.css?v=6">
 <link rel="stylesheet" href="css/input.css?v=7">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
@@ -98,6 +98,6 @@ $basePath = get_base_path();
 <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
   <img src="assets/leaf.svg" alt="Developer Nest">
 </a>
-<script type="module" src="js/main.js?v=14"></script>
+<script type="module" src="js/main.js?v=17"></script>
 </body>
 </html>

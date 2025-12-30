@@ -91,3 +91,46 @@ body.page-chat .wrap {
   height: 100vh;
   min-height: auto;
 }
+
+/* Drag and drop overlay */
+body.dragging-file::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(90, 87, 217, 0.1);
+  border: 3px dashed var(--color-iris);
+  z-index: 9999;
+  pointer-events: none;
+  animation: dragPulse 1s ease-in-out infinite;
+}
+
+body.dragging-file::after {
+  content: '📎 Перетащите изображение сюда';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--color-iris);
+  z-index: 10000;
+  pointer-events: none;
+  text-align: center;
+  padding: 24px 48px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(90, 87, 217, 0.2);
+}
+
+@keyframes dragPulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
