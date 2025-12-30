@@ -10,7 +10,9 @@ export class InlineInput {
     this.commands = [];
     this.commandMode = false;
     this.currentCommand = null;
-    
+    this.atCommands = ['погода', 'сова'];
+    this.currentAtCommandIndex = 0;
+
     this.init();
   }
 
@@ -220,23 +222,28 @@ export class InlineInput {
   }
 
   renderWeatherHint() {
-    const html = `<span class="weather-prefix">@</span><span class="weather-hint">погода</span>`;
+    const command = this.atCommands[this.currentAtCommandIndex];
+    const html = `<span class="weather-prefix">@</span><span class="weather-hint">${command}</span>`;
     this.input.innerHTML = html;
   }
 
   renderWeatherCommand(text, cursorPos) {
     const typed = text.substring(1); // Remove @
-    const command = 'погода';
 
-    if (typed === command) {
-      // Fully typed
-      const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span>`;
-      this.input.innerHTML = html;
-    } else if (command.startsWith(typed)) {
-      // Partial match - show suggestion
-      const remaining = command.substring(typed.length);
-      const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span><span class="weather-hint">${this.escapeHtml(remaining)}</span>`;
-      this.input.innerHTML = html;
+    // Find matching command from our list
+    const matchingCommand = this.atCommands.find(cmd => cmd.startsWith(typed));
+
+    if (matchingCommand) {
+      if (typed === matchingCommand) {
+        // Fully typed
+        const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span>`;
+        this.input.innerHTML = html;
+      } else {
+        // Partial match - show suggestion
+        const remaining = matchingCommand.substring(typed.length);
+        const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span><span class="weather-hint">${this.escapeHtml(remaining)}</span>`;
+        this.input.innerHTML = html;
+      }
     } else {
       // No match
       const html = `<span class="weather-prefix">${this.escapeHtml(text)}</span>`;
@@ -459,14 +466,25 @@ export class InlineInput {
     if ((e.key === 'Tab' || e.key === 'ArrowUp') && this.commandMode) {
       e.preventDefault();
 
-      // Handle @погода completion
+      // Handle @ command cycling and completion
       if (text.startsWith('@')) {
         const typed = text.substring(1);
-        const command = 'погода';
 
-        if (command.startsWith(typed) && typed !== command) {
-          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(command)}</span>`;
+        // If just @, cycle through commands
+        if (typed === '') {
+          this.currentAtCommandIndex = (this.currentAtCommandIndex + 1) % this.atCommands.length;
+          this.renderWeatherHint();
+          this.restoreCursorPosition(1);
+          return;
+        }
+
+        // If partial typing, find matching command and autocomplete
+        const matchingCommand = this.atCommands.find(cmd => cmd.startsWith(typed));
+        if (matchingCommand && typed !== matchingCommand) {
+          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(matchingCommand)}</span>`;
           this.setCursorToEnd();
+          // Reset index after completion
+          this.currentAtCommandIndex = 0;
         }
         return;
       }

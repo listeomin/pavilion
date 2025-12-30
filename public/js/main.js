@@ -6,7 +6,7 @@ import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMess
 import { Editor } from './editor.js?v=13';
 import { FormatMenu } from './format.js?v=6';
 import { setupHotkeys } from './hotkeys.js?v=6';
-import { InlineInput } from './inline-input.js?v=29';
+import { InlineInput } from './inline-input.js?v=30';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=22';
