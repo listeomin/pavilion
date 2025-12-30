@@ -1,7 +1,7 @@
 # Telegram Instant View Template for Murmuration Nest Pages
-# Domain: murmuration.monster/nest/*
+# Domains: murmuration.monster/nest/*, hhrrr.ru/pavilion/nest/*
 # Author: Claude Code
-# Last update: 2025-12-29
+# Last update: 2025-12-30
 
 # ===== VERSION =====
 ~version: "2.1"
@@ -12,73 +12,86 @@
 
 # ===== TITLE =====
 # Extract title from Open Graph meta tag
-?exists: $@/meta[@property="og:title"]
-title: $@/meta[@property="og:title"]/@content
+?exists: //meta[@property="og:title"]
+title: //meta[@property="og:title"]/@content
 
 # ===== COVER =====
-# Extract cover image if present
-?exists: $@/meta[@property="og:image"]
-cover: $@/meta[@property="og:image"]/@content
+# Extract cover image if present (optional)
+?exists: //meta[@property="og:image"]
+cover: //meta[@property="og:image"]/@content
 
 # ===== DESCRIPTION =====
 # Extract description from Open Graph
-?exists: $@/meta[@property="og:description"]
-description: $@/meta[@property="og:description"]/@content
+?exists: //meta[@property="og:description"]
+description: //meta[@property="og:description"]/@content
 
 # ===== AUTHOR =====
-# Extract author from page heading if present
-?exists: $body//h1
-author: $body//h1
+# Skip author for now (can add later from h1 if needed)
 
 # ===== PUBLISHED DATE =====
 # Not available on static pages, skip
 
 # ===== BODY =====
 # Main content is in <article id="nest-static-content">
-body: $body//article[@id="nest-static-content"]
+body: //article[@id="nest-static-content"]
 
 # ==== CLEAN UP NAVIGATION ====
-@remove: $body//nav[@class="main-nav"]
-@remove: $body//button
-@remove: $body//div[@id="telegram-auth-container"]
-@remove: $body//div[@id="toc-container"]
-@remove: $body//div[@id="skeleton-content"]
-@remove: $body//div[@id="nest-editor-container"]
-@remove: $body//script
-@remove: $body//style
+# Remove navigation, buttons, scripts before processing
+@remove: //nav[@class="main-nav"]
+@remove: //button
+@remove: //div[@id="telegram-auth-container"]
+@remove: //div[@id="toc-container"]
+@remove: //div[@id="skeleton-content"]
+@remove: //div[@id="nest-editor-container"]
+@remove: //div[@id="header-container"]
+@remove: //script
+@remove: //style
+@remove: //noscript
+@remove: //link
 
-# ==== FORMAT HEADERS ====
-# Headers are already in correct format (h1, h2, h3)
+# ==== FORMAT CONTENT ====
+# Content is already properly formatted in article
+# Just ensure proper structure
+
+# Headers
 <h1>: $body//h1
 <h2>: $body//h2
 <h3>: $body//h3
+<h4>: $body//h4
+<h5>: $body//h5
+<h6>: $body//h6
 
-# ==== FORMAT PARAGRAPHS ====
+# Paragraphs
 <p>: $body//p
 
-# ==== FORMAT LISTS ====
+# Lists
 <ul>: $body//ul
 <ol>: $body//ol
+<li>: $body//li
 
-# ==== FORMAT QUOTES ====
+# Quotes
 <blockquote>: $body//blockquote
 
-# ==== FORMAT LINKS ====
-# Links are already in correct format
+# Links are already properly formatted
+<a>: $body//a
 
-# ==== FORMAT IMAGES ====
+# Images
 <figure>: $body//figure
-<img>: $body//figure/img
+<img>: $body//img
 
-# ==== FORMAT HORIZONTAL RULES ====
+# Horizontal rules
 <hr>: $body//hr
 
-# ==== FORMAT CODE ====
+# Code blocks
 <code>: $body//code
+<pre>: $body//pre
 
 # ==== FINAL CLEANUP ====
 # Remove empty paragraphs
 @remove: $body//p[not(node())]
 
-# Remove inline styles (optional)
+# Remove inline styles
 @remove: $body//*/@style
+
+# Remove empty elements
+@remove: $body//*[not(node()) and not(self::br) and not(self::hr) and not(self::img)]

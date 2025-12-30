@@ -291,13 +291,13 @@ h3.ce-header {
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-right: none;
   border-radius: 8px 0 0 8px;
-  padding: 16px 0 16px 16px;
+  padding: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   z-index: 50;
 }
 
 /* Hide TOC on smaller screens */
-@media (max-width: 1280px) {
+@media (max-width: 960px) {
   #toc-container {
     display: none;
   }
@@ -331,10 +331,12 @@ h3.ce-header {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 400;
 }
 
 .toc a:hover {
   color: var(--color-olive);
+  font-weight: 400;
 }
 
 /* Remove bullet points from toc-link */
@@ -345,7 +347,7 @@ h3.ce-header {
 /* Active TOC item */
 .toc .is-active-link {
   color: var(--color-olive);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 /* TOC nesting levels */
