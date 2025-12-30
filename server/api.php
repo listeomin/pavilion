@@ -89,6 +89,12 @@ try {
         json($result);
     }
 
+    if ($action === 'delete_message') {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $result = $handler->deleteMessage($input);
+        json($result);
+    }
+
     if ($action === 'rebase') {
         $result = $handler->rebase();
         json($result);

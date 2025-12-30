@@ -84,6 +84,22 @@ class MessageRepository {
         return $row ?: null;
     }
 
+    public function delete(int $id, string $author): bool {
+        // Check if message exists and belongs to this author
+        $stmt = $this->db->prepare('SELECT id, author FROM messages WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$existing || $existing['author'] !== $author) {
+            return false; // Not found or unauthorized
+        }
+
+        $stmt = $this->db->prepare('DELETE FROM messages WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+
+        return true;
+    }
+
     private function decodeMetadata(array $rows): array {
         foreach ($rows as &$row) {
             if (!empty($row['metadata'])) {

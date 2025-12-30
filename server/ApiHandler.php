@@ -418,6 +418,29 @@ class ApiHandler {
         return $message;
     }
 
+    public function deleteMessage(array $input): array {
+        $session_id = $input['session_id'] ?? null;
+        $message_id = $input['message_id'] ?? null;
+
+        if (!$session_id || !$message_id) {
+            throw new InvalidArgumentException('session_id and message_id required');
+        }
+
+        $session = $this->sessionRepo->get($session_id);
+        if (!$session) {
+            throw new RuntimeException('invalid session');
+        }
+
+        $deleted = $this->msgRepo->delete($message_id, $session['name']);
+
+        if (!$deleted) {
+            throw new RuntimeException('message not found or unauthorized');
+        }
+
+        $this->broadcastService->messageDeleted($message_id);
+        return ['success' => true, 'message_id' => $message_id];
+    }
+
     public function rebase(): array {
         $scriptPath = __DIR__ . '/../db-reset.sh';
 

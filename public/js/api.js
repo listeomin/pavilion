@@ -87,6 +87,17 @@ export async function apiUpdateMessage(API, sessionId, messageId, text, metadata
   return await res.json();
 }
 
+export async function apiDeleteMessage(API, sessionId, messageId) {
+  const payload = { session_id: sessionId, message_id: messageId };
+  const res = await fetch(API + '?action=delete_message', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) return null;
+  return await res.json();
+}
+
 export async function apiRebase(API) {
   const res = await fetch(API + '?action=rebase', {
     method: 'POST'

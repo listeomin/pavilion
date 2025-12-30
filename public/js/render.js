@@ -126,7 +126,7 @@ export function removeSystemMessage(element) {
 // Also applies to all messages when asSystemMessages flag is set (e.g., after rebase)
 export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
   if (!messages || !messages.length) return;
-  const { asSystemMessages = false } = options;
+  const { asSystemMessages = false, myName = null } = options;
   const frag = document.createDocumentFragment();
   messages.forEach(m => {
     // Check if we should merge with previous message
@@ -372,6 +372,22 @@ export function updateMessage(chatLog, updatedMessage) {
   
   // Make any new images zoomable
   textSpan.querySelectorAll('img').forEach(img => makeImageZoomable(img));
+}
+
+export function deleteMessageFromChat(chatLog, messageId) {
+  // Find message in DOM by data-message-id
+  const messageEl = chatLog.querySelector(`[data-message-id="${messageId}"]`);
+  if (!messageEl) {
+    console.warn('Message not found in DOM:', messageId);
+    return;
+  }
+
+  // Remove the message with fade animation
+  messageEl.style.transition = 'opacity 0.2s ease';
+  messageEl.style.opacity = '0';
+  setTimeout(() => {
+    messageEl.remove();
+  }, 200);
 }
 
 export function updateSendButton(sendBtn, editor, inlineInput, sendPawBtn = null) {

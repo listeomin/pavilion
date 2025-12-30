@@ -1,11 +1,20 @@
 // public/js/contextMenu.js
 
 export class ContextMenu {
-  constructor(editor) {
+  constructor(editor, options = {}) {
     this.editor = editor;
     this.menu = null;
     this.selectedText = '';
+    this.myName = options.myName || null;
+    this.onEdit = options.onEdit || null;
+    this.onDelete = options.onDelete || null;
+    this.currentMessageId = null;
+    this.currentMenuType = null;
     this.init();
+  }
+
+  setMyName(name) {
+    this.myName = name;
   }
 
   init() {
@@ -17,6 +26,11 @@ export class ContextMenu {
     this.menu = document.createElement('div');
     this.menu.id = 'context-menu';
     this.menu.className = 'context-menu';
+    document.body.appendChild(this.menu);
+  }
+
+  showTextMenu() {
+    this.currentMenuType = 'text';
     this.menu.innerHTML = `
       <div class="context-menu-reactions">
         <span class="context-menu-reaction" data-emoji="😂">😂</span>
@@ -31,18 +45,40 @@ export class ContextMenu {
       <div class="context-menu-item" data-action="quote">Цитировать</div>
       <div class="context-menu-item disabled" data-action="branch">Создать ветку</div>
     `;
-    document.body.appendChild(this.menu);
+  }
+
+  showMessageMenu() {
+    this.currentMenuType = 'message';
+    this.menu.innerHTML = `
+      <div class="context-menu-item" data-action="edit">Редактировать</div>
+      <div class="context-menu-item context-menu-item-danger" data-action="delete">Удалить</div>
+    `;
   }
 
   attachListeners() {
-    // Block default context menu only when text is selected
+    // Block default context menu for text selection and own messages
     document.addEventListener('contextmenu', (e) => {
       const selection = window.getSelection();
       const text = selection.toString().trim();
 
+      // Check if right-clicking on own message
+      const messageEl = e.target.closest('.msg');
+      const isOwnMessage = messageEl &&
+                          this.myName &&
+                          messageEl.dataset.author === this.myName &&
+                          !messageEl.classList.contains('system-msg');
+
       if (text) {
+        // Show text selection menu
         e.preventDefault();
         this.selectedText = text;
+        this.showTextMenu();
+        this.show(e.clientX, e.clientY);
+      } else if (isOwnMessage) {
+        // Show message edit/delete menu
+        e.preventDefault();
+        this.currentMessageId = messageEl.dataset.messageId;
+        this.showMessageMenu();
         this.show(e.clientX, e.clientY);
       } else {
         this.hide();
@@ -101,18 +137,30 @@ export class ContextMenu {
           console.error('Failed to copy:', err);
         }
         break;
-      
+
       case 'quote':
         if (this.editor) {
           this.editor.insertQuoteTag({ text: this.selectedText });
         }
         break;
-      
+
       case 'branch':
         // TODO: implement branch
         break;
+
+      case 'edit':
+        if (this.onEdit && this.currentMessageId) {
+          this.onEdit(this.currentMessageId);
+        }
+        break;
+
+      case 'delete':
+        if (this.onDelete && this.currentMessageId) {
+          this.onDelete(this.currentMessageId);
+        }
+        break;
     }
-    
+
     this.hide();
   }
 }

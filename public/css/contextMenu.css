@@ -75,3 +75,11 @@
   background-color: rgba(255, 255, 255, 0.1);
   transform: scale(1.15);
 }
+
+.context-menu-item-danger {
+  color: #ff6b6b;
+}
+
+.context-menu-item-danger:hover {
+  background-color: rgba(255, 107, 107, 0.15);
+}

@@ -11,7 +11,7 @@ class ImageUploadService {
         'image/gif',
         'image/webp'
     ];
-    private $maxFileSize = 10 * 1024 * 1024; // 10MB
+    private $maxFileSize = 100 * 1024 * 1024; // 100MB
 
     public function __construct() {
         $this->uploadDir = __DIR__ . '/../public/assets/images/';
@@ -28,7 +28,7 @@ class ImageUploadService {
 
         // Validate file size
         if ($file['size'] > $this->maxFileSize) {
-            return ['success' => false, 'error' => 'File too large (max 10MB)'];
+            return ['success' => false, 'error' => 'File too large (max 100MB)'];
         }
 
         // Validate MIME type

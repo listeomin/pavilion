@@ -1,8 +1,8 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=6';
-import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiRebase, apiVersion } from './api.js?v=7';
+import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiDeleteMessage, apiRebase, apiVersion } from './api.js?v=8';
 import { WebSocketClient } from './websocket-client.js?v=2';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage } from './render.js?v=15';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=16';
 import { Editor } from './editor.js?v=10';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=6';
@@ -11,7 +11,7 @@ import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=20';
 import { TelegramAuth } from './telegramAuth.js?v=2';
-import { ContextMenu } from './contextMenu.js?v=1';
+import { ContextMenu } from './contextMenu.js?v=2';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
 import { CommandNavigator } from './command-navigator.js?v=1';
@@ -253,7 +253,7 @@ function alignUserHeader() {
           chatLog.innerHTML = '';
           lastIdRef.value = 0;
           // SYSTEM_MSG_CLASS: Render rebase seed messages as system messages
-          renderMessages(chatLog, result.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
+          renderMessages(chatLog, result.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId, myName });
 
           editor.clear();
           updateSendButton(sendBtn, editor, inlineInput, sendPawBtn);
@@ -358,14 +358,19 @@ function alignUserHeader() {
     wsClient.on('message_new', (message) => {
       console.log('[Main] New message via WS:', message);
       // SYSTEM_MSG_CLASS: Pass current session ID to determine if message is seed
-      renderMessages(chatLog, [message], lastIdRef);
+      renderMessages(chatLog, [message], lastIdRef, { myName });
     });
    
     wsClient.on('message_updated', (message) => {
       console.log('[Main] Message updated via WS:', message);
       updateMessage(chatLog, message);
     });
-   
+
+    wsClient.on('message_deleted', (data) => {
+      console.log('[Main] Message deleted via WS:', data);
+      deleteMessageFromChat(chatLog, data.message_id);
+    });
+
     wsClient.on('rebase', async (data) => {
       console.log('[Main] Rebase via WS:', data);
       // Clear chat
@@ -394,7 +399,7 @@ function alignUserHeader() {
         
         // Render messages from rebase event
         // SYSTEM_MSG_CLASS: Render rebase seed messages as system messages
-        renderMessages(chatLog, data.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId });
+        renderMessages(chatLog, data.messages || [], lastIdRef, { asSystemMessages: true, currentSessionId: sessionId, myName });
       } catch (error) {
         console.error('[Main] Rebase reinit failed:', error);
         renderSystemMessage(chatLog, 'Ошибка переподключения после rebase', {});
@@ -491,9 +496,12 @@ function alignUserHeader() {
 
     console.log('[Main] Final myName:', myName);
 
+    // Update context menu with current user name
+    contextMenu.setMyName(myName);
+
     // Render all messages as regular messages (not system messages)
     // Only rebase/seed operations should show messages as system messages
-    renderMessages(chatLog, data.messages || [], lastIdRef);
+    renderMessages(chatLog, data.messages || [], lastIdRef, { myName });
 
     // Hide skeleton after messages are rendered
     hideSkeleton();
@@ -504,8 +512,8 @@ function alignUserHeader() {
     // Initialize image zoom for existing images
     initImageZoom();
 
-    // Handle clicks on @сова mentions to insert into input field
-    chatLog.addEventListener('click', (e) => {
+    // Handle clicks on @сова mentions to insert into input field and delete buttons
+    chatLog.addEventListener('click', async (e) => {
       if (e.target.classList.contains('ai-mention')) {
         e.preventDefault();
         e.stopPropagation();
@@ -626,10 +634,29 @@ function alignUserHeader() {
   });
  
   NightShift.init();
- 
-  // Initialize context menu
-  new ContextMenu(editor);
- 
+
+  // Initialize context menu with edit/delete callbacks
+  const contextMenu = new ContextMenu(editor, {
+    myName,
+    onEdit: (messageId) => {
+      console.log('[Main] Edit message:', messageId);
+      // TODO: implement edit functionality
+    },
+    onDelete: async (messageId) => {
+      console.log('[Main] Delete message:', messageId);
+      try {
+        const result = await apiDeleteMessage(API, sessionId, parseInt(messageId));
+        if (result && result.success) {
+          console.log('[Main] Message deleted:', messageId);
+        } else {
+          console.error('[Main] Failed to delete message:', result);
+        }
+      } catch (error) {
+        console.error('[Main] Error deleting message:', error);
+      }
+    }
+  });
+
   // Initialize quote handlers
   initQuoteHandlers(editor);
 })();
