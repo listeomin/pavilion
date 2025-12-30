@@ -12,6 +12,7 @@ require_once __DIR__ . '/MessageRepository.php';
 require_once __DIR__ . '/GitHubService.php';
 require_once __DIR__ . '/PinterestService.php';
 require_once __DIR__ . '/NestPreviewService.php';
+require_once __DIR__ . '/BranchPreviewService.php';
 require_once __DIR__ . '/YouTubePreviewService.php';
 require_once __DIR__ . '/LinkPreviewService.php';
 require_once __DIR__ . '/ImageUploadService.php';

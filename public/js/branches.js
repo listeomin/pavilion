@@ -377,7 +377,24 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
   // Render message content
   const renderMessageContent = (text, metadata) => {
-    return escapeHtml(text || '');
+    let html = '';
+
+    // If message has quote metadata, render quote
+    if (metadata && metadata.quote) {
+      html += '<div class="quote-block">';
+      html += `<div class="quote-text"><em>${escapeHtml(metadata.quote.text)}</em></div>`;
+      if (metadata.quote.author) {
+        html += `<div class="quote-author">${escapeHtml(metadata.quote.author)}</div>`;
+      }
+      html += '</div>';
+    }
+
+    // Add regular message text if present
+    if (text) {
+      html += escapeHtml(text);
+    }
+
+    return html;
   };
 
   // Context menu functions

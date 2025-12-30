@@ -149,16 +149,25 @@ export class ContextMenu {
           // Import CONFIG dynamically
           const { CONFIG } = await import('./config.js?v=6');
 
+          // Find the message element containing the selected text
+          const selection = window.getSelection();
+          const messageEl = selection.anchorNode?.parentElement?.closest('.msg');
+          const authorName = messageEl?.dataset?.author || null;
+
           const res = await fetch(CONFIG.BASE_PATH + '/api/branches.php?action=create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: this.selectedText })
+            body: JSON.stringify({
+              title: this.selectedText,
+              quote_text: this.selectedText,
+              quote_author: authorName
+            })
           });
 
           const data = await res.json();
 
           if (data.success) {
-            // Redirect to the new branch
+            // Force navigation to the branch page with reload
             window.location.href = `${CONFIG.BASE_PATH}/branches/${data.branch.id}`;
           } else {
             alert('Ошибка создания ветки');

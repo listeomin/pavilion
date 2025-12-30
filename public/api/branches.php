@@ -5,6 +5,9 @@ session_start();
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../server/db.php';
+require_once __DIR__ . '/../../server/config.php';
+require_once __DIR__ . '/../../server/MessageRepository.php';
+require_once __DIR__ . '/../../server/BroadcastService.php';
 
 $action = $_GET['action'] ?? '';
 
@@ -44,21 +47,84 @@ try {
             // Create new branch
             $data = json_decode(file_get_contents('php://input'), true);
             $title = $data['title'] ?? '';
+            $quoteText = $data['quote_text'] ?? null;
+            $quoteAuthor = $data['quote_author'] ?? null;
+
+            error_log('[Branches API] Create: telegramUserId=' . var_export($telegramUserId, true) . ', sessionId=' . var_export($sessionId, true));
 
             if (empty($title)) {
                 throw new Exception('Title is required');
             }
 
-            $stmt = $db->prepare('
-                INSERT INTO branches (title, creator_user_id, created_at)
-                VALUES (:title, :creator_user_id, datetime("now"))
-            ');
-            $stmt->execute([
-                ':title' => $title,
-                ':creator_user_id' => $telegramUserId
-            ]);
+            // Temporarily disable foreign key checks
+            $db->exec('PRAGMA foreign_keys = OFF');
+
+            // Only set creator_user_id if user is authenticated via Telegram and user exists
+            if ($telegramUserId) {
+                // Check if user exists
+                $userCheck = $db->prepare('SELECT id FROM users WHERE id = :id');
+                $userCheck->execute([':id' => $telegramUserId]);
+                $userExists = $userCheck->fetch();
+            } else {
+                $userExists = false;
+            }
+
+            if ($userExists) {
+                $stmt = $db->prepare('
+                    INSERT INTO branches (title, creator_user_id, created_at)
+                    VALUES (:title, :creator_user_id, datetime("now"))
+                ');
+                $stmt->execute([
+                    ':title' => $title,
+                    ':creator_user_id' => $telegramUserId
+                ]);
+            } else {
+                $stmt = $db->prepare('
+                    INSERT INTO branches (title, created_at)
+                    VALUES (:title, datetime("now"))
+                ');
+                $stmt->execute([
+                    ':title' => $title
+                ]);
+            }
 
             $branchId = $db->lastInsertId();
+
+            // If quote data provided, create initial message with quote
+            if ($quoteText && $quoteAuthor) {
+                $quoteMetadata = json_encode([
+                    'quote' => [
+                        'text' => $quoteText,
+                        'author' => $quoteAuthor
+                    ]
+                ]);
+
+                // Create message with user_id only if authenticated, otherwise use session_id
+                if ($telegramUserId) {
+                    $stmt = $db->prepare('
+                        INSERT INTO branch_messages (branch_id, user_id, session_id, text, metadata, created_at)
+                        VALUES (:branch_id, :user_id, :session_id, :text, :metadata, datetime("now"))
+                    ');
+                    $stmt->execute([
+                        ':branch_id' => $branchId,
+                        ':user_id' => $telegramUserId,
+                        ':session_id' => $sessionId,
+                        ':text' => '',
+                        ':metadata' => $quoteMetadata
+                    ]);
+                } else {
+                    $stmt = $db->prepare('
+                        INSERT INTO branch_messages (branch_id, session_id, text, metadata, created_at)
+                        VALUES (:branch_id, :session_id, :text, :metadata, datetime("now"))
+                    ');
+                    $stmt->execute([
+                        ':branch_id' => $branchId,
+                        ':session_id' => $sessionId,
+                        ':text' => '',
+                        ':metadata' => $quoteMetadata
+                    ]);
+                }
+            }
 
             // Get created branch
             $stmt = $db->prepare('
@@ -72,6 +138,35 @@ try {
             ');
             $stmt->execute([':id' => $branchId]);
             $branch = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Send system message to main chat with branch link
+            $basePath = get_base_path();
+            $branchUrl = ($_SERVER['REQUEST_SCHEME'] ?? 'https') . '://' .
+                         ($_SERVER['HTTP_HOST'] ?? 'murmuration.monster') .
+                         $basePath . '/branches/' . $branchId;
+
+            $msgRepo = new MessageRepository();
+            $broadcastService = new BroadcastService();
+
+            // Add branch preview metadata
+            $branchMetadata = [
+                'type' => 'branch',
+                'title' => $title,
+                'branch_id' => $branchId,
+                'url' => $branchUrl
+            ];
+
+            $systemMessage = $msgRepo->add(
+                'SYSTEM',
+                '🛳️ капитанская рубка',
+                'Создана новая ветка: ' . $branchUrl,
+                $branchMetadata
+            );
+
+            $broadcastService->messageNew($systemMessage);
+
+            // Re-enable foreign key checks
+            $db->exec('PRAGMA foreign_keys = ON');
 
             echo json_encode([
                 'success' => true,
@@ -181,6 +276,8 @@ try {
     }
 
 } catch (Exception $e) {
+    error_log('[Branches API] Error: ' . $e->getMessage());
+    error_log('[Branches API] Stack trace: ' . $e->getTraceAsString());
     http_response_code(400);
     echo json_encode([
         'success' => false,

@@ -89,7 +89,7 @@ if ($branchId) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
-<link rel="stylesheet" href="css/branches.css?v=3">
+<link rel="stylesheet" href="css/branches.css?v=5">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-branches<?php if ($branchId) echo ' has-chat'; ?>">
@@ -173,6 +173,6 @@ if ($branchId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/branches.js?v=4"></script>
+<script type="module" src="js/branches.js?v=5"></script>
 </body>
 </html>

@@ -11,8 +11,10 @@ class NestPreviewService {
     }
 
     public function parseNestUrl(string $text): ?array {
-        // Match URLs like: https://hhrrr.ru/pavilion/nest/username or http://hhrrr.ru/pavilion/nest/5740117539
-        if (preg_match('~https?://hhrrr\.ru/pavilion/nest/([^/\s?#]+)~i', $text, $matches)) {
+        // Match URLs like:
+        // https://hhrrr.ru/pavilion/nest/username
+        // https://murmuration.monster/nest/username
+        if (preg_match('~https?://(?:hhrrr\.ru/pavilion|murmuration\.monster)/nest/([^/\s?#]+)~i', $text, $matches)) {
             return [
                 'identifier' => $matches[1],
                 'url' => $matches[0]

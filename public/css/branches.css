@@ -310,8 +310,8 @@ body.page-branches .wrap {
   height: 48px;
   display: flex;
   align-items: center;
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.2;
   color: rgba(0, 0, 0, 0.8);
   background: var(--color-cloud-light);
   cursor: pointer;
@@ -429,6 +429,29 @@ body.page-branches .wrap {
 /* Empty state text override for DM page */
 .branch-chat-area .empty-state-text {
   display: block;
+}
+
+/* Quote styles */
+.quote-block {
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+  padding-left: 12px;
+  margin: 6px 0;
+  display: block;
+  font-style: italic;
+}
+
+.quote-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 2px;
+}
+
+.quote-author {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.4);
+  margin-top: 2px;
+  font-style: normal;
 }
 
 /* Responsive */

@@ -3,9 +3,10 @@ import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=5';
 import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderNestPreview } from './nest-preview.js?v=1';
+import { renderBranchPreview } from './branch-preview.js?v=2';
 import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=6';
-import { makeImageZoomable } from './image-zoom.js?v=1';
+import { makeImageZoomable } from './image-zoom.js?v=2';
 import { parseYouTubeUrl, isYouTubeUrl } from './youtube.js?v=2';
 import { CONFIG } from './config.js?v=6';
 
@@ -264,6 +265,22 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
 
       // Replace placeholder with actual preview
       content = content.replace('__NEST_PREVIEW__', renderNestPreview(m.metadata));
+    } else if (m.metadata && m.metadata.type === 'branch') {
+      // Replace URL with branch preview in place
+      let replacedUrl = false;
+      content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+        if (!replacedUrl && url === m.metadata.url) {
+          replacedUrl = true;
+          return '__BRANCH_PREVIEW__';
+        }
+        return url;
+      });
+
+      // Apply markdown to text parts
+      content = linkifyImages(parseMarkdown(escapeHtml(content)));
+
+      // Replace placeholder with actual preview
+      content = content.replace('__BRANCH_PREVIEW__', renderBranchPreview(m.metadata));
     } else if (m.metadata && m.metadata.type === 'link') {
       // Replace URL with preview in place
       let replacedUrl = false;
@@ -385,6 +402,17 @@ export function updateMessage(chatLog, updatedMessage) {
     });
     content = linkifyImages(parseMarkdown(escapeHtml(content)));
     content = content.replace('__NEST_PREVIEW__', renderNestPreview(m.metadata));
+  } else if (m.metadata && m.metadata.type === 'branch') {
+    let replacedUrl = false;
+    content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
+      if (!replacedUrl && url === m.metadata.url) {
+        replacedUrl = true;
+        return '__BRANCH_PREVIEW__';
+      }
+      return url;
+    });
+    content = linkifyImages(parseMarkdown(escapeHtml(content)));
+    content = content.replace('__BRANCH_PREVIEW__', renderBranchPreview(m.metadata));
   } else if (m.metadata && m.metadata.type === 'link') {
     let replacedUrl = false;
     content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {
