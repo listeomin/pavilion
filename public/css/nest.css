@@ -84,7 +84,7 @@ h1 .editable-name:focus {
 
 /* Telegraph-style Editor.js */
 #nest-editor-container {
-  max-width: 980px;
+  max-width: 720px;
   margin: 20px 0 60px 0;
   padding: 0;
 }
@@ -107,7 +107,7 @@ h1 .editable-name:focus {
 }
 
 .ce-block__content {
-  max-width: 980px;
+  max-width: 720px;
   margin: 0;
 }
 
