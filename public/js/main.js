@@ -4,14 +4,14 @@ import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiDelete
 import { WebSocketClient } from './websocket-client.js?v=3';
 import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=17';
 import { Editor } from './editor.js?v=13';
-import { FormatMenu } from './format.js?v=5';
+import { FormatMenu } from './format.js?v=6';
 import { setupHotkeys } from './hotkeys.js?v=6';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=22';
 import { TelegramAuth } from './telegramAuth.js?v=2';
-import { ContextMenu } from './contextMenu.js?v=2';
+import { ContextMenu } from './contextMenu.js?v=3';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
 import { MessageHistory } from './message-history.js?v=1';
 import { CommandNavigator } from './command-navigator.js?v=1';

@@ -43,7 +43,7 @@ export class ContextMenu {
       </div>
       <div class="context-menu-item" data-action="copy">Скопировать</div>
       <div class="context-menu-item" data-action="quote">Цитировать</div>
-      <div class="context-menu-item disabled" data-action="branch">Создать ветку</div>
+      <div class="context-menu-item" data-action="branch">Создать ветку</div>
     `;
   }
 
@@ -145,7 +145,28 @@ export class ContextMenu {
         break;
 
       case 'branch':
-        // TODO: implement branch
+        try {
+          // Import CONFIG dynamically
+          const { CONFIG } = await import('./config.js?v=6');
+
+          const res = await fetch(CONFIG.BASE_PATH + '/api/branches.php?action=create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: this.selectedText })
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            // Redirect to the new branch
+            window.location.href = `${CONFIG.BASE_PATH}/branches/${data.branch.id}`;
+          } else {
+            alert('Ошибка создания ветки');
+          }
+        } catch (e) {
+          console.error('[ContextMenu] Error creating branch:', e);
+          alert('Ошибка создания ветки');
+        }
         break;
 
       case 'edit':

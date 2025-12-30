@@ -174,6 +174,12 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
       emptyState.style.display = 'none';
     }
 
+    // Show bird image when chat is opened
+    const birdImg = document.querySelector('.dm-background-bird');
+    if (birdImg) {
+      birdImg.style.display = 'block';
+    }
+
     if (!chatContainer) {
       // Create chat container if it doesn't exist
       const wrap = document.querySelector('.wrap');

@@ -88,6 +88,7 @@ $basePath = get_base_path();
     </button>
   </form>
 </div>
+
 <div id="telegram-auth-container" style="display: none;"></div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
   <img src="assets/paw.svg" alt="Animal Profile">
@@ -98,6 +99,6 @@ $basePath = get_base_path();
 <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
   <img src="assets/leaf.svg" alt="Developer Nest">
 </a>
-<script type="module" src="js/main.js?v=23"></script>
+<script type="module" src="js/main.js?v=27"></script>
 </body>
 </html>

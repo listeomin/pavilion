@@ -1,0 +1,449 @@
+/* dm.css - Direct Messages styling */
+
+/* Background bird decoration */
+.branch-background-bird {
+  position: fixed;
+  top: 120px;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Disable body scroll on DM page */
+body.page-branches {
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-cloud-medium);
+}
+
+body.page-branches .wrap {
+  height: 100vh;
+  min-height: auto;
+  overflow: hidden;
+  max-width: 640px !important;
+}
+
+/* Chat container when user is selected - same size as empty-state */
+.branch-chat-container {
+  position: absolute;
+  top: calc(120px + 48px + 48px + 24px); /* Same as empty-state */
+  bottom: 0;
+  left: 80px;
+  width: 640px;
+  background: #FAF9F5;
+  box-shadow: 0px 0px 64px rgba(0, 0, 0, 0.25);
+  border-radius: 8px 8px 0px 0px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.branch-chat-header {
+  display: none;
+}
+
+.branch-recipient-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.branch-recipient-name {
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-night);
+}
+
+.branch-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Message bubbles */
+.branch-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.branch-message.from-me {
+  align-self: flex-end;
+}
+
+.branch-message.from-them {
+  align-self: flex-start;
+}
+
+.branch-message-bubble {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.branch-message.from-me .branch-message-bubble {
+  background: var(--color-cloud-medium);
+  color: var(--color-night);
+}
+
+.branch-message.from-them .branch-message-bubble {
+  background: var(--color-cloud);
+  color: var(--color-night);
+}
+
+/* Messages from residents (AI agents) */
+.branch-message.from-resident .branch-message-bubble {
+  background: rgba(189, 188, 228, 0.3); /* wisteria with 30% opacity */
+  color: var(--color-night);
+}
+
+/* Typing indicator */
+.branch-message.typing-indicator {
+  align-self: flex-start;
+}
+
+.branch-message.typing-indicator .branch-message-bubble {
+  background: rgba(189, 188, 228, 0.3);
+  color: var(--color-nimbus-dark);
+  font-style: italic;
+}
+
+.branch-message-time {
+  display: none;
+}
+
+/* Input area */
+.branch-input-wrapper {
+  position: relative;
+  padding: 16px 20px;
+  border-top: 3px solid var(--color-cloud-medium);
+  background: var(--color-cloud);
+}
+
+.branch-send-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.branch-input {
+  flex: 1;
+  min-height: 44px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 12px 16px;
+  border-radius: 22px;
+  background: var(--color-cloud-light);
+  border: 1px solid var(--color-nimbus);
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-night);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.branch-input:focus {
+  border-color: var(--color-iris);
+}
+
+.branch-input[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--color-nimbus-dark);
+  pointer-events: none;
+}
+
+/* Send paw button - positioned inside dm-input-wrapper */
+.branch-send-paw-btn {
+  position: absolute;
+  bottom: -38px; /* Same as main page */
+  right: 20px; /* Aligned with wrapper padding */
+  width: auto;
+  height: auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  transform: translateY(20px);
+  z-index: 100;
+}
+
+.branch-send-paw-btn.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+.branch-send-paw-btn:hover {
+  transform: translateY(-32px);
+}
+
+.branch-send-paw-btn img {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+}
+
+/* Branches sidebar (right side) - fixed position */
+.branches-sidebar {
+  position: fixed;
+  top: calc(120px + 48px + 48px + 24px); /* Same as chat container/empty-state */
+  left: calc(80px + 640px + 16px); /* chat container left + max-width + gap */
+  bottom: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.branches-header-row {
+  padding: 0 8px 12px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.branches-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Legacy: Users sidebar (right side) - fixed position */
+.branch-users-sidebar {
+  position: fixed;
+  top: calc(120px + 48px + 48px + 24px); /* Same as chat container/empty-state */
+  left: calc(80px + 640px + 16px); /* chat container left + max-width + gap */
+  bottom: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.branch-users-header-row {
+  padding: 0 8px 12px 8px;
+  display: flex;
+  align-items: center;
+}
+
+.branch-users-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.branch-nav-item {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  color: var(--color-nimbus-dark);
+  cursor: pointer;
+}
+
+.branch-nav-item:not(.active):hover {
+  color: var(--color-iris);
+}
+
+.branch-nav-item.active {
+  color: var(--color-cumulonimbus-medium);
+  cursor: pointer;
+}
+
+.branch-nav-separator {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-nimbus-light);
+  user-select: none;
+}
+
+.branch-hidden-btn {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-nimbus-dark);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  transition: color 0.2s ease;
+}
+
+.branch-hidden-btn:hover {
+  color: var(--color-iris);
+}
+
+.branches-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.branch-item {
+  margin: 8px;
+  padding: 0 16px 0 12px;
+  width: calc(280px - 16px); /* 280px - margin left and right */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+  background: var(--color-cloud-light);
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  user-select: none;
+  font-weight: normal;
+}
+
+.branch-item:hover {
+  border-color: var(--color-nimbus-light);
+}
+
+.branch-item.active {
+  border-color: var(--color-olive);
+}
+
+.branch-users-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.branch-user-item {
+  margin: 8px;
+  padding: 0 16px 0 12px;
+  width: calc(280px - 16px); /* 280px - margin left and right */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+  background: var(--color-cloud-light);
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  user-select: none;
+  font-weight: normal;
+}
+
+.branch-user-item:hover {
+  border-color: var(--color-nimbus-light);
+}
+
+.branch-user-item.active {
+  border-color: var(--color-olive);
+}
+
+/* User context menu */
+.branch-user-context-menu {
+  position: fixed;
+  background: #5A57D9;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  min-width: 200px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: 'Ubuntu Sans', sans-serif;
+}
+
+.branch-user-context-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+/* Branch context menu (for branch items) */
+.branch-context-menu {
+  position: fixed;
+  background: #5A57D9;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  min-width: 200px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: 'Ubuntu Sans', sans-serif;
+}
+
+.branch-context-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.branch-context-menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  user-select: none;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.branch-context-menu-item:last-child {
+  margin-bottom: 0;
+}
+
+.branch-context-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Empty state text override for DM page */
+.branch-chat-area .empty-state-text {
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .branches-sidebar,
+  .branch-users-sidebar {
+    display: none;
+  }
+
+  .page-branches.has-chat .branches-sidebar,
+  .page-branches.has-chat .branch-users-sidebar {
+    display: none;
+  }
+
+  .branch-message {
+    max-width: 85%;
+  }
+}

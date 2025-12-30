@@ -223,7 +223,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=25">
+<link rel="stylesheet" href="css/nest.css?v=26">
 <link rel="stylesheet" href="css/nest-layout.css?v=1">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- tocbot CSS -->

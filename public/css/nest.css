@@ -241,6 +241,10 @@ code.inline-code,
 }
 
 /* Toolbar customization */
+.ce-toolbar {
+  right: auto !important;
+}
+
 .ce-toolbar__plus {
   left: -40px;
   color: #999;

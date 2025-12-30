@@ -232,7 +232,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
-<img src="assets/bird.png" alt="" class="dm-background-bird">
+<img src="assets/bird.png" alt="" class="dm-background-bird" style="display: <?php echo $recipientUsername ? 'block' : 'none'; ?>;">
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -314,6 +314,6 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/dm.js?v=14"></script>
+<script type="module" src="js/dm.js?v=15"></script>
 </body>
 </html>
