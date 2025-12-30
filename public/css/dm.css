@@ -278,6 +278,12 @@ body.page-dm .wrap {
 .dm-users-list {
   flex: 1;
   overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE и Edge */
+}
+
+.dm-users-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .dm-user-item {

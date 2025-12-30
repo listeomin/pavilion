@@ -2,11 +2,11 @@
 import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiDeleteMessage, apiRebase, apiVersion } from './api.js?v=8';
 import { WebSocketClient } from './websocket-client.js?v=3';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=19';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=22';
 import { Editor } from './editor.js?v=13';
 import { FormatMenu } from './format.js?v=6';
 import { setupHotkeys } from './hotkeys.js?v=6';
-import { InlineInput } from './inline-input.js?v=28';
+import { InlineInput } from './inline-input.js?v=29';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=22';

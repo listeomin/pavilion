@@ -3,7 +3,8 @@ import { escapeHtml, parseMarkdown, linkifyImages } from './markdown.js?v=5';
 import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderNestPreview } from './nest-preview.js?v=1';
-import { renderBranchPreview } from './branch-preview.js?v=2';
+import { renderBranchPreview } from './branch-preview.js?v=4';
+import { renderWeatherPreview } from './weather-preview.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=6';
 import { makeImageZoomable } from './image-zoom.js?v=2';
@@ -281,6 +282,9 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
 
       // Replace placeholder with actual preview
       content = content.replace('__BRANCH_PREVIEW__', renderBranchPreview(m.metadata));
+    } else if (m.metadata && m.metadata.type === 'weather') {
+      // Render weather preview (no URL to replace, just show the card)
+      content = renderWeatherPreview(m.metadata);
     } else if (m.metadata && m.metadata.type === 'link') {
       // Replace URL with preview in place
       let replacedUrl = false;
@@ -413,6 +417,9 @@ export function updateMessage(chatLog, updatedMessage) {
     });
     content = linkifyImages(parseMarkdown(escapeHtml(content)));
     content = content.replace('__BRANCH_PREVIEW__', renderBranchPreview(m.metadata));
+  } else if (m.metadata && m.metadata.type === 'weather') {
+    // Render weather preview (no URL to replace, just show the card)
+    content = renderWeatherPreview(m.metadata);
   } else if (m.metadata && m.metadata.type === 'link') {
     let replacedUrl = false;
     content = m.text.replace(/(https?:\/\/[^\s<>"]+)/gi, (url) => {

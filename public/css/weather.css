@@ -1,0 +1,95 @@
+/* public/css/weather.css */
+
+.weather-preview-card {
+  position: relative;
+  max-width: 345px;
+  min-height: 96px;
+  background: white;
+  border: 2px solid #E8E6DC;
+  border-radius: 7px;
+  padding: 16px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  display: inline-block;
+}
+
+.weather-preview-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #87867F;
+  letter-spacing: 0.5px;
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.weather-preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.weather-preview-city {
+  font-size: 18px;
+  font-weight: 600;
+  color: #141413;
+  margin-bottom: 4px;
+}
+
+.weather-preview-data {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.weather-preview-temp {
+  font-size: 32px;
+  font-weight: 500;
+  color: #141413;
+  line-height: 1;
+}
+
+.weather-preview-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.weather-detail {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.weather-label {
+  color: #87867F;
+  font-weight: 400;
+}
+
+.weather-value {
+  color: #141413;
+  font-weight: 500;
+}
+
+/* Night shift mode support */
+body.nightshift .weather-preview-card {
+  background: #2A2A2A;
+  border-color: #444;
+}
+
+body.nightshift .weather-preview-badge {
+  color: #999;
+}
+
+body.nightshift .weather-preview-city,
+body.nightshift .weather-preview-temp,
+body.nightshift .weather-value {
+  color: #E8E6DC;
+}
+
+body.nightshift .weather-label {
+  color: #999;
+}

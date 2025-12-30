@@ -89,7 +89,8 @@ if ($branchId) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
-<link rel="stylesheet" href="css/branches.css?v=5">
+<link rel="stylesheet" href="css/weather.css?v=1">
+<link rel="stylesheet" href="css/branches.css?v=6">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-branches<?php if ($branchId) echo ' has-chat'; ?>">

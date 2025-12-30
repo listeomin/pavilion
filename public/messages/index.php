@@ -67,6 +67,7 @@ if (!$telegramUserId && !$recipientUsername) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/weather.css?v=1">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
 <body class="page-chat skeleton-active">
@@ -228,7 +229,8 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
-<link rel="stylesheet" href="css/dm.css?v=24">
+<link rel="stylesheet" href="css/weather.css?v=1">
+<link rel="stylesheet" href="css/dm.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">

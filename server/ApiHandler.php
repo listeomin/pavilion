@@ -13,6 +13,7 @@ class ApiHandler {
     private ImageUploadService $imageService;
     private FileUploadService $fileService;
     private BroadcastService $broadcastService;
+    private WeatherService $weatherService;
 
     public function __construct(
         ?SessionRepository $sessionRepo = null,
@@ -25,7 +26,8 @@ class ApiHandler {
         ?LinkPreviewService $linkPreviewService = null,
         ?ImageUploadService $imageService = null,
         ?FileUploadService $fileService = null,
-        ?BroadcastService $broadcastService = null
+        ?BroadcastService $broadcastService = null,
+        ?WeatherService $weatherService = null
     ) {
         $this->sessionRepo = $sessionRepo ?? new SessionRepository();
         $this->msgRepo = $msgRepo ?? new MessageRepository();
@@ -38,6 +40,7 @@ class ApiHandler {
         $this->imageService = $imageService ?? new ImageUploadService();
         $this->fileService = $fileService ?? new FileUploadService();
         $this->broadcastService = $broadcastService ?? new BroadcastService();
+        $this->weatherService = $weatherService ?? new WeatherService();
     }
 
     public function init(array $input, array $cookies = []): array {
@@ -140,6 +143,37 @@ class ApiHandler {
         $session = $this->sessionRepo->get($session_id);
         if (!$session) {
             throw new RuntimeException('invalid session');
+        }
+
+        // Check for @погода weather command
+        if (preg_match('/^@погода\s*$/ui', $text)) {
+            $weatherData = $this->weatherService->getWeatherByIp();
+
+            if ($weatherData) {
+                // Create system message with weather data
+                $weatherMessage = $this->msgRepo->add(
+                    $session_id,  // Use current session
+                    '🐝 Метеошмель',
+                    '',  // Empty text, data is in metadata
+                    $weatherData
+                );
+
+                $this->broadcastService->messageNew($weatherMessage);
+
+                return ['success' => true, 'message' => 'Weather data sent'];
+            } else {
+                // Failed to get weather data
+                $errorMessage = $this->msgRepo->add(
+                    $session_id,  // Use current session
+                    '🐝 Метеошмель',
+                    'Не удалось получить данные о погоде. Попробуйте позже.',
+                    null
+                );
+
+                $this->broadcastService->messageNew($errorMessage);
+
+                return ['success' => false, 'message' => 'Failed to fetch weather'];
+            }
         }
 
         // Check if this is the first message from this session (for owl greeting)

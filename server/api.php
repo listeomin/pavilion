@@ -18,6 +18,7 @@ require_once __DIR__ . '/LinkPreviewService.php';
 require_once __DIR__ . '/ImageUploadService.php';
 require_once __DIR__ . '/FileUploadService.php';
 require_once __DIR__ . '/BroadcastService.php';
+require_once __DIR__ . '/WeatherService.php';
 require_once __DIR__ . '/ApiHandler.php';
 
 header('Content-Type: application/json; charset=utf-8');

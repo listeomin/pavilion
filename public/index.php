@@ -28,7 +28,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/input.css?v=9">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
 <link rel="stylesheet" href="css/colors.css?v=1">
-<link rel="stylesheet" href="css/inline-input.css?v=3">
+<link rel="stylesheet" href="css/inline-input.css?v=4">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
 <link rel="stylesheet" href="css/audio-player.css?v=1">
@@ -40,6 +40,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/image-zoom.css?v=1">
 <link rel="stylesheet" href="css/nest-preview.css?v=4">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/weather.css?v=1">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
 <body class="page-chat skeleton-active">
@@ -99,6 +100,6 @@ $basePath = get_base_path();
 <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
   <img src="assets/leaf.svg" alt="Developer Nest">
 </a>
-<script type="module" src="js/main.js?v=32"></script>
+<script type="module" src="js/main.js?v=36"></script>
 </body>
 </html>

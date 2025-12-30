@@ -94,7 +94,7 @@ export class InlineInput {
 
     console.log('[INLINE-INPUT] handleInput, text:', text);
 
-    if (text.startsWith('/')) {
+    if (text.startsWith('/') || text.startsWith('@')) {
       console.log('[INLINE-INPUT] Entering command mode');
       this.enterCommandMode();
       await this.processCommandInput(text);
@@ -166,9 +166,21 @@ export class InlineInput {
       this.restoreCursorPosition(1);
       return;
     }
-    
+
+    // Handle @ commands (weather)
+    if (text === '@') {
+      this.renderWeatherHint();
+      this.restoreCursorPosition(1);
+      return;
+    }
+
+    if (text.startsWith('@')) {
+      this.renderWeatherCommand(text, savedCursorPos);
+      return;
+    }
+
     const colonIndex = text.indexOf(':');
-    
+
     if (colonIndex === -1) {
       this.renderCommandName(text);
       this.restoreCursorPosition(savedCursorPos);
@@ -205,6 +217,33 @@ export class InlineInput {
   renderCommandHint() {
     const html = `<span class="cmd-prefix">/</span><span class="cmd-hint">music</span>`;
     this.input.innerHTML = html;
+  }
+
+  renderWeatherHint() {
+    const html = `<span class="weather-prefix">@</span><span class="weather-hint">погода</span>`;
+    this.input.innerHTML = html;
+  }
+
+  renderWeatherCommand(text, cursorPos) {
+    const typed = text.substring(1); // Remove @
+    const command = 'погода';
+
+    if (typed === command) {
+      // Fully typed
+      const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span>`;
+      this.input.innerHTML = html;
+    } else if (command.startsWith(typed)) {
+      // Partial match - show suggestion
+      const remaining = command.substring(typed.length);
+      const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span><span class="weather-hint">${this.escapeHtml(remaining)}</span>`;
+      this.input.innerHTML = html;
+    } else {
+      // No match
+      const html = `<span class="weather-prefix">${this.escapeHtml(text)}</span>`;
+      this.input.innerHTML = html;
+    }
+
+    this.restoreCursorPosition(cursorPos);
   }
 
   renderCommandName(text) {
@@ -419,11 +458,23 @@ export class InlineInput {
     
     if ((e.key === 'Tab' || e.key === 'ArrowUp') && this.commandMode) {
       e.preventDefault();
-      
+
+      // Handle @погода completion
+      if (text.startsWith('@')) {
+        const typed = text.substring(1);
+        const command = 'погода';
+
+        if (command.startsWith(typed) && typed !== command) {
+          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(command)}</span>`;
+          this.setCursorToEnd();
+        }
+        return;
+      }
+
       if (!text.includes(':')) {
         const typed = text.substring(1);
         const match = this.findCommandMatch(typed);
-        
+
         if (match) {
           const completed = `/${match}:`;
           this.input.innerHTML = `<span class="cmd-prefix">${completed}</span> `;

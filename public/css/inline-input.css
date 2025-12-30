@@ -22,3 +22,14 @@
   color: var(--color-olive);
   cursor: pointer;
 }
+
+/* Weather command styles */
+.weather-prefix {
+  color: var(--color-olive);
+}
+
+.weather-hint {
+  color: var(--color-cactus);
+  user-select: none;
+  pointer-events: none;
+}
