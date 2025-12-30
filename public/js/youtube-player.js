@@ -9,8 +9,29 @@ class YouTubePlayerManager {
     this.apiLoading = false;
     this.apiLoadCallbacks = [];
 
+    // Suppress YouTube postMessage errors
+    this.suppressYouTubeErrors();
+
     // Load YouTube IFrame API
     this.loadAPI();
+  }
+
+  suppressYouTubeErrors() {
+    // Override console.error to filter YouTube postMessage errors
+    const originalError = console.error.bind(console);
+    console.error = (...args) => {
+      // Check if this is a postMessage error from YouTube
+      const firstArg = args[0];
+      if (firstArg && typeof firstArg === 'string') {
+        if (firstArg.includes('postMessage') ||
+            firstArg.includes('youtube.com') ||
+            firstArg.includes('www-widgetapi')) {
+          return; // Suppress the error
+        }
+      }
+      // Otherwise, call the original console.error
+      originalError(...args);
+    };
   }
 
   loadAPI() {
@@ -35,7 +56,6 @@ class YouTubePlayerManager {
       window.onYouTubeIframeAPIReady = () => {
         this.apiReady = true;
         this.apiLoading = false;
-        console.log('[YouTube] IFrame API ready');
 
         // Execute callbacks
         this.apiLoadCallbacks.forEach(cb => cb());
@@ -104,7 +124,9 @@ class YouTubePlayer {
         disablekb: 1,
         fs: 0,
         modestbranding: 1,
-        rel: 0
+        rel: 0,
+        enablejsapi: 1,
+        origin: window.location.origin
       },
       events: {
         onReady: (e) => this.onPlayerReady(e),
@@ -146,7 +168,6 @@ class YouTubePlayer {
   }
 
   onPlayerReady(event) {
-    console.log('[YouTube] Player ready for:', this.videoId);
     // Fetch and update track title
     this.updateTitle();
   }

@@ -4,12 +4,33 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { renderPinterestPreview } from './pinterest.js?v=1';
 import { renderNestPreview } from './nest-preview.js?v=1';
 import { renderLinkPreview } from './link.js?v=1';
-import { renderMusicPlayer } from './music.js?v=2';
+import { renderMusicPlayer } from './music.js?v=6';
 import { makeImageZoomable } from './image-zoom.js?v=1';
 import { parseYouTubeUrl, isYouTubeUrl } from './youtube.js?v=2';
 import { CONFIG } from './config.js?v=6';
 
 let spinnerInterval = null;
+
+// Helper function to get file icon by extension
+function getFileIcon(extension) {
+  const iconMap = {
+    'pdf': '📄',
+    'doc': '📝', 'docx': '📝',
+    'xls': '📊', 'xlsx': '📊',
+    'ppt': '📽️', 'pptx': '📽️',
+    'txt': '📃', 'csv': '📊',
+    'zip': '📦', 'rar': '📦', '7z': '📦',
+    'json': '🗂️', 'xml': '🗂️'
+  };
+  return iconMap[extension] || '📎';
+}
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
 
 // Helper to highlight @сова mentions in green
 function highlightOwlMentions(html) {
@@ -181,18 +202,41 @@ export function renderMessages(chatLog, messages, lastIdRef, options = {}) {
     } else if (m.metadata && m.metadata.type === 'images') {
       // Remove any HTML tags from text first
       const cleanText = m.text.replace(/<[^>]*>/g, '');
-      
+
       // Start with escaped text
       content = escapeHtml(cleanText);
-      
+
       // Replace image placeholders with actual images
       m.metadata.images.forEach(img => {
         const placeholder = `__IMAGE_TAG_${img.id}__`;
         const imgTag = `<img src="${img.url}" style="max-width: 100%; height: auto; object-fit: contain; margin: 8px 0; display: block;" loading="lazy" class="chat-image" />`;
         content = content.replace(placeholder, imgTag);
       });
-      
+
+      // Replace file placeholders with file links
+      if (m.metadata.files) {
+        m.metadata.files.forEach(file => {
+          const placeholder = `__FILE_TAG_${file.id}__`;
+          const fileTag = `<a href="${file.url}" target="_blank" class="file-attachment" download="${file.name}"><span class="file-icon">${getFileIcon(file.extension)}</span> <span class="file-name">${file.name}</span> <span class="file-size">(${formatFileSize(file.size)})</span></a>`;
+          content = content.replace(placeholder, fileTag);
+        });
+      }
+
       // Apply markdown to the rest (without linkifyImages to avoid double processing)
+      content = parseMarkdown(content);
+    } else if (m.metadata && m.metadata.type === 'files') {
+      // File-only messages (no images)
+      const cleanText = m.text.replace(/<[^>]*>/g, '');
+      content = escapeHtml(cleanText);
+
+      // Replace file placeholders with file links
+      m.metadata.files.forEach(file => {
+        const placeholder = `__FILE_TAG_${file.id}__`;
+        const fileTag = `<a href="${file.url}" target="_blank" class="file-attachment" download="${file.name}"><span class="file-icon">${getFileIcon(file.extension)}</span> <span class="file-name">${file.name}</span> <span class="file-size">(${formatFileSize(file.size)})</span></a>`;
+        content = content.replace(placeholder, fileTag);
+      });
+
+      // Apply markdown
       content = parseMarkdown(content);
     } else if (m.metadata && m.metadata.type === 'pinterest') {
       // Replace URL with preview in place

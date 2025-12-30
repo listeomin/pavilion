@@ -1,6 +1,6 @@
 // public/js/music.js
 import { initAudioPlayer } from './audio-player.js?v=3';
-import { initYouTubePlayer } from './youtube-player.js?v=1';
+import { initYouTubePlayer } from './youtube-player.js?v=5';
 
 export function renderMusicPlayer(metadata) {
   if (!metadata || metadata.type !== 'music') return '';

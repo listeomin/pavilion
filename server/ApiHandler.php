@@ -10,6 +10,7 @@ class ApiHandler {
     private YouTubePreviewService $youtubeService;
     private LinkPreviewService $linkPreviewService;
     private ImageUploadService $imageService;
+    private FileUploadService $fileService;
     private BroadcastService $broadcastService;
 
     public function __construct(
@@ -21,6 +22,7 @@ class ApiHandler {
         ?YouTubePreviewService $youtubeService = null,
         ?LinkPreviewService $linkPreviewService = null,
         ?ImageUploadService $imageService = null,
+        ?FileUploadService $fileService = null,
         ?BroadcastService $broadcastService = null
     ) {
         $this->sessionRepo = $sessionRepo ?? new SessionRepository();
@@ -31,6 +33,7 @@ class ApiHandler {
         $this->youtubeService = $youtubeService ?? new YouTubePreviewService();
         $this->linkPreviewService = $linkPreviewService ?? new LinkPreviewService();
         $this->imageService = $imageService ?? new ImageUploadService();
+        $this->fileService = $fileService ?? new FileUploadService();
         $this->broadcastService = $broadcastService ?? new BroadcastService();
     }
 
@@ -361,11 +364,41 @@ class ApiHandler {
         }
 
         $result = $this->imageService->delete($id);
-        
+
         if (!$result['success']) {
             throw new RuntimeException($result['error'] ?? 'Delete failed');
         }
-        
+
+        return $result;
+    }
+
+    public function uploadFile(array $files): array {
+        if (!isset($files['file'])) {
+            throw new InvalidArgumentException('No file provided');
+        }
+
+        $result = $this->fileService->upload($files['file']);
+
+        if (!$result['success']) {
+            throw new RuntimeException($result['error'] ?? 'Upload failed');
+        }
+
+        return $result;
+    }
+
+    public function deleteFile(array $input): array {
+        $id = $input['id'] ?? null;
+
+        if (!$id) {
+            throw new InvalidArgumentException('ID required');
+        }
+
+        $result = $this->fileService->delete($id);
+
+        if (!$result['success']) {
+            throw new RuntimeException($result['error'] ?? 'Delete failed');
+        }
+
         return $result;
     }
 

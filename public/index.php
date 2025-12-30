@@ -25,7 +25,7 @@ $basePath = get_base_path();
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css?v=9">
 <link rel="stylesheet" href="css/chat.css?v=6">
-<link rel="stylesheet" href="css/input.css?v=7">
+<link rel="stylesheet" href="css/input.css?v=9">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
 <link rel="stylesheet" href="css/colors.css?v=1">
 <link rel="stylesheet" href="css/inline-input.css?v=3">
@@ -33,7 +33,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/track-preview.css?v=1">
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
-<link rel="stylesheet" href="css/animalProfile.css?v=17">
+<link rel="stylesheet" href="css/animalProfile.css?v=18">
 <link rel="stylesheet" href="css/contextMenu.css?v=2">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=6">
@@ -88,7 +88,7 @@ $basePath = get_base_path();
     </button>
   </form>
 </div>
-<div id="telegram-auth-container"></div>
+<div id="telegram-auth-container" style="display: none;"></div>
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
   <img src="assets/paw.svg" alt="Animal Profile">
 </button>
@@ -98,6 +98,6 @@ $basePath = get_base_path();
 <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
   <img src="assets/leaf.svg" alt="Developer Nest">
 </a>
-<script type="module" src="js/main.js?v=17"></script>
+<script type="module" src="js/main.js?v=23"></script>
 </body>
 </html>

@@ -1,5 +1,15 @@
 /* dm.css - Direct Messages styling */
 
+/* Background bird decoration */
+.dm-background-bird {
+  position: fixed;
+  top: 120px;
+  right: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Disable body scroll on DM page */
 body.page-dm {
   height: 100vh;
@@ -124,8 +134,9 @@ body.page-dm .wrap {
 
 /* Input area */
 .dm-input-wrapper {
+  position: relative;
   padding: 16px 20px;
-  border-top: 1px solid var(--color-nimbus);
+  border-top: 3px solid var(--color-cloud-medium);
   background: var(--color-cloud);
 }
 
@@ -162,28 +173,39 @@ body.page-dm .wrap {
   pointer-events: none;
 }
 
-.dm-send-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--color-iris);
+/* Send paw button - positioned inside dm-input-wrapper */
+.dm-send-paw-btn {
+  position: absolute;
+  bottom: -38px; /* Same as main page */
+  right: 20px; /* Aligned with wrapper padding */
+  width: auto;
+  height: auto;
   border: none;
+  background: transparent;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s ease;
-  flex-shrink: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  transform: translateY(20px);
+  z-index: 100;
 }
 
-.dm-send-btn:hover {
-  opacity: 0.9;
+.dm-send-paw-btn.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
 }
 
-.dm-send-btn img {
-  width: 20px;
-  height: 20px;
-  filter: brightness(0) invert(1);
+.dm-send-paw-btn:hover {
+  transform: translateY(-32px);
+}
+
+.dm-send-paw-btn img {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
 }
 
 /* Users sidebar (right side) - fixed position */
@@ -192,19 +214,65 @@ body.page-dm .wrap {
   top: calc(120px + 48px + 48px + 24px); /* Same as chat container/empty-state */
   left: calc(80px + 640px + 16px); /* chat container left + max-width + gap */
   bottom: 0;
-  width: 280px;
   background: transparent;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
-.dm-users-header {
+.dm-users-header-row {
   padding: 0 8px 12px 8px;
-  font-family: 'Ubuntu Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.dm-users-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dm-nav-item {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
   color: var(--color-nimbus-dark);
+  cursor: pointer;
+}
+
+.dm-nav-item:not(.active):hover {
+  color: var(--color-iris);
+}
+
+.dm-nav-item.active {
+  color: var(--color-cumulonimbus-medium);
+  cursor: pointer;
+}
+
+.dm-nav-separator {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-nimbus-light);
+  user-select: none;
+}
+
+.dm-hidden-btn {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-nimbus-dark);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  transition: color 0.2s ease;
+}
+
+.dm-hidden-btn:hover {
+  color: var(--color-iris);
 }
 
 .dm-users-list {
@@ -215,6 +283,7 @@ body.page-dm .wrap {
 .dm-user-item {
   margin: 8px;
   padding: 0 16px 0 12px;
+  width: calc(280px - 16px); /* 280px - margin left and right */
   height: 48px;
   display: flex;
   align-items: center;
@@ -236,6 +305,48 @@ body.page-dm .wrap {
 
 .dm-user-item.active {
   border-color: var(--color-olive);
+}
+
+/* User context menu */
+.dm-user-context-menu {
+  position: fixed;
+  background: #5A57D9;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  min-width: 200px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-family: 'Ubuntu Sans', sans-serif;
+}
+
+.dm-user-context-menu.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.dm-context-menu-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #ffffff;
+  user-select: none;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.dm-context-menu-item:last-child {
+  margin-bottom: 0;
+}
+
+.dm-context-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Empty state text override for DM page */

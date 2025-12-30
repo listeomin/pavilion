@@ -44,12 +44,13 @@ export class AnimalProfile {
             <div class="animal-profile-label">Вид</div>
             <div class="animal-profile-input-wrapper" id="kind-wrapper">
               <span class="animal-profile-emoji-icon" id="kind-emoji">🐳</span>
-              <input 
-                type="text" 
-                class="animal-profile-input" 
+              <input
+                type="text"
+                class="animal-profile-input"
                 id="kind-input"
                 placeholder="52-герцовый великан"
                 minlength="2"
+                autocomplete="off"
               >
               <div class="animal-profile-icon-btn" id="refresh-kind">
                 <img src="${CONFIG.BASE_PATH}/assets/refresh.svg" alt="Refresh">
@@ -93,6 +94,7 @@ export class AnimalProfile {
 
           <button class="animal-profile-submit" id="submit-profile">Сохранить</button>
           <button class="text-button" id="logout-profile" style="display: none;">Уйти</button>
+          <div id="telegram-auth-profile-container"></div>
         </div>
       </div>
     `;

@@ -81,6 +81,6 @@ $basePath = get_base_path();
 <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
   <img src="assets/leaf.svg" alt="Developer Nest">
 </a>
-<script type="module" src="js/branches.js?v=4"></script>
+<script type="module" src="js/branches.js?v=5"></script>
 </body>
 </html>

@@ -36,8 +36,88 @@ $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
 $telegramUsername = $_SESSION['telegram_user']['telegram_username'] ?? null;
 $telegramFirstName = $_SESSION['telegram_user']['first_name'] ?? null;
 
-// Redirect to nest if not authorized
-if (!$telegramUserId) {
+// Show simple list page for unauthorized users (like branches.php)
+if (!$telegramUserId && !$recipientUsername) {
+    // Show simple messages list page (like branches.php)
+    ?>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<base href="<?php echo htmlspecialchars($basePath); ?>/">
+<title>Послания</title>
+<link rel="icon" href="assets/favicon.png" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css?v=8">
+<link rel="stylesheet" href="css/chat.css?v=5">
+<link rel="stylesheet" href="css/input.css?v=7">
+<link rel="stylesheet" href="css/format-menu.css?v=4">
+<link rel="stylesheet" href="css/colors.css?v=1">
+<link rel="stylesheet" href="css/inline-input.css?v=3">
+<link rel="stylesheet" href="css/music.css?v=1">
+<link rel="stylesheet" href="css/track-preview.css?v=1">
+<link rel="stylesheet" href="css/audio-player.css?v=1">
+<link rel="stylesheet" href="css/nightshift.css?v=1">
+<link rel="stylesheet" href="css/animalProfile.css?v=17">
+<link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/telegramAuth.css?v=1">
+<link rel="stylesheet" href="css/navigation.css?v=6">
+<link rel="stylesheet" href="css/empty-state.css?v=1">
+<link rel="stylesheet" href="css/skeleton.css?v=3">
+<link rel="stylesheet" href="css/dev-nest.css?v=2">
+</head>
+<body class="page-chat skeleton-active">
+<nav class="main-nav">
+  <a href="./" class="nav-item">Мурмурация</a>
+  <span class="nav-separator">|</span>
+  <a href="branches" class="nav-item">Ветки</a>
+  <span class="nav-separator">|</span>
+  <a href="messages" class="nav-item active">Послания</a>
+  <span class="nav-separator">|</span>
+  <a href="nest" class="nav-item">Гнездо</a>
+</nav>
+<div class="wrap">
+  <div id="header-container">
+    <div id="user-header">
+      <span id="user-emoji" class="user-emoji-clickable"></span>
+      <span id="user-label-header">– это вы!</span>
+    </div>
+    <h1>Послания</h1>
+  </div>
+  <div id="skeleton-ui" class="skeleton-container">
+    <div class="skeleton-header">
+      <div class="skeleton skeleton-user-header"></div>
+      <div class="skeleton skeleton-title"></div>
+    </div>
+    <div class="skeleton skeleton-chat-area"></div>
+  </div>
+  <div class="empty-state">
+    <img src="assets/empty-msg.png" alt="Пусто">
+    <div class="empty-state-text">Здесь пока пусто</div>
+  </div>
+</div>
+<div id="telegram-auth-container"></div>
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
+  <img src="assets/paw.svg" alt="Animal Profile">
+</button>
+<button id="nightshift-toggle">
+  <img src="assets/moon.svg" alt="Night Shift">
+</button>
+<a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
+  <img src="assets/leaf.svg" alt="Developer Nest">
+</a>
+<script type="module" src="js/messages.js?v=5"></script>
+</body>
+</html>
+<?php
+    exit;
+}
+
+// Redirect to nest if not authorized AND trying to access a specific conversation
+if (!$telegramUserId && $recipientUsername) {
     header("Location: {$basePath}/nest");
     exit;
 }
@@ -148,10 +228,11 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
-<link rel="stylesheet" href="css/dm.css?v=6">
+<link rel="stylesheet" href="css/dm.css?v=24">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
+<img src="assets/bird.png" alt="" class="dm-background-bird">
 <nav class="main-nav">
   <a href="./" class="nav-item">Мурмурация</a>
   <span class="nav-separator">|</span>
@@ -186,8 +267,8 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
       <div class="dm-input-wrapper">
         <form id="dm-send-form" class="dm-send-form">
           <div id="dm-input" class="dm-input" contenteditable="true" data-placeholder="Написать послание..."></div>
-          <button type="submit" id="dm-send-btn" class="dm-send-btn">
-            <img src="assets/paw.svg" alt="Send">
+          <button type="submit" id="dm-send-paw-btn" class="dm-send-paw-btn">
+            <img src="assets/send-paw.png" alt="Отправить">
           </button>
         </form>
       </div>
@@ -203,8 +284,24 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 
 <!-- User list (right) - always visible -->
 <div class="dm-users-sidebar">
-  <div class="dm-users-header">Пользователи</div>
+  <div class="dm-users-header-row">
+    <nav class="dm-users-nav">
+      <a href="#" class="dm-nav-item active" data-filter="all">Все</a>
+      <span class="dm-nav-separator">|</span>
+      <a href="#" class="dm-nav-item" data-filter="pack">Стая</a>
+      <span class="dm-nav-separator">|</span>
+      <a href="#" class="dm-nav-item" data-filter="residents">Жители</a>
+    </nav>
+    <button id="dm-hidden-btn" class="dm-hidden-btn">Скрытые</button>
+  </div>
   <div id="dm-users-list" class="dm-users-list"></div>
+</div>
+
+<!-- Context menu for user items -->
+<div id="dm-user-context-menu" class="dm-user-context-menu" style="display: none;">
+  <div class="dm-context-menu-item" data-action="add-to-pack">В Стаю</div>
+  <div class="dm-context-menu-item" data-action="goto-nest">Гнездо</div>
+  <div class="dm-context-menu-item" data-action="hide">Спрятать</div>
 </div>
 
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
@@ -217,6 +314,6 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/dm.js?v=10"></script>
+<script type="module" src="js/dm.js?v=14"></script>
 </body>
 </html>

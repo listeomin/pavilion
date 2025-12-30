@@ -1,4 +1,4 @@
-// branches.js - инициализация страницы Ветки без чата
+// messages.js - инициализация страницы Сообщения без чата
 import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiChangeName } from './api.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
@@ -98,27 +98,32 @@ function alignUserHeader() {
   const authData = await telegramAuth.checkAuth();
 
   if (authData && authData.user_id) {
+    console.log('[Messages] User already authorized, loading profile...');
     const savedProfile = await animalProfile.loadAndApplyUserProfile();
 
     if (savedProfile) {
+      console.log('[Messages] Using saved profile:', savedProfile);
       myName = savedProfile.name;
       userEmojiEl.textContent = savedProfile.emoji;
     } else {
+      console.log('[Messages] No saved profile, using session name');
     }
 
     // Показываем кнопку "Уйти" для авторизованных пользователей
     animalProfile.showLogoutButton();
   } else {
+    console.log('[Messages] Not authorized, using session name');
   }
 
+  console.log('[Messages] Final myName:', myName);
 
   // Hide skeleton after initialization
   hideSkeleton();
 
-  // Set fixed margin for user header (Ветки)
+  // Set fixed margin for user header (Послания)
   const userHeader = document.getElementById('user-header');
   if (userHeader) {
-    userHeader.style.marginLeft = '28.0312px';
+    userHeader.style.marginLeft = '118.453px';
   }
 
   // Кнопка профиля

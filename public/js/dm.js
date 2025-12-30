@@ -18,6 +18,15 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
   // Helper function to check if user is a resident
   const isResident = (userId) => RESIDENT_USER_IDS.includes(parseInt(userId));
 
+  // Current filter state
+  let currentFilter = 'all'; // 'all', 'pack', 'residents'
+
+  // Pack members (users added to pack) - stored in localStorage
+  let packMembers = JSON.parse(localStorage.getItem('dm_pack_members') || '[]');
+
+  // Hidden users - stored in localStorage
+  let hiddenUsers = JSON.parse(localStorage.getItem('dm_hidden_users') || '[]');
+
   // Initialize NightShift
   NightShift.init();
 
@@ -80,9 +89,12 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
       if (data.success) {
         renderUsersList(data.users);
+        return data.users;
       }
+      return [];
     } catch (e) {
       console.error('[DM] Error loading users:', e);
+      return [];
     }
   };
 
@@ -91,7 +103,22 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     const listEl = document.getElementById('dm-users-list');
     if (!listEl) return;
 
-    listEl.innerHTML = users.map(user => `
+    // Filter users based on current filter
+    let filteredUsers = users;
+    if (currentFilter === 'residents') {
+      filteredUsers = users.filter(user => isResident(user.id));
+    } else if (currentFilter === 'pack') {
+      // Pack members - users added to pack
+      filteredUsers = users.filter(user => packMembers.includes(parseInt(user.id)));
+    } else if (currentFilter === 'hidden') {
+      // Hidden users
+      filteredUsers = users.filter(user => hiddenUsers.includes(parseInt(user.id)));
+    } else {
+      // 'all' shows all users except hidden
+      filteredUsers = users.filter(user => !hiddenUsers.includes(parseInt(user.id)));
+    }
+
+    listEl.innerHTML = filteredUsers.map(user => `
       <div class="dm-user-item ${user.username === dmConfig.recipientUsername ? 'active' : ''}"
            data-user-id="${user.id}"
            data-username="${user.username}"
@@ -103,6 +130,7 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 
     // Add click handlers to user items
     listEl.querySelectorAll('.dm-user-item').forEach(item => {
+      // Left click - open chat
       item.addEventListener('click', () => {
         const userId = item.dataset.userId;
         const username = item.dataset.username;
@@ -110,6 +138,12 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
         const emoji = item.dataset.emoji;
 
         openChat(userId, username, firstName, emoji);
+      });
+
+      // Right click - show context menu
+      item.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        showContextMenu(e.clientX, e.clientY, item);
       });
     });
   };
@@ -154,8 +188,8 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
         <div class="dm-input-wrapper">
           <form id="dm-send-form" class="dm-send-form">
             <div id="dm-input" class="dm-input" contenteditable="true" data-placeholder="Написать послание..."></div>
-            <button type="submit" id="dm-send-btn" class="dm-send-btn">
-              <img src="assets/paw.svg" alt="Send">
+            <button type="submit" id="dm-send-paw-btn" class="dm-send-paw-btn">
+              <img src="assets/send-paw.png" alt="Отправить">
             </button>
           </form>
         </div>
@@ -235,9 +269,22 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
   const attachSendHandler = () => {
     const sendForm = document.getElementById('dm-send-form');
     const inputEl = document.getElementById('dm-input');
-    const sendBtn = document.getElementById('dm-send-btn');
+    const sendBtn = document.getElementById('dm-send-paw-btn');
 
     if (!sendForm || !inputEl || !sendBtn) return;
+
+    // Toggle paw button visibility based on input content
+    const updatePawVisibility = () => {
+      const hasContent = inputEl.textContent.trim().length > 0;
+      if (hasContent) {
+        sendBtn.classList.add('visible');
+      } else {
+        sendBtn.classList.remove('visible');
+      }
+    };
+
+    inputEl.addEventListener('input', updatePawVisibility);
+    updatePawVisibility();
 
     // Handle paste event for images
     inputEl.addEventListener('paste', async (e) => {
@@ -500,12 +547,168 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     }
   };
 
+  // Context menu functions
+  const contextMenu = document.getElementById('dm-user-context-menu');
+  let contextMenuTargetItem = null;
+
+  const showContextMenu = (x, y, item) => {
+    contextMenuTargetItem = item;
+    const userId = parseInt(item.dataset.userId);
+
+    // Update menu items based on user state
+    const packItem = contextMenu.querySelector('[data-action="add-to-pack"]');
+    const hideItem = contextMenu.querySelector('[data-action="hide"]');
+
+    // Update pack menu item
+    if (packMembers.includes(userId)) {
+      packItem.textContent = 'Выгнать из стаи';
+    } else {
+      packItem.textContent = 'В Стаю';
+    }
+
+    // Update hide menu item
+    if (hiddenUsers.includes(userId)) {
+      hideItem.textContent = 'Вернуть';
+    } else {
+      hideItem.textContent = 'Спрятать';
+    }
+
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    contextMenu.style.display = 'block';
+
+    // Add active class with slight delay for animation
+    setTimeout(() => {
+      contextMenu.classList.add('active');
+    }, 10);
+  };
+
+  const hideContextMenu = () => {
+    contextMenu.classList.remove('active');
+    setTimeout(() => {
+      contextMenu.style.display = 'none';
+      contextMenuTargetItem = null;
+    }, 150);
+  };
+
+  // Hide context menu on click outside
+  document.addEventListener('click', (e) => {
+    if (!contextMenu.contains(e.target)) {
+      hideContextMenu();
+    }
+  });
+
+  // Context menu actions
+  contextMenu.querySelectorAll('.dm-context-menu-item').forEach(item => {
+    item.addEventListener('click', async () => {
+      const action = item.dataset.action;
+      if (!contextMenuTargetItem) return;
+
+      const userId = parseInt(contextMenuTargetItem.dataset.userId);
+      const username = contextMenuTargetItem.dataset.username;
+
+      if (action === 'add-to-pack') {
+        // Toggle pack membership
+        if (packMembers.includes(userId)) {
+          // Remove from pack
+          packMembers = packMembers.filter(id => id !== userId);
+        } else {
+          // Add to pack
+          packMembers.push(userId);
+        }
+        localStorage.setItem('dm_pack_members', JSON.stringify(packMembers));
+      } else if (action === 'goto-nest') {
+        // Go to user's nest
+        window.location.href = `${CONFIG.BASE_PATH}/nest/${username}`;
+        return; // Don't hide menu or re-render, we're navigating away
+      } else if (action === 'hide') {
+        // Toggle hidden status
+        if (hiddenUsers.includes(userId)) {
+          // Unhide user
+          hiddenUsers = hiddenUsers.filter(id => id !== userId);
+        } else {
+          // Hide user
+          hiddenUsers.push(userId);
+        }
+        localStorage.setItem('dm_hidden_users', JSON.stringify(hiddenUsers));
+      }
+
+      // Re-render users list
+      const res = await fetch(`${DM_API}?action=get_users`);
+      const data = await res.json();
+      if (data.success) {
+        renderUsersList(data.users);
+      }
+
+      hideContextMenu();
+    });
+  });
+
   // Initialize
-  await loadUsers();
+  let allUsers = []; // Store all users for filtering
+  const initialUsers = await loadUsers();
   if (dmConfig.recipientUserId) {
     await loadMessages();
     const inputEl = document.getElementById('dm-input');
     if (inputEl) inputEl.focus();
+  }
+
+  // Setup navigation filter
+  document.querySelectorAll('.dm-nav-item').forEach(item => {
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const filter = item.dataset.filter;
+      if (filter === currentFilter) return;
+
+      // Update active state
+      document.querySelectorAll('.dm-nav-item').forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+
+      // Update filter and re-render
+      currentFilter = filter;
+
+      // Re-fetch users to ensure we have latest data
+      try {
+        const res = await fetch(`${DM_API}?action=get_users`);
+        const data = await res.json();
+        if (data.success) {
+          allUsers = data.users;
+          renderUsersList(allUsers);
+        }
+      } catch (e) {
+        console.error('[DM] Error loading users:', e);
+      }
+    });
+  });
+
+  // Hidden button - toggle hidden filter
+  const hiddenBtn = document.getElementById('dm-hidden-btn');
+  if (hiddenBtn) {
+    hiddenBtn.addEventListener('click', async () => {
+      if (currentFilter === 'hidden') {
+        // Switch back to 'all'
+        currentFilter = 'all';
+        document.querySelectorAll('.dm-nav-item').forEach(nav => nav.classList.remove('active'));
+        document.querySelector('.dm-nav-item[data-filter="all"]')?.classList.add('active');
+      } else {
+        // Switch to 'hidden'
+        currentFilter = 'hidden';
+        document.querySelectorAll('.dm-nav-item').forEach(nav => nav.classList.remove('active'));
+      }
+
+      // Re-fetch users
+      try {
+        const res = await fetch(`${DM_API}?action=get_users`);
+        const data = await res.json();
+        if (data.success) {
+          allUsers = data.users;
+          renderUsersList(allUsers);
+        }
+      } catch (e) {
+        console.error('[DM] Error loading users:', e);
+      }
+    });
   }
 
   // Poll for new messages every 3 seconds

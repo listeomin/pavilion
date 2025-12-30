@@ -98,24 +98,19 @@ function alignUserHeader() {
   const authData = await telegramAuth.checkAuth();
 
   if (authData && authData.user_id) {
-    console.log('[Messages] User already authorized, loading profile...');
     const savedProfile = await animalProfile.loadAndApplyUserProfile();
 
     if (savedProfile) {
-      console.log('[Messages] Using saved profile:', savedProfile);
       myName = savedProfile.name;
       userEmojiEl.textContent = savedProfile.emoji;
     } else {
-      console.log('[Messages] No saved profile, using session name');
     }
 
     // Показываем кнопку "Уйти" для авторизованных пользователей
     animalProfile.showLogoutButton();
   } else {
-    console.log('[Messages] Not authorized, using session name');
   }
 
-  console.log('[Messages] Final myName:', myName);
 
   // Hide skeleton after initialization
   hideSkeleton();

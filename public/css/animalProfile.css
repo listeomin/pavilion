@@ -198,6 +198,16 @@
   outline: none;
 }
 
+/* Remove browser autocomplete background */
+.animal-profile-input:-webkit-autofill,
+.animal-profile-input:-webkit-autofill:hover,
+.animal-profile-input:-webkit-autofill:focus,
+.animal-profile-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #7673F6 inset !important;
+  -webkit-text-fill-color: var(--color-cloud-light) !important;
+  box-shadow: 0 0 0 1000px #7673F6 inset !important;
+}
+
 .animal-profile-input::placeholder {
   color: var(--color-cloud-light);
   opacity: 0.6;

@@ -1,6 +1,6 @@
 // public/js/editor.js
 import { escapeHtml, parseMarkdown } from './markdown.js?v=4';
-import { apiUploadImage, apiDeleteImage } from './api.js?v=5';
+import { apiUploadImage, apiDeleteImage, apiUploadFile, apiDeleteFile } from './api.js?v=5';
 import { CONFIG } from './config.js?v=6';
 
 export class Editor {
@@ -56,20 +56,18 @@ export class Editor {
 
       const files = e.dataTransfer?.files;
       if (files && files.length > 0) {
-        const imageFiles = Array.from(files).filter(file =>
-          file.type.startsWith('image/')
-        );
+        console.log('[Drop] Processing', files.length, 'files');
 
-        if (imageFiles.length > 0) {
-          console.log('[Drop] Uploading', imageFiles.length, 'images');
-
-          for (const file of imageFiles) {
+        for (const file of files) {
+          if (file.type.startsWith('image/')) {
             await this.insertImageTag(file);
+          } else {
+            await this.insertFileTag(file);
           }
-
-          // Focus input after upload
-          this.inputEl.focus();
         }
+
+        // Focus input after upload
+        this.inputEl.focus();
       }
     });
   }
@@ -229,6 +227,74 @@ export class Editor {
     this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
+  async insertFileTag(file) {
+    const id = this.generateUUID();
+
+    console.log('Inserting file tag, file:', file);
+
+    // Get file extension
+    const extension = file.name.split('.').pop().toLowerCase();
+
+    // Map extensions to icons
+    const iconMap = {
+      'pdf': '📄',
+      'doc': '📝', 'docx': '📝',
+      'xls': '📊', 'xlsx': '📊',
+      'ppt': '📽️', 'pptx': '📽️',
+      'txt': '📃', 'csv': '📊',
+      'zip': '📦', 'rar': '📦', '7z': '📦',
+      'json': '🗂️', 'xml': '🗂️'
+    };
+
+    const icon = iconMap[extension] || '📎';
+
+    // Create tag (black color initially)
+    const tag = document.createElement('span');
+    tag.className = 'file-tag';
+    tag.contentEditable = 'false';
+    tag.dataset.id = id;
+    tag.dataset.loaded = 'false';
+    tag.dataset.filename = file.name;
+    tag.dataset.extension = extension;
+    tag.textContent = `${icon} ${file.name}`;
+
+    // Insert at cursor
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(tag);
+
+    // Move cursor after tag
+    range.setStartAfter(tag);
+    range.setEndAfter(tag);
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    // Upload in background
+    console.log('Starting file upload...');
+    const result = await apiUploadFile(CONFIG.API_PATH, file);
+    console.log('Upload result:', result);
+
+    if (result.success) {
+      console.log('Upload successful, setting loaded=true');
+      tag.dataset.loaded = 'true';
+      tag.dataset.url = result.url;
+      tag.dataset.size = result.size;
+      tag.dataset.type = result.type;
+      tag.setAttribute('data-loaded', 'true');
+      // Change to iris color when loaded
+      tag.style.color = '#5A57D9'; // iris color
+      console.log('Tag color set to:', tag.style.color);
+    } else {
+      console.error('Upload failed:', result.error);
+      // Tag stays black (not loaded)
+    }
+
+    this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   async handleKeydown(e) {
     if (e.key === 'Backspace') {
       const sel = window.getSelection();
@@ -249,17 +315,30 @@ export class Editor {
           if (prev && prev.classList) {
             if (prev.classList.contains('image-tag')) {
               e.preventDefault();
-              
+
               // Delete from server if uploaded
               if (prev.dataset.loaded === 'true') {
                 await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
               }
-              
+
               prev.remove();
               this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
               return;
             }
-            
+
+            if (prev.classList.contains('file-tag')) {
+              e.preventDefault();
+
+              // Delete from server if uploaded
+              if (prev.dataset.loaded === 'true') {
+                await apiDeleteFile(CONFIG.API_PATH, prev.dataset.id);
+              }
+
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
+            }
+
             if (prev.classList.contains('quote-tag')) {
               e.preventDefault();
               prev.remove();
@@ -276,17 +355,30 @@ export class Editor {
           if (prev && prev.classList) {
             if (prev.classList.contains('image-tag')) {
               e.preventDefault();
-              
+
               // Delete from server if uploaded
               if (prev.dataset.loaded === 'true') {
                 await apiDeleteImage(CONFIG.API_PATH, prev.dataset.id);
               }
-              
+
               prev.remove();
               this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
               return;
             }
-            
+
+            if (prev.classList.contains('file-tag')) {
+              e.preventDefault();
+
+              // Delete from server if uploaded
+              if (prev.dataset.loaded === 'true') {
+                await apiDeleteFile(CONFIG.API_PATH, prev.dataset.id);
+              }
+
+              prev.remove();
+              this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+              return;
+            }
+
             if (prev.classList.contains('quote-tag')) {
               e.preventDefault();
               prev.remove();
@@ -422,9 +514,9 @@ export class Editor {
 
   renderLiveMarkdown() {
     if (this.paused) return;
-    
-    // Don't render if we have image tags - they should stay as-is
-    const hasTags = this.inputEl.querySelector('.image-tag');
+
+    // Don't render if we have image or file tags - they should stay as-is
+    const hasTags = this.inputEl.querySelector('.image-tag, .file-tag');
     if (hasTags) return;
     
     const cursorPos = this.saveCursorPosition();
@@ -449,6 +541,9 @@ export class Editor {
       } else if (node.classList && node.classList.contains('image-tag')) {
         // Preserve image tag as placeholder
         text += `__IMAGE_TAG_${node.dataset.id}__`;
+      } else if (node.classList && node.classList.contains('file-tag')) {
+        // Preserve file tag as placeholder
+        text += `__FILE_TAG_${node.dataset.id}__`;
       } else if (node.classList && node.classList.contains('quote-tag')) {
         // Preserve quote tag as placeholder
         text += '__QUOTE_TAG__';

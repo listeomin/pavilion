@@ -15,6 +15,7 @@ require_once __DIR__ . '/NestPreviewService.php';
 require_once __DIR__ . '/YouTubePreviewService.php';
 require_once __DIR__ . '/LinkPreviewService.php';
 require_once __DIR__ . '/ImageUploadService.php';
+require_once __DIR__ . '/FileUploadService.php';
 require_once __DIR__ . '/BroadcastService.php';
 require_once __DIR__ . '/ApiHandler.php';
 
@@ -80,6 +81,17 @@ try {
     if ($action === 'delete_image') {
         $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
         $result = $handler->deleteImage($input);
+        json($result);
+    }
+
+    if ($action === 'upload_file') {
+        $result = $handler->uploadFile($_FILES);
+        json($result);
+    }
+
+    if ($action === 'delete_file') {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $result = $handler->deleteFile($input);
         json($result);
     }
 

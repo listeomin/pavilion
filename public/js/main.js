@@ -1,15 +1,15 @@
 // public/js/main.js
 import { CONFIG } from './config.js?v=6';
 import { getCookie, apiInit, apiSend, apiChangeName, apiUpdateMessage, apiDeleteMessage, apiRebase, apiVersion } from './api.js?v=8';
-import { WebSocketClient } from './websocket-client.js?v=2';
-import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=16';
+import { WebSocketClient } from './websocket-client.js?v=3';
+import { renderMessages, updateSendButton, renderSystemMessage, removeSystemMessage, updateMessage, deleteMessageFromChat } from './render.js?v=17';
 import { Editor } from './editor.js?v=13';
 import { FormatMenu } from './format.js?v=5';
 import { setupHotkeys } from './hotkeys.js?v=6';
 import { InlineInput } from './inline-input.js?v=28';
 import { WheelScroll } from './wheel-scroll.js?v=1';
 import * as NightShift from './nightshift.js?v=1';
-import { AnimalProfile } from './animalProfile.js?v=20';
+import { AnimalProfile } from './animalProfile.js?v=22';
 import { TelegramAuth } from './telegramAuth.js?v=2';
 import { ContextMenu } from './contextMenu.js?v=2';
 import { initQuoteHandlers, extractQuoteData } from './quotes.js?v=1';
@@ -352,7 +352,7 @@ function alignUserHeader() {
     wsClient = new WebSocketClient(CONFIG.WS_URL, sessionId);
    
     wsClient.on('auth_ok', (data) => {
-      console.log('[Main] WS authenticated:', data.name);
+      // WebSocket authenticated
     });
    
     wsClient.on('message_new', (message) => {
@@ -487,14 +487,23 @@ function alignUserHeader() {
 
       // Показываем кнопку "Уйти" для авторизованных пользователей
       animalProfile.showLogoutButton();
+
+      // Hide Telegram auth widget for authorized users
+      const container = document.getElementById('telegram-auth-profile-container');
+      if (container) {
+        container.style.display = 'none';
+      }
     } else {
       // Не авторизован - используем имя из сессии
-      console.log('[Main] Not authorized, using session name');
       myName = data.name;
       userEmojiEl.textContent = initialEmoji;
-    }
 
-    console.log('[Main] Final myName:', myName);
+      // Show Telegram auth widget for unauthorized users
+      const container = document.getElementById('telegram-auth-profile-container');
+      if (container) {
+        container.style.display = 'block';
+      }
+    }
 
     // Update context menu with current user name
     contextMenu.setMyName(myName);
@@ -546,23 +555,17 @@ function alignUserHeader() {
       });
     }
    
-// Initialize Telegram Auth UI
-    telegramAuth.init('telegram-auth-container', 'hhrrrp_bot', async (newAuthData) => {
-      console.log('[Main] New Telegram authorization:', newAuthData);
-
-      const displayName = newAuthData.first_name || newAuthData.username || 'Telegram User';
-
-      const container = document.getElementById('telegram-auth-container');
+// Initialize Telegram Auth UI in Animal Profile
+    telegramAuth.init('telegram-auth-profile-container', 'hhrrrp_bot', async (newAuthData) => {
+      // Hide Telegram widget after auth and show logout button
+      const container = document.getElementById('telegram-auth-profile-container');
       if (container) {
-        // Создаём кнопку и вешаем обработчик напрямую
-        const btn = document.createElement('button');
-        btn.className = 'my-chat-button';
-        btn.textContent = displayName + ' (выйти)';
-        btn.onclick = function() {
-          telegramAuth.logout();
-        };
-        container.innerHTML = '';
-        container.appendChild(btn);
+        container.style.display = 'none';
+      }
+
+      // Show logout button in profile
+      if (animalProfile) {
+        animalProfile.showLogoutButton();
       }
 
       // Загружаем профиль ТОЛЬКО если это НОВАЯ авторизация (не при загрузке страницы)

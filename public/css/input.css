@@ -75,6 +75,22 @@ form {
   color: var(--color-iris);
 }
 
+.file-tag {
+  color: rgba(0, 0, 0, 0.8);
+  cursor: default;
+  user-select: none;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 16px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.file-tag[data-loaded="true"] {
+  color: var(--color-iris);
+  background: rgba(90, 87, 217, 0.1);
+}
+
 .quote-tag {
   color: var(--color-iris);
   cursor: default;
@@ -112,7 +128,7 @@ form {
 /* Кнопка-лапка */
 .send-paw-btn {
   position: fixed;
-  bottom: -40px; /* Опускаем ниже, чтобы при ховере была на краю */
+  bottom: -38px; /* Опускаем ниже, чтобы при ховере была на краю */
   /* Привязка к правому краю чата (720px + 16px падинг = 736px) */
   left: calc(50% + 360px + 16px); /* центр + половина ширины + падинг, БЕЗ отступа */
   /* Размер 100% от файла - убираем фиксированные размеры */
@@ -135,7 +151,7 @@ form {
 }
 
 .send-paw-btn:hover {
-  transform: translateY(-35px); /* уменьшаем на 5px: -40px + 5px = -35px */
+  transform: translateY(-32px);
 }
 
 .send-paw-btn img {
