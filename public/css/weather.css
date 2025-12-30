@@ -2,76 +2,92 @@
 
 .weather-preview-card {
   position: relative;
-  max-width: 345px;
-  min-height: 96px;
+  max-width: 430px;
   background: white;
   border: 2px solid #E8E6DC;
   border-radius: 7px;
-  padding: 16px;
+  padding: 20px;
   margin: 8px 0;
   box-sizing: border-box;
-  display: inline-block;
+  display: block;
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 .weather-preview-badge {
   position: absolute;
   top: 8px;
-  right: 8px;
+  right: 12px;
   font-size: 11px;
   font-weight: 600;
-  color: #87867F;
+  color: #B0AEA5;
   letter-spacing: 0.5px;
   font-family: 'Ubuntu Mono', monospace;
 }
 
 .weather-preview-content {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 24px;
+  align-items: center;
 }
 
-.weather-preview-city {
-  font-size: 18px;
-  font-weight: 600;
-  color: #141413;
+.weather-preview-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  border-right: 2px solid var(--color-cloud-dark);
+}
+
+.weather-icon {
+  font-size: 52px;
+  line-height: 1;
   margin-bottom: 4px;
 }
 
-.weather-preview-data {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
+.weather-preview-city {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-cumulonimbus-dark);
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 .weather-preview-temp {
-  font-size: 32px;
-  font-weight: 500;
-  color: #141413;
+  font-size: 48px;
+  font-weight: 400;
+  color: var(--color-cumulonimbus-dark);
   line-height: 1;
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 .weather-preview-details {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   flex: 1;
 }
 
 .weather-detail {
-  display: flex;
-  gap: 4px;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.5;
+  color: var(--color-nimbus-dark);
+  font-family: 'Ubuntu Sans', sans-serif;
+}
+
+.weather-detail::before {
+  content: '';
+  display: none;
 }
 
 .weather-label {
-  color: #87867F;
+  color: #141413;
   font-weight: 400;
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 .weather-value {
   color: #141413;
-  font-weight: 500;
+  font-weight: 400;
+  font-family: 'Ubuntu Sans', sans-serif;
 }
 
 /* Night shift mode support */

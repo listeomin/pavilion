@@ -82,7 +82,7 @@ class WeatherService {
             $url = "https://api.open-meteo.com/v1/forecast?" . http_build_query([
                 'latitude' => $lat,
                 'longitude' => $lon,
-                'current' => 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m',
+                'current' => 'temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weathercode',
                 'timezone' => 'auto'
             ]);
 
@@ -107,16 +107,54 @@ class WeatherService {
             }
 
             $current = $data['current'];
+            $weatherCode = $current['weathercode'] ?? 0;
+            $icon = $this->getWeatherIcon($weatherCode);
+
+            error_log("Weather API response - code: $weatherCode, icon: $icon");
 
             return [
                 'temperature' => round($current['temperature_2m']),
                 'wind' => round($current['wind_speed_10m']),
                 'humidity' => round($current['relative_humidity_2m']),
-                'precipitation' => round($current['precipitation'])
+                'precipitation' => round($current['precipitation']),
+                'icon' => $icon
             ];
         } catch (Exception $e) {
             error_log("Weather service data error: " . $e->getMessage());
             return null;
         }
+    }
+
+    private function getWeatherIcon(int $code): string {
+        // WMO Weather interpretation codes
+        // https://open-meteo.com/en/docs
+        if ($code === 0) {
+            return '☀️'; // Clear sky
+        } elseif ($code >= 1 && $code <= 3) {
+            return '⛅'; // Partly cloudy
+        } elseif ($code >= 45 && $code <= 48) {
+            return '🌫️'; // Fog
+        } elseif ($code >= 51 && $code <= 55) {
+            return '🌦️'; // Drizzle
+        } elseif ($code >= 56 && $code <= 57) {
+            return '🌧️'; // Freezing drizzle
+        } elseif ($code >= 61 && $code <= 65) {
+            return '🌧️'; // Rain
+        } elseif ($code >= 66 && $code <= 67) {
+            return '🌧️'; // Freezing rain
+        } elseif ($code >= 71 && $code <= 75) {
+            return '🌨️'; // Snow fall
+        } elseif ($code === 77) {
+            return '🌨️'; // Snow grains
+        } elseif ($code >= 80 && $code <= 82) {
+            return '🌧️'; // Rain showers
+        } elseif ($code >= 85 && $code <= 86) {
+            return '🌨️'; // Snow showers
+        } elseif ($code === 95) {
+            return '⛈️'; // Thunderstorm
+        } elseif ($code >= 96 && $code <= 99) {
+            return '⛈️'; // Thunderstorm with hail
+        }
+        return '🌤️'; // Default
     }
 }
