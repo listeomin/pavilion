@@ -111,9 +111,9 @@ h1 .editable-name:focus {
   margin: 0;
 }
 
-/* Hide settings button and tune menu in read-only */
-.codex-editor--narrow .ce-toolbar__plus,
-.codex-editor--narrow .ce-toolbar__settings-btn {
+/* Hide toolbar buttons only in read-only mode */
+.codex-editor--read-only .ce-toolbar__plus,
+.codex-editor--read-only .ce-toolbar__settings-btn {
   display: none;
 }
 
@@ -204,13 +204,40 @@ h3.ce-header {
 }
 
 /* Inline code */
-.cdx-inline-code {
-  background: rgba(124, 119, 238, 0.1);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-family: 'Ubuntu Mono', monospace;
-  font-size: 16px;
-  color: var(--color-iris);
+.cdx-inline-code,
+code.inline-code,
+.cdx-marker {
+  background: rgba(106, 155, 204, 0.1) !important;
+  padding: 2px 6px !important;
+  border-radius: 3px !important;
+  font-family: 'Ubuntu Mono', monospace !important;
+  font-size: 16px !important;
+  color: var(--color-sky) !important;
+}
+
+/* Code block */
+.ce-code {
+  margin: 1.5em 0;
+}
+
+.ce-code__textarea {
+  font-family: 'Ubuntu Mono', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  background: rgba(106, 155, 204, 0.05) !important;
+  border: 1px solid rgba(106, 155, 204, 0.2) !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  color: var(--color-sky) !important;
+  min-height: 50px !important;
+  resize: none !important;
+  overflow: hidden !important;
+}
+
+.ce-code__textarea:focus {
+  background: rgba(106, 155, 204, 0.08) !important;
+  border-color: var(--color-sky) !important;
+  outline: none !important;
 }
 
 /* Toolbar customization */
@@ -279,6 +306,21 @@ h3.ce-header {
 /* Adjust toolbar actions position */
 .ce-toolbar__actions {
   right: 103% !important;
+}
+
+/* Fix popover menu to appear on the right */
+.ce-popover {
+  left: 0 !important;
+  right: auto !important;
+}
+
+/* Popover menu text - use sans-serif font */
+.ce-popover__item,
+.ce-popover__item-label,
+.ce-popover-item,
+.ce-popover-item__title,
+.ce-settings__button {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
 /* Table of Contents (Minimap) */
@@ -371,4 +413,124 @@ h3.ce-header {
 
 #toc-container:has(.toc:empty) {
   display: none;
+}
+
+/* Editor.js Images - prevent stretching beyond original size */
+.image-tool__image-picture {
+  max-width: 100%;
+  height: auto;
+}
+
+.image-tool__image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Image resize functionality */
+.image-tool__image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.image-tool__image-wrapper.resizing {
+  cursor: nwse-resize;
+}
+
+.image-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 15;
+  background: rgba(124, 119, 238, 0.9);
+  border-radius: 4px 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  pointer-events: auto;
+}
+
+.image-tool__image-wrapper:hover .image-resize-handle {
+  opacity: 1;
+}
+
+.image-resize-handle::after {
+  content: '⇲';
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Image action buttons overlay */
+.image-actions-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+  z-index: 11;
+}
+
+.image-tool__image:hover .image-actions-overlay,
+.image-tool__image-wrapper:hover .image-actions-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.image-actions {
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.image-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.image-action-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.image-action-btn svg {
+  flex-shrink: 0;
+}
+
+.image-replace-btn:hover {
+  background: var(--color-iris);
+  border-color: var(--color-iris);
+}
+
+.image-delete-btn:hover {
+  background: #dc3545;
+  border-color: #dc3545;
 }

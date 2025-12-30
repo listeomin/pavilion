@@ -37,10 +37,10 @@ try {
         exit;
     }
 
-    // Check file size (max 10MB)
-    $maxSize = 10 * 1024 * 1024;
+    // Check file size (max 100MB)
+    $maxSize = 100 * 1024 * 1024;
     if ($file['size'] > $maxSize) {
-        echo json_encode(['success' => 0, 'error' => 'File too large. Maximum size is 10MB.']);
+        echo json_encode(['success' => 0, 'error' => 'File too large. Maximum size is 100MB.']);
         exit;
     }
 

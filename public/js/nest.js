@@ -494,6 +494,12 @@ function alignUserHeader() {
           inlineCode: {
             class: InlineCode
           },
+          code: {
+            class: CodeTool,
+            config: {
+              placeholder: 'Вставьте код здесь...'
+            }
+          },
           image: {
             class: window.ImageTool,
             config: {
@@ -525,6 +531,9 @@ function alignUserHeader() {
         onChange: async () => {
           if (!nestConfig.isOwnNest) return;
 
+          // Add image action buttons to new images
+          setTimeout(() => addImageActionButtons(), 100);
+
           // Debounced autosave
           if (saveTimeout) {
             clearTimeout(saveTimeout);
@@ -551,7 +560,213 @@ function alignUserHeader() {
             makeImageZoomable(img);
           }
         });
+      } else {
+        // Add image action buttons in edit mode
+        addImageActionButtons();
       }
+    };
+
+    // Add action buttons to images (Replace/Delete) and resize functionality
+    const addImageActionButtons = () => {
+      if (!nestConfig.isOwnNest || !editor) return;
+
+      const imageBlocks = document.querySelectorAll('#nest-editor .image-tool');
+
+      imageBlocks.forEach((block, index) => {
+        // Skip if buttons already added
+        if (block.querySelector('.image-actions')) return;
+
+        const img = block.querySelector('img');
+        if (!img) return;
+
+        // Wrap image in wrapper for resize functionality
+        const imageContainer = block.querySelector('.image-tool__image');
+        if (imageContainer && !imageContainer.querySelector('.image-tool__image-wrapper')) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'image-tool__image-wrapper';
+
+          // Move image into wrapper
+          const imgClone = img.cloneNode(true);
+          wrapper.appendChild(imgClone);
+          img.replaceWith(wrapper);
+
+          // Restore custom width from localStorage
+          const imageUrl = imgClone.src;
+          const storageKey = `nest-image-width-${imageUrl}`;
+          const savedWidth = localStorage.getItem(storageKey);
+
+          if (savedWidth) {
+            const width = parseInt(savedWidth);
+            if (width > 0) {
+              wrapper.style.width = width + 'px';
+              wrapper.dataset.customWidth = width;
+              console.log('[Nest] Restored image width from localStorage:', width);
+            }
+          }
+
+          // Add resize handle
+          const resizeHandle = document.createElement('div');
+          resizeHandle.className = 'image-resize-handle';
+          resizeHandle.title = 'Потяните, чтобы изменить размер';
+          wrapper.appendChild(resizeHandle);
+
+          // Implement resize functionality
+          let isResizing = false;
+          let startX, startWidth;
+
+          resizeHandle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = wrapper.offsetWidth;
+            wrapper.classList.add('resizing');
+            document.body.style.cursor = 'nwse-resize';
+            document.body.style.userSelect = 'none';
+          });
+
+          document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            const diff = e.clientX - startX;
+            const newWidth = Math.max(100, Math.min(980, startWidth + diff));
+            wrapper.style.width = newWidth + 'px';
+            imgClone.style.width = '100%';
+          });
+
+          document.addEventListener('mouseup', () => {
+            if (isResizing) {
+              isResizing = false;
+              wrapper.classList.remove('resizing');
+              document.body.style.cursor = '';
+              document.body.style.userSelect = '';
+
+              // Save width to localStorage
+              const currentWidth = wrapper.offsetWidth;
+              const imageUrl = imgClone.src;
+              const storageKey = `nest-image-width-${imageUrl}`;
+
+              localStorage.setItem(storageKey, currentWidth.toString());
+              wrapper.dataset.customWidth = currentWidth;
+
+              console.log('[Nest] Image size saved to localStorage:', currentWidth, storageKey);
+            }
+          });
+        }
+
+        // Create overlay with actions
+        const overlay = document.createElement('div');
+        overlay.className = 'image-actions-overlay';
+        overlay.innerHTML = `
+          <div class="image-actions">
+            <button class="image-action-btn image-replace-btn" title="Заменить изображение">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                <path d="M13.5 5.5L10.5 2.5L2.5 10.5V13.5H5.5L13.5 5.5Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9 4L12 7" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              Заменить
+            </button>
+            <button class="image-action-btn image-delete-btn" title="Удалить изображение">
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                <path d="M3 4H13M5 4V3C5 2.44772 5.44772 2 6 2H10C10.5523 2 11 2.44772 11 3V4M6.5 7.5V11.5M9.5 7.5V11.5M4 4H12V13C12 13.5523 11.5523 14 11 14H5C4.44772 14 4 13.5523 4 13V4Z" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              Удалить
+            </button>
+          </div>
+        `;
+
+        // Add overlay to wrapper (or container if no wrapper)
+        const wrapper = imageContainer.querySelector('.image-tool__image-wrapper');
+        const target = wrapper || imageContainer;
+
+        if (target) {
+          target.style.position = 'relative';
+          target.appendChild(overlay);
+        }
+
+        // Replace button handler
+        const replaceBtn = overlay.querySelector('.image-replace-btn');
+        replaceBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Create file input
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Get current block index
+            const blockIndex = Array.from(document.querySelectorAll('#nest-editor .image-tool')).indexOf(block);
+
+            try {
+              // Upload new image
+              const formData = new FormData();
+              formData.append('image', file);
+
+              const response = await fetch(CONFIG.BASE_PATH + '/api/upload_image.php', {
+                method: 'POST',
+                body: formData
+              });
+
+              const result = await response.json();
+
+              if (result.success && result.file && result.file.url) {
+                // Update block data
+                await editor.blocks.delete(blockIndex);
+                await editor.blocks.insert('image', {
+                  file: {
+                    url: result.file.url
+                  }
+                }, {}, blockIndex);
+
+                // Re-add buttons after a short delay
+                setTimeout(() => addImageActionButtons(), 100);
+
+                console.log('[Nest] Image replaced successfully');
+              } else {
+                alert('Ошибка загрузки изображения');
+              }
+            } catch (err) {
+              console.error('[Nest] Error replacing image:', err);
+              alert('Ошибка: ' + err.message);
+            }
+          };
+          input.click();
+        });
+
+        // Delete button handler
+        const deleteBtn = overlay.querySelector('.image-delete-btn');
+        deleteBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          try {
+            // Find block index by iterating through editor blocks
+            const blocks = await editor.save();
+            let blockIndexToDelete = -1;
+
+            for (let i = 0; i < blocks.blocks.length; i++) {
+              const blockElement = document.querySelectorAll('#nest-editor .ce-block')[i];
+              if (blockElement && blockElement.contains(block)) {
+                blockIndexToDelete = i;
+                break;
+              }
+            }
+
+            if (blockIndexToDelete !== -1) {
+              await editor.blocks.delete(blockIndexToDelete);
+              console.log('[Nest] Image deleted successfully');
+            } else {
+              console.error('[Nest] Could not find block index');
+            }
+          } catch (err) {
+            console.error('[Nest] Error deleting image:', err);
+          }
+        });
+      });
     };
 
     // Load content from server

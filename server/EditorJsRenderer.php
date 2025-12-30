@@ -41,6 +41,8 @@ class EditorJsRenderer {
                 return self::renderQuote($data);
             case 'delimiter':
                 return self::renderDelimiter();
+            case 'code':
+                return self::renderCode($data);
             case 'image':
                 return self::renderImage($data);
             default:
@@ -115,6 +117,19 @@ class EditorJsRenderer {
      */
     private static function renderDelimiter() {
         return "<hr />\n";
+    }
+
+    /**
+     * Render code block
+     */
+    private static function renderCode($data) {
+        $code = htmlspecialchars($data['code'] ?? '', ENT_QUOTES, 'UTF-8');
+
+        if (empty($code)) {
+            return '';
+        }
+
+        return "<pre><code>{$code}</code></pre>\n";
     }
 
     /**
