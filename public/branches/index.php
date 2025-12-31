@@ -162,6 +162,7 @@ if ($branchId) {
 <!-- Context menu for branch items -->
 <div id="branch-context-menu" class="branch-context-menu" style="display: none;">
   <div class="branch-context-menu-item" data-action="hide">Спрятать</div>
+  <div class="branch-context-menu-item" data-action="delete">Удалить</div>
 </div>
 
 <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
@@ -174,6 +175,6 @@ if ($branchId) {
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
 </a>
 
-<script type="module" src="js/branches.js?v=5"></script>
+<script type="module" src="js/branches.js?v=6"></script>
 </body>
 </html>

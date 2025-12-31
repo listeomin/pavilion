@@ -271,6 +271,46 @@ try {
             ]);
             break;
 
+        case 'delete':
+            // Delete branch (only creator can delete)
+            $data = json_decode(file_get_contents('php://input'), true);
+            $branchId = $data['branch_id'] ?? null;
+
+            if (!$branchId) {
+                throw new Exception('Branch ID is required');
+            }
+
+            if (!$telegramUserId) {
+                throw new Exception('Authentication required');
+            }
+
+            // Check if user is the creator
+            $stmt = $db->prepare('SELECT creator_user_id FROM branches WHERE id = :id');
+            $stmt->execute([':id' => $branchId]);
+            $branch = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$branch) {
+                throw new Exception('Branch not found');
+            }
+
+            if ($branch['creator_user_id'] != $telegramUserId) {
+                throw new Exception('Only creator can delete branch');
+            }
+
+            // Delete branch messages first (due to foreign key)
+            $stmt = $db->prepare('DELETE FROM branch_messages WHERE branch_id = :id');
+            $stmt->execute([':id' => $branchId]);
+
+            // Delete branch
+            $stmt = $db->prepare('DELETE FROM branches WHERE id = :id');
+            $stmt->execute([':id' => $branchId]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Branch deleted successfully'
+            ]);
+            break;
+
         default:
             throw new Exception('Invalid action');
     }

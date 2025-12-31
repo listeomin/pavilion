@@ -1,5 +1,5 @@
 // branches.js - Branches (topics/threads) frontend logic
-import { CONFIG } from './config.js?v=6';
+import { CONFIG } from './config.js?v=7';
 import * as NightShift from './nightshift.js?v=1';
 import { AnimalProfile } from './animalProfile.js?v=18';
 import { getCookie, apiInit } from './api.js?v=7';
@@ -121,7 +121,8 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     listEl.innerHTML = filteredBranches.map(branch => `
       <div class="branch-item ${branch.id == branchConfig.branchId ? 'active' : ''}"
            data-branch-id="${branch.id}"
-           data-title="${escapeHtml(branch.title)}">
+           data-title="${escapeHtml(branch.title)}"
+           data-creator-user-id="${branch.creatorUserId || ''}">
         ${escapeHtml(branch.title)}
       </div>
     `).join('');
@@ -409,6 +410,7 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
     if (!contextMenu) return;
     contextMenuTargetItem = item;
     const branchId = parseInt(item.dataset.branchId);
+    const creatorUserId = item.dataset.creatorUserId;
 
     // Update hide menu item
     const hideItem = contextMenu.querySelector('[data-action="hide"]');
@@ -416,6 +418,16 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
       hideItem.textContent = 'Вернуть';
     } else {
       hideItem.textContent = 'Спрятать';
+    }
+
+    // Show/hide delete button based on ownership
+    const deleteItem = contextMenu.querySelector('[data-action="delete"]');
+    if (deleteItem) {
+      if (branchConfig.currentUserId && creatorUserId && branchConfig.currentUserId == creatorUserId) {
+        deleteItem.style.display = 'block';
+      } else {
+        deleteItem.style.display = 'none';
+      }
     }
 
     contextMenu.style.left = x + 'px';
@@ -467,6 +479,57 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
         const data = await res.json();
         if (data.success) {
           renderBranchesList(data.branches);
+        }
+      }
+
+      if (action === 'delete') {
+        // Confirm deletion
+        if (!confirm('Вы уверены, что хотите удалить эту ветку? Это действие нельзя отменить.')) {
+          hideContextMenu();
+          return;
+        }
+
+        try {
+          const res = await fetch(`${BRANCHES_API}?action=delete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ branch_id: branchId })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            // Remove from hidden branches if present
+            if (hiddenBranches.includes(branchId)) {
+              hiddenBranches = hiddenBranches.filter(id => id !== branchId);
+              localStorage.setItem('hidden_branches', JSON.stringify(hiddenBranches));
+            }
+
+            // If currently viewing this branch, clear chat
+            if (branchConfig.branchId === branchId) {
+              const chatContainer = document.querySelector('.branch-chat-container');
+              if (chatContainer) {
+                chatContainer.remove();
+              }
+              const emptyState = document.querySelector('.empty-state');
+              if (emptyState) {
+                emptyState.style.display = 'block';
+              }
+              branchConfig.branchId = null;
+              branchConfig.branchTitle = null;
+            }
+
+            // Re-fetch and render branches list
+            const refreshRes = await fetch(`${BRANCHES_API}?action=get_branches`);
+            const refreshData = await refreshRes.json();
+            if (refreshData.success) {
+              renderBranchesList(refreshData.branches);
+            }
+          } else {
+            alert('Ошибка при удалении ветки: ' + (data.error || 'Неизвестная ошибка'));
+          }
+        } catch (error) {
+          console.error('[Branches] Delete error:', error);
+          alert('Ошибка при удалении ветки');
         }
       }
 
