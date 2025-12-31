@@ -33,3 +33,7 @@
   user-select: none;
   pointer-events: none;
 }
+
+.weather-text {
+  color: var(--color-cumulonimbus-dark);
+}

@@ -1,5 +1,5 @@
 // public/js/inline-input.js
-import { CONFIG } from './config.js?v=6';
+import { CONFIG } from './config.js?v=7';
 import { getAudioUrl } from './audio-mapping.js?v=1';
 
 export class InlineInput {
@@ -171,8 +171,11 @@ export class InlineInput {
 
     // Handle @ commands (weather)
     if (text === '@') {
-      this.renderWeatherHint();
-      this.restoreCursorPosition(1);
+      // Automatically insert the first @ command
+      const command = this.atCommands[0];
+      const html = `<span class="weather-prefix">@${this.escapeHtml(command)}</span>`;
+      this.input.innerHTML = html;
+      this.setCursorToEnd();
       return;
     }
 
@@ -230,17 +233,34 @@ export class InlineInput {
   renderWeatherCommand(text, cursorPos) {
     const typed = text.substring(1); // Remove @
 
-    // Find matching command from our list
-    const matchingCommand = this.atCommands.find(cmd => cmd.startsWith(typed));
+    // Check if there's text after the command (e.g., "@сова привет")
+    let commandPart = typed;
+    let textAfterCommand = '';
 
-    if (matchingCommand) {
-      if (typed === matchingCommand) {
+    // Find if typed text starts with any command
+    const matchingCommand = this.atCommands.find(cmd => typed.startsWith(cmd));
+
+    if (matchingCommand && typed.length > matchingCommand.length) {
+      // There's text after the command
+      commandPart = matchingCommand;
+      textAfterCommand = typed.substring(matchingCommand.length);
+      const html = `<span class="weather-prefix">@${this.escapeHtml(commandPart)}</span><span class="weather-text">${this.escapeHtml(textAfterCommand)}</span>`;
+      this.input.innerHTML = html;
+      this.restoreCursorPosition(cursorPos);
+      return;
+    }
+
+    // Find matching command for autocomplete
+    const autocompleteCommand = this.atCommands.find(cmd => cmd.startsWith(typed));
+
+    if (autocompleteCommand) {
+      if (typed === autocompleteCommand) {
         // Fully typed
         const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span>`;
         this.input.innerHTML = html;
       } else {
         // Partial match - show suggestion
-        const remaining = matchingCommand.substring(typed.length);
+        const remaining = autocompleteCommand.substring(typed.length);
         const html = `<span class="weather-prefix">@${this.escapeHtml(typed)}</span><span class="weather-hint">${this.escapeHtml(remaining)}</span>`;
         this.input.innerHTML = html;
       }
@@ -470,21 +490,26 @@ export class InlineInput {
       if (text.startsWith('@')) {
         const typed = text.substring(1);
 
-        // If just @, cycle through commands
-        if (typed === '') {
-          this.currentAtCommandIndex = (this.currentAtCommandIndex + 1) % this.atCommands.length;
-          this.renderWeatherHint();
-          this.restoreCursorPosition(1);
+        // Check if it's a complete command - cycle to next
+        const currentIndex = this.atCommands.indexOf(typed);
+        if (currentIndex !== -1) {
+          // It's a complete command, cycle to next
+          this.currentAtCommandIndex = (currentIndex + 1) % this.atCommands.length;
+          const nextCommand = this.atCommands[this.currentAtCommandIndex];
+          // Add comma and space for сова command
+          const suffix = (nextCommand === 'сова') ? ', ' : '';
+          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(nextCommand)}</span><span class="weather-text">${suffix}</span>`;
+          this.setCursorToEnd();
           return;
         }
 
         // If partial typing, find matching command and autocomplete
         const matchingCommand = this.atCommands.find(cmd => cmd.startsWith(typed));
         if (matchingCommand && typed !== matchingCommand) {
-          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(matchingCommand)}</span>`;
+          // Add comma and space for сова command
+          const suffix = (matchingCommand === 'сова') ? ', ' : '';
+          this.input.innerHTML = `<span class="weather-prefix">@${this.escapeHtml(matchingCommand)}</span><span class="weather-text">${suffix}</span>`;
           this.setCursorToEnd();
-          // Reset index after completion
-          this.currentAtCommandIndex = 0;
         }
         return;
       }
