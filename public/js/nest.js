@@ -909,6 +909,105 @@ function alignUserHeader() {
       renderNavigation();
     };
 
+    // Show custom input modal
+    const showInputModal = (title, placeholder, callback) => {
+      // Create modal overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;';
+
+      // Create modal
+      const modal = document.createElement('div');
+      modal.className = 'context-menu active';
+      modal.style.cssText = 'position: relative; opacity: 1; pointer-events: auto; transform: scale(1);';
+
+      const titleEl = document.createElement('div');
+      titleEl.textContent = title;
+      titleEl.style.cssText = 'color: #ffffff; font-size: 16px; font-weight: 600; margin-bottom: 12px;';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = placeholder;
+      input.style.cssText = 'width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-family: Ubuntu Sans, sans-serif; margin-bottom: 12px; outline: none;';
+
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.style.cssText = 'display: flex; gap: 8px;';
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Отмена';
+      cancelBtn.className = 'context-menu-item';
+      cancelBtn.style.cssText = 'flex: 1; margin: 0;';
+
+      const okBtn = document.createElement('button');
+      okBtn.textContent = 'OK';
+      okBtn.className = 'context-menu-item';
+      okBtn.style.cssText = 'flex: 1; margin: 0; background: rgba(255, 255, 255, 0.2);';
+
+      modal.appendChild(titleEl);
+      modal.appendChild(input);
+      buttonsContainer.appendChild(cancelBtn);
+      buttonsContainer.appendChild(okBtn);
+      modal.appendChild(buttonsContainer);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      input.focus();
+
+      const close = (value) => {
+        document.body.removeChild(overlay);
+        if (value !== null) callback(value);
+      };
+
+      cancelBtn.onclick = () => close(null);
+      okBtn.onclick = () => close(input.value);
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter') close(input.value);
+        if (e.key === 'Escape') close(null);
+      };
+      overlay.onclick = (e) => {
+        if (e.target === overlay) close(null);
+      };
+    };
+
+    // Show context menu for section
+    const showSectionContextMenu = (sectionName, x, y) => {
+      // Remove existing context menu
+      const existing = document.querySelector('.section-context-menu');
+      if (existing) existing.remove();
+
+      const menu = document.createElement('div');
+      menu.className = 'context-menu active section-context-menu';
+      menu.style.left = x + 'px';
+      menu.style.top = y + 'px';
+
+      const deleteItem = document.createElement('div');
+      deleteItem.className = 'context-menu-item context-menu-item-danger';
+      deleteItem.textContent = 'Удалить';
+      deleteItem.onclick = () => {
+        removeSection(sectionName);
+        menu.remove();
+      };
+
+      menu.appendChild(deleteItem);
+      document.body.appendChild(menu);
+
+      // Close menu on click outside
+      const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+          menu.remove();
+          document.removeEventListener('click', closeMenu);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeMenu), 0);
+    };
+
+    // Remove section
+    const removeSection = (name) => {
+      const sections = getSections();
+      const filtered = sections.filter(s => s !== name);
+      saveSections(filtered);
+      renderNavigation();
+    };
+
     // Render navigation
     let currentFilter = null; // null = all, { type: 'section', name: 'tag' }, { type: 'post', index: 0 }
 
@@ -1003,6 +1102,19 @@ function alignUserHeader() {
           sectionHeader.classList.add('active');
         }
 
+        // Add context menu for manual sections (only for own nest)
+        if (nestConfig.isOwnNest) {
+          const manualSections = getSections();
+          if (manualSections.includes(sectionName)) {
+            sectionHeader.style.cursor = 'context-menu';
+            sectionHeader.addEventListener('contextmenu', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              showSectionContextMenu(sectionName, e.clientX, e.clientY);
+            });
+          }
+        }
+
         section.appendChild(sectionHeader);
 
         // Add posts for this section
@@ -1043,15 +1155,16 @@ function alignUserHeader() {
 
         const addSectionLink = document.createElement('a');
         addSectionLink.className = 'nav-add-section-link';
-        addSectionLink.textContent = '[Добавить раздел]';
+        addSectionLink.textContent = '[добавить раздел]';
         addSectionLink.href = '#';
 
         addSectionLink.addEventListener('click', (e) => {
           e.preventDefault();
-          const sectionName = prompt('Название раздела:');
-          if (sectionName && sectionName.trim()) {
-            addSection(sectionName.trim());
-          }
+          showInputModal('Новый раздел', 'Название раздела', (value) => {
+            if (value && value.trim()) {
+              addSection(value.trim());
+            }
+          });
         });
 
         addSectionContainer.appendChild(addSectionLink);
