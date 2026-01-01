@@ -517,7 +517,9 @@ function alignUserHeader() {
 
       // Initial navigation render (no delay to avoid visual flicker)
       // Use requestAnimationFrame to ensure DOM is ready
-      requestAnimationFrame(() => {
+      requestAnimationFrame(async () => {
+        // Load sections from server first
+        await loadSections();
         renderNavigation();
         // Only highlight tags in edit mode to avoid visual changes in read mode
         if (nestConfig.isOwnNest) {
@@ -876,19 +878,48 @@ function alignUserHeader() {
       return { sections, posts };
     };
 
-    // Sections storage (in localStorage for now)
-    const SECTIONS_KEY = `nest-sections-${nestConfig.urlUsername || 'default'}`;
+    // Sections storage (on server)
+    let cachedSections = [];
+    let sectionsLoaded = false;
 
-    const getSections = () => {
+
+
+    // Load sections from server
+    const loadSections = async () => {
       try {
-        return JSON.parse(localStorage.getItem(SECTIONS_KEY) || '[]');
-      } catch {
-        return [];
+        const username = nestConfig.urlUsername;
+        const url = username 
+          ? 'api/nest_sections.php?action=get&username=' + encodeURIComponent(username)
+          : 'api/nest_sections.php?action=get';
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success) {
+          cachedSections = data.sections || [];
+          sectionsLoaded = true;
+        }
+      } catch (error) {
+        console.error('Failed to load sections:', error);
+        cachedSections = [];
+        sectionsLoaded = true;
       }
+    };
+    const getSections = () => {
+      return cachedSections;
     };
 
     const saveSections = (sections) => {
-      localStorage.setItem(SECTIONS_KEY, JSON.stringify(sections));
+      cachedSections = sections;
+      
+      // Save to server asynchronously (only for own nest)
+      if (nestConfig.isOwnNest) {
+        fetch('api/nest_sections.php?action=save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sections })
+        }).catch(error => console.error('Failed to save sections:', error));
+      }
     };
 
     const addSection = (name) => {

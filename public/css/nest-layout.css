@@ -111,6 +111,10 @@
 .nav-add-section {
   position: fixed;
   bottom: 32px;
+  right: 20px;
+  z-index: 20;
+
+
 }
 
 .nav-add-section-link {
