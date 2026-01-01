@@ -207,7 +207,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="icon" href="assets/favicon.png" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&family=Cascadia+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/base.css?v=6">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
@@ -227,7 +227,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/nest-layout.css?v=21">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- Tiptap Editor -->
-<link rel="stylesheet" href="css/tiptap.css?v=6">
+<link rel="stylesheet" href="css/tiptap.css?v=7">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=5">
 </head>

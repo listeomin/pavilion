@@ -92,6 +92,7 @@
 
 /* Typography */
 .tiptap h1 {
+  font-family: 'Noto Serif', serif;
   font-size: 32px;
   font-weight: 600;
   line-height: 1.2;
