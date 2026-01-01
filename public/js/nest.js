@@ -761,19 +761,8 @@ function alignUserHeader() {
       isSaving = true;
 
       try {
-        let htmlContent;
-
-        // If filter is active, save from originalContent, not filtered view
-        if (currentFilter && originalContent) {
-          // Temporarily restore full content to get HTML
-          const filteredContent = editor.getJSON();
-          editor.commands.setContent(originalContent);
-          htmlContent = editor.getHTML();
-          // Restore filtered view
-          editor.commands.setContent(filteredContent);
-        } else {
-          htmlContent = editor.getHTML();
-        }
+        // Get full HTML content (CSS visibility doesn't affect HTML output)
+        const htmlContent = editor.getHTML();
 
         const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
           method: 'POST',
@@ -818,7 +807,7 @@ function alignUserHeader() {
     };
 
     // Parse content to build navigation structure
-    // When filter is active, parse from originalContent JSON instead of DOM
+    // Always parse from DOM (filter uses CSS visibility, doesn't remove nodes)
     const parseContentStructure = (sectionNames = []) => {
       if (!editor) return { sections: {}, posts: [] };
 
@@ -830,117 +819,55 @@ function alignUserHeader() {
         sections[name] = [];
       });
 
-      // Helper to extract text from Tiptap node content
-      const extractText = (content) => {
-        if (!content) return '';
-        return content.map(node => {
-          if (node.type === 'text') return node.text || '';
-          if (node.content) return extractText(node.content);
-          return '';
-        }).join('');
-      };
-
-      let allNodes;
-      let useJSON = false;
-
-      // If filter is active, parse from originalContent (full JSON)
-      if (currentFilter && originalContent) {
-        allNodes = originalContent.content || [];
-        useJSON = true;
-      } else {
-        // Parse from DOM
-        const editorEl = document.querySelector('.tiptap');
-        if (!editorEl) {
-          return { sections: {}, posts: [] };
-        }
-        allNodes = Array.from(editorEl.children);
-        useJSON = false;
+      // Parse from DOM (all nodes always present, just hidden with CSS)
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) {
+        return { sections: {}, posts: [] };
       }
+
+      const allNodes = Array.from(editorEl.children);
 
       let currentH1 = null;
       let currentH1Index = -1;
 
       // Walk through content from top to bottom
       allNodes.forEach((node, index) => {
-        if (useJSON) {
-          // Parse from JSON structure
-          if (node.type === 'heading' && node.attrs?.level === 1) {
-            const title = extractText(node.content);
-            currentH1 = {
-              title: title,
-              element: null,
-              index: index
-            };
-            currentH1Index = index;
-          }
+        // Parse from DOM
+        if (node.tagName === 'H1') {
+          currentH1 = {
+            title: node.textContent.trim(),
+            element: node,
+            index: index
+          };
+          currentH1Index = index;
+        }
 
-          if (node.type === 'paragraph') {
-            const text = extractText(node.content);
-            const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
+        if (node.tagName === 'P') {
+          const text = node.textContent;
+          const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
 
-            if (tagMatch && currentH1) {
-              const rawTag = tagMatch[1];
-              const tagName = rawTag.replace(/_/g, ' ');
-              const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
+          if (tagMatch && currentH1) {
+            const rawTag = tagMatch[1];
+            const tagName = rawTag.replace(/_/g, ' ');
+            const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
 
-              if (matchingSection) {
-                const alreadyAdded = Object.values(sections).some(posts =>
-                  posts.some(p => p.startIndex === currentH1Index)
-                );
+            if (matchingSection) {
+              const alreadyAdded = Object.values(sections).some(posts =>
+                posts.some(p => p.startIndex === currentH1Index)
+              );
 
-                if (!alreadyAdded) {
-                  sections[matchingSection].push({
-                    title: currentH1.title,
-                    startIndex: currentH1Index,
-                    endIndex: index,
-                    element: currentH1.element
-                  });
-                  posts.push(currentH1);
-                }
-
-                currentH1 = null;
-                currentH1Index = -1;
+              if (!alreadyAdded) {
+                sections[matchingSection].push({
+                  title: currentH1.title,
+                  startIndex: currentH1Index,
+                  endIndex: index,
+                  element: currentH1.element
+                });
+                posts.push(currentH1);
               }
-            }
-          }
-        } else {
-          // Parse from DOM (existing logic)
-          if (node.tagName === 'H1') {
-            currentH1 = {
-              title: node.textContent.trim(),
-              element: node,
-              index: index
-            };
-            currentH1Index = index;
-          }
 
-          if (node.tagName === 'P') {
-            const text = node.textContent;
-            const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
-
-            if (tagMatch && currentH1) {
-              const rawTag = tagMatch[1];
-              const tagName = rawTag.replace(/_/g, ' ');
-              const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
-
-              if (matchingSection) {
-                const alreadyAdded = Object.values(sections).some(posts =>
-                  posts.some(p => p.startIndex === currentH1Index)
-                );
-
-                if (!alreadyAdded) {
-                  sections[matchingSection].push({
-                    title: currentH1.title,
-                    startIndex: currentH1Index,
-                    endIndex: index,
-                    element: currentH1.element
-                  });
-                  posts.push(currentH1);
-                }
-
-                currentH1 = null;
-                currentH1Index = -1;
-              }
+              currentH1 = null;
+              currentH1Index = -1;
             }
           }
         }
@@ -1158,16 +1085,24 @@ function alignUserHeader() {
       }
     };
 
-    // Apply filter to content
+    // Apply filter to content using CSS visibility (not content replacement)
     const applyFilter = () => {
       if (!editor) return;
 
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) return;
+
+      const allNodes = Array.from(editorEl.children);
+
       if (!currentFilter) {
-        // Restore original content if we have it
-        if (originalContent) {
-          editor.commands.setContent(originalContent);
-          originalContent = null;
-        }
+        // Show all - remove filter
+        allNodes.forEach(node => {
+          node.style.removeProperty('visibility');
+          node.style.removeProperty('height');
+          node.style.removeProperty('overflow');
+          node.style.removeProperty('margin');
+          node.style.removeProperty('padding');
+        });
         // Re-enable editing
         if (nestConfig.isOwnNest) {
           editor.setEditable(true);
@@ -1175,9 +1110,9 @@ function alignUserHeader() {
         return;
       }
 
-      // Store original content if not already stored
-      if (!originalContent) {
-        originalContent = editor.getJSON();
+      // Disable editing during filtering
+      if (nestConfig.isOwnNest) {
+        editor.setEditable(false);
       }
 
       // Get filtered node indices
@@ -1201,17 +1136,24 @@ function alignUserHeader() {
         }
       }
 
-      // Build filtered content from original
-      const filteredContent = {
-        type: 'doc',
-        content: originalContent.content.filter((node, index) => indicesToShow.has(index))
-      };
-
-      // Disable editing and set filtered content
-      if (nestConfig.isOwnNest) {
-        editor.setEditable(false);
-      }
-      editor.commands.setContent(filteredContent);
+      // Hide/show nodes using CSS visibility (not display to keep images loaded)
+      allNodes.forEach((node, index) => {
+        if (indicesToShow.has(index)) {
+          // Show
+          node.style.removeProperty('visibility');
+          node.style.removeProperty('height');
+          node.style.removeProperty('overflow');
+          node.style.removeProperty('margin');
+          node.style.removeProperty('padding');
+        } else {
+          // Hide but keep in DOM (images stay loaded)
+          node.style.visibility = 'hidden';
+          node.style.height = '0';
+          node.style.overflow = 'hidden';
+          node.style.margin = '0';
+          node.style.padding = '0';
+        }
+      });
 
       logToFile(`Filter applied: ${currentFilter.type} with ${indicesToShow.size} nodes visible`);
     };
