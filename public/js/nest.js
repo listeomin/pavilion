@@ -1058,9 +1058,10 @@ function alignUserHeader() {
         navContainer.appendChild(addSectionContainer);
       }
 
-      // Place navigation content in tabs container
-      tabsContainer.innerHTML = '';
-      tabsContainer.appendChild(navContainer);
+      // Place navigation content in tabs container (only if not already there)
+      if (!navContainer.parentElement || navContainer.parentElement !== tabsContainer) {
+        tabsContainer.appendChild(navContainer);
+      }
 
       // Add click handlers
       attachNavigationHandlers();
@@ -1224,23 +1225,39 @@ function alignUserHeader() {
         }
       });
 
-      // Update content
-      const tabContent = document.querySelector('.nest-tabs-content');
-      if (!tabContent) return;
+      // Update content - hide all tab contents first
+      const navContent = document.querySelector('.nest-navigation-content');
+      const metaContent = document.querySelector('.nest-meta-content');
+      const discussionsContent = document.querySelector('.nest-discussions-content');
 
-      if (tabName === 'navigation') {
-        // Show navigation content (already rendered by renderNavigation)
-        const navContent = document.querySelector('.nest-navigation-content');
-        if (navContent) {
-          tabContent.innerHTML = '';
-          tabContent.appendChild(navContent);
-        }
+      // Hide all
+      if (navContent) navContent.style.display = 'none';
+      if (metaContent) metaContent.style.display = 'none';
+      if (discussionsContent) discussionsContent.style.display = 'none';
+
+      // Show selected tab content
+      if (tabName === 'navigation' && navContent) {
+        navContent.style.display = 'block';
       } else if (tabName === 'meta') {
-        // Show meta content
-        tabContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+        if (!metaContent) {
+          const container = document.querySelector('.nest-tabs-content');
+          const meta = document.createElement('div');
+          meta.className = 'nest-meta-content';
+          meta.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+          container.appendChild(meta);
+        } else {
+          metaContent.style.display = 'block';
+        }
       } else if (tabName === 'discussions') {
-        // Show discussions content
-        tabContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+        if (!discussionsContent) {
+          const container = document.querySelector('.nest-tabs-content');
+          const discussions = document.createElement('div');
+          discussions.className = 'nest-discussions-content';
+          discussions.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+          container.appendChild(discussions);
+        } else {
+          discussionsContent.style.display = 'block';
+        }
       }
     };
 

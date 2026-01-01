@@ -74,7 +74,7 @@
   outline: none;
   min-height: 400px;
   padding: 16px;
-  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Cascadia Code', 'Ubuntu Mono', 'Courier New', monospace;
   font-size: 16px;
   line-height: 1.6;
   color: var(--color-cumulonimbus-dark);
