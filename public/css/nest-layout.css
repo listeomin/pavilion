@@ -30,6 +30,8 @@
 
 /* Nest internal navigation (sidebar navigation) */
 .nest-nav {
+  position: sticky;
+  top: 151px;
   display: flex;
   align-items: center;
   gap: 16px;
