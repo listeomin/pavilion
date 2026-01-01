@@ -811,16 +811,10 @@ function alignUserHeader() {
     };
 
     // Parse content to build navigation structure
+    // When filter is active, parse from originalContent JSON instead of DOM
     const parseContentStructure = (sectionNames = []) => {
       if (!editor) return { sections: {}, posts: [] };
 
-      // Tiptap editor content is inside .tiptap div, not #tiptap-content
-      const editorEl = document.querySelector('.tiptap');
-      if (!editorEl) {
-        return { sections: {}, posts: [] };
-      }
-
-      const allNodes = Array.from(editorEl.children);
       const posts = [];
       const sections = {}; // tag -> [post objects]
 
@@ -829,42 +823,60 @@ function alignUserHeader() {
         sections[name] = [];
       });
 
+      // Helper to extract text from Tiptap node content
+      const extractText = (content) => {
+        if (!content) return '';
+        return content.map(node => {
+          if (node.type === 'text') return node.text || '';
+          if (node.content) return extractText(node.content);
+          return '';
+        }).join('');
+      };
 
-      // Log all nodes for debugging
-      allNodes.forEach((node, i) => {
-      });
+      let allNodes;
+      let useJSON = false;
+
+      // If filter is active, parse from originalContent (full JSON)
+      if (currentFilter && originalContent) {
+        allNodes = originalContent.content || [];
+        useJSON = true;
+      } else {
+        // Parse from DOM
+        const editorEl = document.querySelector('.tiptap');
+        if (!editorEl) {
+          return { sections: {}, posts: [] };
+        }
+        allNodes = Array.from(editorEl.children);
+        useJSON = false;
+      }
 
       let currentH1 = null;
       let currentH1Index = -1;
 
       // Walk through content from top to bottom
       allNodes.forEach((node, index) => {
-        // Check if it's H1
-        if (node.tagName === 'H1') {
-          currentH1 = {
-            title: node.textContent.trim(),
-            element: node,
-            index: index
-          };
-          currentH1Index = index;
-        }
+        if (useJSON) {
+          // Parse from JSON structure
+          if (node.type === 'heading' && node.attrs?.level === 1) {
+            const title = extractText(node.content);
+            currentH1 = {
+              title: title,
+              element: null,
+              index: index
+            };
+            currentH1Index = index;
+          }
 
-        // Check if it's a paragraph with a tag
-        if (node.tagName === 'P') {
-          const text = node.textContent;
-          const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
+          if (node.type === 'paragraph') {
+            const text = extractText(node.content);
+            const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
 
-          if (tagMatch) {
-            const rawTag = tagMatch[1];
-            const tagName = rawTag.replace(/_/g, ' '); // Replace underscores with spaces
-
-
-            if (currentH1) {
-              // Find matching section (case-insensitive)
+            if (tagMatch && currentH1) {
+              const rawTag = tagMatch[1];
+              const tagName = rawTag.replace(/_/g, ' ');
               const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
 
               if (matchingSection) {
-                // Add post to section (only if not already added by another tag)
                 const alreadyAdded = Object.values(sections).some(posts =>
                   posts.some(p => p.startIndex === currentH1Index)
                 );
@@ -872,25 +884,60 @@ function alignUserHeader() {
                 if (!alreadyAdded) {
                   sections[matchingSection].push({
                     title: currentH1.title,
-                    startIndex: currentH1Index,  // H1 position
-                    endIndex: index,              // Tag paragraph position
+                    startIndex: currentH1Index,
+                    endIndex: index,
                     element: currentH1.element
                   });
                   posts.push(currentH1);
-                } else {
                 }
 
-                // Reset currentH1 so next tag won't capture the same H1
                 currentH1 = null;
                 currentH1Index = -1;
-              } else {
               }
-            } else {
+            }
+          }
+        } else {
+          // Parse from DOM (existing logic)
+          if (node.tagName === 'H1') {
+            currentH1 = {
+              title: node.textContent.trim(),
+              element: node,
+              index: index
+            };
+            currentH1Index = index;
+          }
+
+          if (node.tagName === 'P') {
+            const text = node.textContent;
+            const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
+
+            if (tagMatch && currentH1) {
+              const rawTag = tagMatch[1];
+              const tagName = rawTag.replace(/_/g, ' ');
+              const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
+
+              if (matchingSection) {
+                const alreadyAdded = Object.values(sections).some(posts =>
+                  posts.some(p => p.startIndex === currentH1Index)
+                );
+
+                if (!alreadyAdded) {
+                  sections[matchingSection].push({
+                    title: currentH1.title,
+                    startIndex: currentH1Index,
+                    endIndex: index,
+                    element: currentH1.element
+                  });
+                  posts.push(currentH1);
+                }
+
+                currentH1 = null;
+                currentH1Index = -1;
+              }
             }
           }
         }
       });
-
 
       return { sections, posts };
     };
