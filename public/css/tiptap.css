@@ -74,8 +74,9 @@
   outline: none;
   min-height: 400px;
   padding: 16px;
-  font-family: 'Cascadia Code', 'Ubuntu Mono', 'Courier New', monospace;
+  font-family: monospace;
   font-size: 16px;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--color-cumulonimbus-dark);
 }
