@@ -912,12 +912,44 @@ function alignUserHeader() {
     // Render navigation
     let currentFilter = null; // null = all, { type: 'section', name: 'tag' }, { type: 'post', index: 0 }
 
+    // Extract all unique tags from content automatically
+    const extractTagsFromContent = () => {
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) return [];
+
+      const tags = new Set();
+      const paragraphs = editorEl.querySelectorAll('p');
+
+      paragraphs.forEach(p => {
+        const text = p.textContent;
+        const tagMatches = text.matchAll(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/g);
+        for (const match of tagMatches) {
+          const tagName = match[1].replace(/_/g, ' ');
+          tags.add(tagName);
+        }
+      });
+
+      return Array.from(tags);
+    };
+
     const renderNavigation = () => {
       const navItem = document.querySelector('.nest-nav-item[href="#navigation"]');
       if (!navItem) return;
 
-      // Get manually created sections
-      const sectionNames = getSections();
+      // Get manually created sections (only for own nest)
+      let sectionNames = getSections();
+
+      // For visitors or if no manual sections, use tags from content
+      if (!nestConfig.isOwnNest || sectionNames.length === 0) {
+        const autoTags = extractTagsFromContent();
+        // Merge with manual sections (manual takes priority)
+        const manualSet = new Set(sectionNames.map(s => s.toLowerCase()));
+        autoTags.forEach(tag => {
+          if (!manualSet.has(tag.toLowerCase())) {
+            sectionNames.push(tag);
+          }
+        });
+      }
 
       // Parse content to find posts for each section
       const { sections: contentSections } = parseContentStructure(sectionNames);
