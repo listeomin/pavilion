@@ -370,9 +370,9 @@
 
 /* Animal Profile Button */
 .animal-profile-trigger {
-  position: absolute;
+  position: fixed;
   top: 24px;
-  right: 36px;
+  right: calc(320px + 40px + 32px); /* sidebar width + gap + offset = 392px */
   width: 40px;
   height: 40px;
   border: none;

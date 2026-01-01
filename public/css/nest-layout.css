@@ -10,7 +10,6 @@
 .main-column {
   flex: 1;
   min-width: 0;
-  position: relative; /* For absolute positioned buttons */
   /* Visual separation from sidebar */
   border-right: 1px solid #D1CFC5;
   box-shadow: 16px 0px 32px #E8E6DC;

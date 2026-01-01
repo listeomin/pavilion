@@ -937,15 +937,8 @@ function alignUserHeader() {
       // Clear and rebuild
       navContainer.innerHTML = '';
 
-      // Always show in edit mode
-      if (nestConfig.isOwnNest) {
-        navContainer.style.display = 'block';
-      } else if (sectionNames.length === 0) {
-        navContainer.style.display = 'none';
-        return;
-      } else {
-        navContainer.style.display = 'block';
-      }
+      // Always show navigation (even if empty)
+      navContainer.style.display = 'block';
 
       // Show sections
       if (sectionNames.length === 0 && !nestConfig.isOwnNest) {
