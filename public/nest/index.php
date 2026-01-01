@@ -227,7 +227,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/nest-layout.css?v=16">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- Tiptap Editor -->
-<link rel="stylesheet" href="css/tiptap.css?v=3">
+<link rel="stylesheet" href="css/tiptap.css?v=4">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=3">
 </head>

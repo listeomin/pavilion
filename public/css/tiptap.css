@@ -6,33 +6,38 @@
   margin: 0;
 }
 
-/* Toolbar */
+/* Toolbar - vertical, fixed left center */
 .tiptap-toolbar {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border-bottom: 1px solid var(--color-nimbus-light);
-  margin-bottom: 16px;
-  position: sticky;
-  top: 0;
+  gap: 4px;
+  padding: 12px 6px;
   background: var(--color-cirrus);
-  z-index: 10;
+  border-right: 1px solid var(--color-nimbus-light);
+  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  border-radius: 0 8px 8px 0;
 }
 
 /* Toolbar groups */
 .tiptap-toolbar-group {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 /* Toolbar separator */
 .tiptap-toolbar-separator {
-  width: 1px;
-  height: 24px;
+  width: 32px;
+  height: 1px;
   background: var(--color-nimbus-light);
-  margin: 0 4px;
+  margin: 4px 0;
 }
 
 /* Toolbar buttons */
@@ -40,17 +45,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  padding: 0 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--color-cumulonimbus-dark);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
