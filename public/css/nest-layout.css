@@ -1,6 +1,76 @@
 /* nest-layout.css - Layout overrides for nest pages */
 
-/* Max width for nest pages */
-.wrap {
+/* Page layout - main column + sidebar */
+.page-layout {
+  display: flex;
+  gap: 40px;
+}
+
+/* Main column - takes all remaining space, content aligned to left */
+.main-column {
+  flex: 1;
+  min-width: 0;
+  /* Visual separation from sidebar */
+  border-right: 1px solid #D1CFC5;
+  box-shadow: 16px 0px 32px #E8E6DC;
+}
+
+/* Keep wrap max-width for content alignment */
+.page-layout .wrap {
   max-width: 980px !important;
+}
+
+/* Sidebar - fixed width 320px, full height */
+.nest-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  /* Align navigation with page title - 151px from top */
+  padding-top: 151px;
+}
+
+/* Nest internal navigation (sidebar navigation) */
+.nest-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nest-nav-item {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Available items */
+.nest-nav-item:not(.active):not(.disabled) {
+  color: var(--color-nimbus-dark);
+  cursor: pointer;
+}
+
+.nest-nav-item:not(.active):not(.disabled):hover {
+  color: var(--color-iris);
+}
+
+/* Active item */
+.nest-nav-item.active {
+  color: var(--color-cumulonimbus-medium);
+  cursor: pointer;
+}
+
+/* Disabled item */
+.nest-nav-item.disabled {
+  color: var(--color-nimbus-light);
+  cursor: default;
+}
+
+/* Separator */
+.nest-nav-separator {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-nimbus-light);
+  user-select: none;
 }
