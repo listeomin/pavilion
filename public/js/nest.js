@@ -1097,6 +1097,7 @@ function alignUserHeader() {
       if (!currentFilter) {
         // Show all - remove filter
         allNodes.forEach(node => {
+          node.style.removeProperty('position');
           node.style.removeProperty('visibility');
           node.style.removeProperty('height');
           node.style.removeProperty('overflow');
@@ -1136,17 +1137,19 @@ function alignUserHeader() {
         }
       }
 
-      // Hide/show nodes using CSS visibility (not display to keep images loaded)
+      // Hide/show nodes using CSS (not display to keep images loaded)
       allNodes.forEach((node, index) => {
         if (indicesToShow.has(index)) {
           // Show
+          node.style.removeProperty('position');
           node.style.removeProperty('visibility');
           node.style.removeProperty('height');
           node.style.removeProperty('overflow');
           node.style.removeProperty('margin');
           node.style.removeProperty('padding');
         } else {
-          // Hide but keep in DOM (images stay loaded)
+          // Hide completely - remove from document flow
+          node.style.position = 'absolute';
           node.style.visibility = 'hidden';
           node.style.height = '0';
           node.style.overflow = 'hidden';
