@@ -226,8 +226,8 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/nest.css?v=26">
 <link rel="stylesheet" href="css/nest-layout.css?v=7">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
-<!-- Editor.js -->
-<link href="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.css" rel="stylesheet">
+<!-- Tiptap Editor -->
+<link rel="stylesheet" href="css/tiptap.css?v=1">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=3">
 </head>
@@ -356,16 +356,6 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<!-- Editor.js Core -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.28.2/dist/editorjs.umd.min.js"></script>
-<!-- Editor.js Plugins -->
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@2.7.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@1.8.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/quote@2.5.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/delimiter@1.3.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/inline-code@1.4.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/code@2.8.0/dist/bundle.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@editorjs/image@2.8.1/dist/bundle.js"></script>
-<script type="module" src="js/nest.js?v=37"></script>
+<script type="module" src="js/nest.js?v=39"></script>
 </body>
 </html>
