@@ -370,7 +370,7 @@
 
 /* Animal Profile Button */
 .animal-profile-trigger {
-  position: fixed;
+  position: absolute;
   top: 24px;
   right: 36px;
   width: 40px;

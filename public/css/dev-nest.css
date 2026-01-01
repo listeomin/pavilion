@@ -1,6 +1,6 @@
 /* Developer Nest button */
 #dev-nest-btn {
-  position: fixed;
+  position: absolute;
   bottom: 24px;
   right: 36px;
   width: 40px;
