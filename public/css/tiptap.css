@@ -182,3 +182,14 @@
 .tiptap[contenteditable="false"] {
   cursor: default;
 }
+
+/* Tag styling - match #word pattern */
+.tiptap p {
+  /* This will be handled by a custom Tiptap extension or post-processing */
+}
+
+/* Tag highlight class (applied dynamically) */
+.tiptap-tag {
+  color: var(--color-iris);
+  font-weight: 500;
+}

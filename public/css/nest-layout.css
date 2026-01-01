@@ -20,18 +20,22 @@
   max-width: 980px !important;
 }
 
-/* Sidebar - fixed width 320px, full height */
+/* Sidebar - fixed width 320px, full height, fixed position */
 .nest-sidebar {
   width: 320px;
   flex-shrink: 0;
   /* Align navigation with page title - 151px from top */
   padding-top: 151px;
+  /* Make sidebar sticky so it doesn't scroll with content */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  align-self: flex-start;
 }
 
 /* Nest internal navigation (sidebar navigation) */
 .nest-nav {
-  position: sticky;
-  top: 151px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -75,4 +79,108 @@
   font-weight: 500;
   color: var(--color-nimbus-light);
   user-select: none;
+}
+
+/* Navigation content panel */
+.nest-navigation-content {
+  margin-top: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  max-width: 280px;
+}
+
+/* Add section link */
+.nav-add-section {
+  margin-top: 16px;
+}
+
+.nav-add-section-link {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: var(--color-iris);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-add-section-link:hover {
+  text-decoration: underline;
+}
+
+/* Navigation section */
+.nav-section {
+  margin-bottom: 16px;
+}
+
+.nav-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Section header (tag name) */
+.nav-section-header {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-cumulonimbus-dark);
+  margin-bottom: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-section-header:hover {
+  background: var(--color-nimbus-light);
+}
+
+.nav-section-header.active {
+  background: var(--color-iris);
+  color: var(--color-cirrus);
+}
+
+/* Posts list */
+.nav-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 16px;
+}
+
+/* Individual post */
+.nav-post {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--color-nimbus-dark);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-post:hover {
+  background: var(--color-nimbus-light);
+  color: var(--color-cumulonimbus-dark);
+}
+
+.nav-post.active {
+  background: var(--color-nimbus-medium);
+  color: var(--color-cumulonimbus-dark);
+  font-weight: 500;
+}
+
+/* Empty state */
+.nav-empty {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--color-nimbus-medium);
+  font-style: italic;
+  padding: 8px;
+}
+
+.nav-post-empty {
+  font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: var(--color-nimbus-medium);
+  font-style: italic;
+  padding: 4px 8px;
 }

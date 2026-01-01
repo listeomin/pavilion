@@ -493,6 +493,11 @@ function alignUserHeader() {
         onUpdate: ({ editor }) => {
           if (!nestConfig.isOwnNest) return;
 
+          // Update navigation in real-time (but don't highlight tags during editing)
+          setTimeout(() => {
+            renderNavigation();
+          }, 100);
+
           // Debounced autosave
           if (saveTimeout) {
             clearTimeout(saveTimeout);
@@ -502,7 +507,19 @@ function alignUserHeader() {
             await saveContent();
           }, 2000);
         },
+        onBlur: ({ editor }) => {
+          // Highlight tags when editor loses focus (not during typing)
+          setTimeout(() => {
+            highlightTags();
+          }, 100);
+        },
       });
+
+      // Initial navigation render and tag highlighting
+      setTimeout(() => {
+        renderNavigation();
+        highlightTags();
+      }, 500);
 
       // Setup toolbar buttons
       if (nestConfig.isOwnNest) {
@@ -758,6 +775,383 @@ function alignUserHeader() {
         isSaving = false;
       }
     };
+
+    // Highlight tags in content
+    const highlightTags = () => {
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) return;
+
+      const paragraphs = editorEl.querySelectorAll('p');
+      paragraphs.forEach(p => {
+        const html = p.innerHTML;
+        // Replace #word with styled span
+        const highlightedHtml = html.replace(
+          /(#[a-zA-Zа-яА-ЯёЁ0-9_]+)/g,
+          '<span class="tiptap-tag">$1</span>'
+        );
+
+        // Only update if changed to avoid breaking cursor position
+        if (html !== highlightedHtml) {
+          p.innerHTML = highlightedHtml;
+        }
+      });
+    };
+
+    // Parse content to build navigation structure
+    const parseContentStructure = (sectionNames = []) => {
+      if (!editor) return { sections: {}, posts: [] };
+
+      // Tiptap editor content is inside .tiptap div, not #tiptap-content
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) {
+        return { sections: {}, posts: [] };
+      }
+
+      const allNodes = Array.from(editorEl.children);
+      const posts = [];
+      const sections = {}; // tag -> [post objects]
+
+      // Initialize sections
+      sectionNames.forEach(name => {
+        sections[name] = [];
+      });
+
+
+      // Log all nodes for debugging
+      allNodes.forEach((node, i) => {
+      });
+
+      let currentH1 = null;
+      let currentH1Index = -1;
+
+      // Walk through content from top to bottom
+      allNodes.forEach((node, index) => {
+        // Check if it's H1
+        if (node.tagName === 'H1') {
+          currentH1 = {
+            title: node.textContent.trim(),
+            element: node,
+            index: index
+          };
+          currentH1Index = index;
+        }
+
+        // Check if it's a paragraph with a tag
+        if (node.tagName === 'P') {
+          const text = node.textContent;
+          const tagMatch = text.match(/#([a-zA-Zа-яА-ЯёЁ0-9_]+)/);
+
+          if (tagMatch) {
+            const rawTag = tagMatch[1];
+            const tagName = rawTag.replace(/_/g, ' '); // Replace underscores with spaces
+
+
+            if (currentH1) {
+              // Find matching section (case-insensitive)
+              const matchingSection = sectionNames.find(s => s.toLowerCase() === tagName.toLowerCase());
+
+              if (matchingSection) {
+                // Add post to section (only if not already added by another tag)
+                const alreadyAdded = Object.values(sections).some(posts =>
+                  posts.some(p => p.index === currentH1Index)
+                );
+
+                if (!alreadyAdded) {
+                  sections[matchingSection].push({
+                    title: currentH1.title,
+                    index: currentH1Index,
+                    element: currentH1.element
+                  });
+                  posts.push(currentH1);
+                } else {
+                }
+
+                // Reset currentH1 so next tag won't capture the same H1
+                currentH1 = null;
+                currentH1Index = -1;
+              } else {
+              }
+            } else {
+            }
+          }
+        }
+      });
+
+
+      return { sections, posts };
+    };
+
+    // Sections storage (in localStorage for now)
+    const SECTIONS_KEY = `nest-sections-${nestConfig.urlUsername || 'default'}`;
+
+    const getSections = () => {
+      try {
+        return JSON.parse(localStorage.getItem(SECTIONS_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    };
+
+    const saveSections = (sections) => {
+      localStorage.setItem(SECTIONS_KEY, JSON.stringify(sections));
+    };
+
+    const addSection = (name) => {
+
+      // Capitalize first letter
+      const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+
+      const sections = getSections();
+
+      // Check if section already exists (case-insensitive)
+      const exists = sections.some(s => s.toLowerCase() === capitalizedName.toLowerCase());
+
+      if (!exists) {
+        sections.push(capitalizedName);
+        saveSections(sections);
+      } else {
+      }
+      renderNavigation();
+    };
+
+    // Render navigation
+    let currentFilter = null; // null = all, { type: 'section', name: 'tag' }, { type: 'post', index: 0 }
+
+    const renderNavigation = () => {
+      const navItem = document.querySelector('.nest-nav-item[href="#navigation"]');
+      if (!navItem) return;
+
+      // Get manually created sections
+      const sectionNames = getSections();
+
+      // Parse content to find posts for each section
+      const { sections: contentSections } = parseContentStructure(sectionNames);
+
+      // Create navigation container if it doesn't exist
+      let navContainer = document.querySelector('.nest-navigation-content');
+      if (!navContainer) {
+        navContainer = document.createElement('div');
+        navContainer.className = 'nest-navigation-content';
+        // Insert AFTER nest-nav, not at the end of sidebar
+        const nestNav = document.querySelector('.nest-nav');
+        if (nestNav && nestNav.parentElement) {
+          nestNav.parentElement.insertBefore(navContainer, nestNav.nextSibling);
+        }
+      }
+
+      // Clear and rebuild
+      navContainer.innerHTML = '';
+
+      // Always show in edit mode
+      if (nestConfig.isOwnNest) {
+        navContainer.style.display = 'block';
+      } else if (sectionNames.length === 0) {
+        navContainer.style.display = 'none';
+        return;
+      } else {
+        navContainer.style.display = 'block';
+      }
+
+      // Show sections
+      if (sectionNames.length === 0 && !nestConfig.isOwnNest) {
+        navContainer.innerHTML += '<div class="nav-empty">Нет разделов</div>';
+        return;
+      }
+
+      // Build navigation HTML for each section
+      sectionNames.forEach(sectionName => {
+        const section = document.createElement('div');
+        section.className = 'nav-section';
+
+        const sectionHeader = document.createElement('div');
+        sectionHeader.className = 'nav-section-header';
+        sectionHeader.textContent = sectionName;
+        sectionHeader.dataset.section = sectionName;
+
+        // Check if this section is active
+        if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+          sectionHeader.classList.add('active');
+        }
+
+        section.appendChild(sectionHeader);
+
+        // Add posts for this section
+        const posts = contentSections[sectionName] || [];
+        const postsList = document.createElement('div');
+        postsList.className = 'nav-posts';
+
+        if (posts.length === 0) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.className = 'nav-post-empty';
+          emptyMsg.textContent = 'Нет статей';
+          postsList.appendChild(emptyMsg);
+        } else {
+          posts.forEach(post => {
+            const postItem = document.createElement('div');
+            postItem.className = 'nav-post';
+            postItem.textContent = post.title;
+            postItem.dataset.postIndex = post.index;
+
+            // Check if this post is active
+            if (currentFilter?.type === 'post' && currentFilter.index === post.index) {
+              postItem.classList.add('active');
+            }
+
+            postsList.appendChild(postItem);
+          });
+        }
+
+        section.appendChild(postsList);
+        navContainer.appendChild(section);
+      });
+
+      // Add "[Добавить раздел]" link at the bottom (only in edit mode)
+      if (nestConfig.isOwnNest) {
+        const addSectionContainer = document.createElement('div');
+        addSectionContainer.className = 'nav-add-section';
+
+        const addSectionLink = document.createElement('a');
+        addSectionLink.className = 'nav-add-section-link';
+        addSectionLink.textContent = '[Добавить раздел]';
+        addSectionLink.href = '#';
+
+        addSectionLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          const sectionName = prompt('Название раздела:');
+          if (sectionName && sectionName.trim()) {
+            addSection(sectionName.trim());
+          }
+        });
+
+        addSectionContainer.appendChild(addSectionLink);
+        navContainer.appendChild(addSectionContainer);
+      }
+
+      // Add click handlers
+      attachNavigationHandlers();
+    };
+
+    // Attach click handlers to navigation
+    const attachNavigationHandlers = () => {
+      // Section headers
+      document.querySelectorAll('.nav-section-header').forEach(header => {
+        header.addEventListener('click', (e) => {
+          const sectionName = e.target.dataset.section;
+
+          // Toggle filter
+          if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+            // Deactivate filter
+            currentFilter = null;
+          } else {
+            // Activate section filter
+            currentFilter = { type: 'section', name: sectionName };
+          }
+
+          applyFilter();
+          renderNavigation(); // Re-render to update active states
+        });
+      });
+
+      // Posts
+      document.querySelectorAll('.nav-post').forEach(postEl => {
+        postEl.addEventListener('click', (e) => {
+          const postIndex = parseInt(e.target.dataset.postIndex);
+
+          // Toggle filter
+          if (currentFilter?.type === 'post' && currentFilter.index === postIndex) {
+            // Deactivate filter
+            currentFilter = null;
+          } else {
+            // Activate post filter
+            currentFilter = { type: 'post', index: postIndex };
+          }
+
+          applyFilter();
+          renderNavigation(); // Re-render to update active states
+        });
+      });
+    };
+
+    // Apply filter to content
+    const applyFilter = () => {
+      const editorEl = document.querySelector('.tiptap');
+      if (!editorEl) return;
+
+      const allNodes = Array.from(editorEl.children);
+
+      if (!currentFilter) {
+        // Show all
+        allNodes.forEach(node => node.style.display = '');
+        return;
+      }
+
+      const { sections } = parseContentStructure();
+
+      if (currentFilter.type === 'section') {
+        // Show only posts in this section
+        const sectionPosts = sections[currentFilter.name] || [];
+        const postIndices = sectionPosts.map(p => p.index);
+
+        // Hide all nodes, then show relevant ones
+        allNodes.forEach((node, index) => {
+          // Find which post this node belongs to
+          let belongsToPost = -1;
+          for (let i = postIndices.length - 1; i >= 0; i--) {
+            if (index >= postIndices[i]) {
+              belongsToPost = postIndices[i];
+              break;
+            }
+          }
+
+          // Determine next post index for boundary
+          const currentPostIdx = postIndices.indexOf(belongsToPost);
+          let nextPostIndex = allNodes.length;
+          if (currentPostIdx !== -1 && currentPostIdx < postIndices.length - 1) {
+            nextPostIndex = postIndices[currentPostIdx + 1];
+          }
+
+          // Show if belongs to a post in this section and before next post
+          if (belongsToPost !== -1 && index < nextPostIndex) {
+            node.style.display = '';
+          } else {
+            node.style.display = 'none';
+          }
+        });
+      } else if (currentFilter.type === 'post') {
+        // Show only this specific post
+        const postIndex = currentFilter.index;
+
+        // Find next H1 to determine boundary
+        let nextH1Index = allNodes.length;
+        for (let i = postIndex + 1; i < allNodes.length; i++) {
+          if (allNodes[i].tagName === 'H1') {
+            nextH1Index = i;
+            break;
+          }
+        }
+
+        // Show nodes from post H1 to next H1
+        allNodes.forEach((node, index) => {
+          if (index >= postIndex && index < nextH1Index) {
+            node.style.display = '';
+          } else {
+            node.style.display = 'none';
+          }
+        });
+      }
+    };
+
+    // Toggle navigation panel
+    const navToggle = document.querySelector('.nest-nav-item[href="#navigation"]');
+    if (navToggle) {
+      navToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const navContent = document.querySelector('.nest-navigation-content');
+        if (navContent) {
+          navContent.style.display = navContent.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+    }
 
     // Initialize editor with content
     loadContent();
