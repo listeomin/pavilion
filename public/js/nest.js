@@ -1141,8 +1141,20 @@ function alignUserHeader() {
         editor.setEditable(false);
       }
 
-      // Get filtered node indices
-      const sectionNames = getSections();
+      // Get filtered node indices (use same logic as renderNavigation)
+      let sectionNames = getSections();
+
+      // For visitors or if no manual sections, use tags from content
+      if (!nestConfig.isOwnNest || sectionNames.length === 0) {
+        const autoTags = extractTagsFromContent();
+        const manualSet = new Set(sectionNames.map(s => s.toLowerCase()));
+        autoTags.forEach(tag => {
+          if (!manualSet.has(tag.toLowerCase())) {
+            sectionNames.push(tag);
+          }
+        });
+      }
+
       const { sections } = parseContentStructure(sectionNames);
 
       let indicesToShow = new Set();
@@ -1195,6 +1207,44 @@ function alignUserHeader() {
         if (navContent) {
           navContent.style.display = navContent.style.display === 'none' ? 'block' : 'none';
         }
+      });
+    }
+
+    // Meta panel
+    const metaToggle = document.querySelector('.nest-nav-item[href="#meta"]');
+    if (metaToggle) {
+      metaToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        let metaContent = document.querySelector('.nest-meta-content');
+        if (!metaContent) {
+          metaContent = document.createElement('div');
+          metaContent.className = 'nest-navigation-content nest-meta-content';
+          metaContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+          const nestNav = document.querySelector('.nest-nav');
+          if (nestNav && nestNav.parentElement) {
+            nestNav.parentElement.insertBefore(metaContent, nestNav.nextSibling.nextSibling || nestNav.nextSibling);
+          }
+        }
+        metaContent.style.display = metaContent.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    // Discussions panel
+    const discussionsToggle = document.querySelector('.nest-nav-item[href="#discussions"]');
+    if (discussionsToggle) {
+      discussionsToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        let discussionsContent = document.querySelector('.nest-discussions-content');
+        if (!discussionsContent) {
+          discussionsContent = document.createElement('div');
+          discussionsContent.className = 'nest-navigation-content nest-discussions-content';
+          discussionsContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+          const nestNav = document.querySelector('.nest-nav');
+          if (nestNav && nestNav.parentElement) {
+            nestNav.parentElement.appendChild(discussionsContent);
+          }
+        }
+        discussionsContent.style.display = discussionsContent.style.display === 'none' ? 'block' : 'none';
       });
     }
 
