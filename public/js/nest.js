@@ -912,6 +912,12 @@ function alignUserHeader() {
     // Render navigation
     let currentFilter = null; // null = all, { type: 'section', name: 'tag' }, { type: 'post', index: 0 }
 
+    // Capitalize first letter of string
+    const capitalize = (str) => {
+      if (!str) return str;
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    };
+
     // Extract all unique tags from content automatically
     const extractTagsFromContent = () => {
       const editorEl = document.querySelector('.tiptap');
@@ -985,7 +991,7 @@ function alignUserHeader() {
 
         const sectionHeader = document.createElement('div');
         sectionHeader.className = 'nav-section-header';
-        sectionHeader.textContent = sectionName;
+        sectionHeader.textContent = capitalize(sectionName);
         sectionHeader.dataset.section = sectionName;
 
         // Check if this section is active
