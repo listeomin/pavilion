@@ -426,7 +426,7 @@ function alignUserHeader() {
         <div class="tiptap-toolbar-group">
           <button type="button" class="tiptap-toolbar-button" data-action="bold" title="Bold (Ctrl+B)">B</button>
           <button type="button" class="tiptap-toolbar-button" data-action="italic" title="Italic (Ctrl+I)">I</button>
-          <button type="button" class="tiptap-toolbar-button" data-action="code" title="Code (Ctrl+E)">Code</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="code" title="Code (Ctrl+E)">&lt;&gt;</button>
         </div>
         <div class="tiptap-toolbar-separator"></div>
         <div class="tiptap-toolbar-group">
@@ -436,14 +436,14 @@ function alignUserHeader() {
         </div>
         <div class="tiptap-toolbar-separator"></div>
         <div class="tiptap-toolbar-group">
-          <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Bullet List">• List</button>
-          <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Ordered List">1. List</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Bullet List">•</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Ordered List">1.</button>
         </div>
         <div class="tiptap-toolbar-separator"></div>
         <div class="tiptap-toolbar-group">
           <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Code Block">{ }</button>
-          <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">Link</button>
-          <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">Image</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">🔗</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">🖼</button>
         </div>
       `;
       return toolbar;
