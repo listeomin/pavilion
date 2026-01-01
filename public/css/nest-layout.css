@@ -10,6 +10,8 @@
 .main-column {
   flex: 1;
   min-width: 0;
+  /* Add right margin to prevent overlap with fixed sidebar */
+  margin-right: 360px; /* sidebar width (320px) + gap (40px) */
   /* Visual separation from sidebar */
   border-right: 1px solid #D1CFC5;
   box-shadow: 16px 0px 32px #E8E6DC;
@@ -26,12 +28,12 @@
   flex-shrink: 0;
   /* Align navigation with page title - 151px from top */
   padding-top: 40px;
-  /* Make sidebar sticky so it doesn't scroll with content */
-  position: sticky;
+  /* Fix sidebar so it doesn't scroll with page content */
+  position: fixed;
+  right: 0;
   top: 0;
   height: 100vh;
   overflow-y: hidden;
-  align-self: flex-start;
 }
 
 /* Nest internal navigation (sidebar navigation) */
