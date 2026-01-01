@@ -227,7 +227,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/nest-layout.css?v=7">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- Tiptap Editor -->
-<link rel="stylesheet" href="css/tiptap.css?v=1">
+<link rel="stylesheet" href="css/tiptap.css?v=2">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=3">
 </head>
@@ -356,6 +356,6 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<script type="module" src="js/nest.js?v=39"></script>
+<script type="module" src="js/nest.js?v=40"></script>
 </body>
 </html>

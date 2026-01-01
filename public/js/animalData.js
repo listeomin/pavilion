@@ -1,5 +1,5 @@
 // public/js/animalData.js
-import { CONFIG } from './config.js?v=6';
+import { CONFIG } from './config.js?v=7';
 
 export class AnimalData {
   constructor() {

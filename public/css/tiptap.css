@@ -9,9 +9,9 @@
 /* Toolbar */
 .tiptap-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
   border-bottom: 1px solid var(--color-nimbus-light);
   margin-bottom: 16px;
   position: sticky;
@@ -20,34 +20,48 @@
   z-index: 10;
 }
 
+/* Toolbar groups */
+.tiptap-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Toolbar separator */
+.tiptap-toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background: var(--color-nimbus-light);
+  margin: 0 4px;
+}
+
+/* Toolbar buttons */
 .tiptap-toolbar-button {
-  padding: 6px 12px;
-  border: 1px solid var(--color-nimbus-light);
-  background: var(--color-cirrus);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
   color: var(--color-cumulonimbus-dark);
   border-radius: 4px;
   cursor: pointer;
   font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .tiptap-toolbar-button:hover {
   background: var(--color-nimbus-light);
-  border-color: var(--color-nimbus-medium);
 }
 
 .tiptap-toolbar-button.is-active {
-  background: var(--color-iris);
-  color: var(--color-cirrus);
-  border-color: var(--color-iris);
-}
-
-.tiptap-toolbar-separator {
-  width: 1px;
-  background: var(--color-nimbus-light);
-  margin: 0 4px;
+  background: var(--color-nimbus-medium);
+  color: var(--color-cumulonimbus-dark);
 }
 
 /* Editor content */

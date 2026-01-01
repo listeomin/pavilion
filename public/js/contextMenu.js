@@ -147,7 +147,7 @@ export class ContextMenu {
       case 'branch':
         try {
           // Import CONFIG dynamically
-          const { CONFIG } = await import('./config.js?v=6');
+          const { CONFIG } = await import('./config.js?v=7');
 
           // Find the message element containing the selected text
           const selection = window.getSelection();

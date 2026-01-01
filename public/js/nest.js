@@ -423,17 +423,28 @@ function alignUserHeader() {
       const toolbar = document.createElement('div');
       toolbar.className = 'tiptap-toolbar';
       toolbar.innerHTML = `
-        <button type="button" class="tiptap-toolbar-button" data-action="bold" title="Жирный">Bold</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="italic" title="Курсив">Italic</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="h1" title="Заголовок 1">H1</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="h2" title="Заголовок 2">H2</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="h3" title="Заголовок 3">H3</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Список">• List</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Нумерованный список">1. List</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="code" title="Код">Code</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Блок кода">Code Block</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="link" title="Ссылка">Link</button>
-        <button type="button" class="tiptap-toolbar-button" data-action="image" title="Изображение">Image</button>
+        <div class="tiptap-toolbar-group">
+          <button type="button" class="tiptap-toolbar-button" data-action="bold" title="Bold (Ctrl+B)">B</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="italic" title="Italic (Ctrl+I)">I</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="code" title="Code (Ctrl+E)">Code</button>
+        </div>
+        <div class="tiptap-toolbar-separator"></div>
+        <div class="tiptap-toolbar-group">
+          <button type="button" class="tiptap-toolbar-button" data-action="h1" title="Heading 1">H1</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="h2" title="Heading 2">H2</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="h3" title="Heading 3">H3</button>
+        </div>
+        <div class="tiptap-toolbar-separator"></div>
+        <div class="tiptap-toolbar-group">
+          <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Bullet List">• List</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Ordered List">1. List</button>
+        </div>
+        <div class="tiptap-toolbar-separator"></div>
+        <div class="tiptap-toolbar-group">
+          <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Code Block">{ }</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">Link</button>
+          <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">Image</button>
+        </div>
       `;
       return toolbar;
     };

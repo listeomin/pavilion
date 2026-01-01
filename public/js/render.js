@@ -9,7 +9,7 @@ import { renderLinkPreview } from './link.js?v=1';
 import { renderMusicPlayer } from './music.js?v=6';
 import { makeImageZoomable } from './image-zoom.js?v=2';
 import { parseYouTubeUrl, isYouTubeUrl } from './youtube.js?v=2';
-import { CONFIG } from './config.js?v=6';
+import { CONFIG } from './config.js?v=7';
 
 let spinnerInterval = null;
 
