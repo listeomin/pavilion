@@ -754,7 +754,20 @@ function alignUserHeader() {
       isSaving = true;
 
       try {
-        const htmlContent = editor.getHTML();
+        let htmlContent;
+
+        // If filter is active, save from originalContent, not filtered view
+        if (currentFilter && originalContent) {
+          // Temporarily restore full content to get HTML
+          const filteredContent = editor.getJSON();
+          editor.commands.setContent(originalContent);
+          htmlContent = editor.getHTML();
+          // Restore filtered view
+          editor.commands.setContent(filteredContent);
+        } else {
+          htmlContent = editor.getHTML();
+        }
+
         const response = await fetch(CONFIG.BASE_PATH + '/api/nest_content.php?action=save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -767,10 +780,10 @@ function alignUserHeader() {
         const result = await response.json();
 
         if (!result.success) {
-          console.error('[Nest] Save error:', result.error);
+          logToFile('[Nest] Save error: ' + result.error, 'ERROR');
         }
       } catch (err) {
-        console.error('[Nest] Save error:', err);
+        logToFile('[Nest] Save error: ' + err.message, 'ERROR');
       } finally {
         isSaving = false;
       }
