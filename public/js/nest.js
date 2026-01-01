@@ -515,11 +515,15 @@ function alignUserHeader() {
         },
       });
 
-      // Initial navigation render and tag highlighting
-      setTimeout(() => {
+      // Initial navigation render (no delay to avoid visual flicker)
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
         renderNavigation();
-        highlightTags();
-      }, 500);
+        // Only highlight tags in edit mode to avoid visual changes in read mode
+        if (nestConfig.isOwnNest) {
+          highlightTags();
+        }
+      });
 
       // Setup toolbar buttons
       if (nestConfig.isOwnNest) {
@@ -528,8 +532,11 @@ function alignUserHeader() {
 
       // Enable image zoom in read-only mode
       if (!nestConfig.isOwnNest) {
-        initImageZoom();
-        setTimeout(() => {
+        // Wait for DOM to be ready before initializing zoom
+        requestAnimationFrame(() => {
+          initImageZoom();
+        });
+        requestAnimationFrame(() => {
           const editorImages = document.querySelectorAll('#nest-editor img');
           editorImages.forEach(img => {
             if (!img.classList.contains('zoomable-image')) {
