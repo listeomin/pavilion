@@ -960,23 +960,27 @@ function alignUserHeader() {
       // Parse content to find posts for each section
       const { sections: contentSections } = parseContentStructure(sectionNames);
 
-      // Create navigation container if it doesn't exist
+      // Create tabs content container if it doesn't exist
+      let tabsContainer = document.querySelector('.nest-tabs-content');
+      if (!tabsContainer) {
+        tabsContainer = document.createElement('div');
+        tabsContainer.className = 'nest-tabs-content';
+        // Insert AFTER nest-nav
+        const nestNav = document.querySelector('.nest-nav');
+        if (nestNav && nestNav.parentElement) {
+          nestNav.parentElement.insertBefore(tabsContainer, nestNav.nextSibling);
+        }
+      }
+
+      // Create navigation content container
       let navContainer = document.querySelector('.nest-navigation-content');
       if (!navContainer) {
         navContainer = document.createElement('div');
         navContainer.className = 'nest-navigation-content';
-        // Insert AFTER nest-nav, not at the end of sidebar
-        const nestNav = document.querySelector('.nest-nav');
-        if (nestNav && nestNav.parentElement) {
-          nestNav.parentElement.insertBefore(navContainer, nestNav.nextSibling);
-        }
       }
 
-      // Clear and rebuild
+      // Clear and rebuild navigation content
       navContainer.innerHTML = '';
-
-      // Always show navigation (even if empty)
-      navContainer.style.display = 'block';
 
       // Show sections
       if (sectionNames.length === 0 && !nestConfig.isOwnNest) {
@@ -1053,6 +1057,10 @@ function alignUserHeader() {
         addSectionContainer.appendChild(addSectionLink);
         navContainer.appendChild(addSectionContainer);
       }
+
+      // Place navigation content in tabs container
+      tabsContainer.innerHTML = '';
+      tabsContainer.appendChild(navContainer);
 
       // Add click handlers
       attachNavigationHandlers();
@@ -1204,53 +1212,60 @@ function alignUserHeader() {
       logToFile(`Filter applied: ${currentFilter.type} with ${indicesToShow.size} nodes visible`);
     };
 
-    // Toggle navigation panel
+    // Tab switching logic
+    const switchTab = (tabName) => {
+      // Update active tab
+      const allTabs = document.querySelectorAll('.nest-nav-item');
+      allTabs.forEach(tab => {
+        if (tab.getAttribute('href') === `#${tabName}`) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // Update content
+      const tabContent = document.querySelector('.nest-tabs-content');
+      if (!tabContent) return;
+
+      if (tabName === 'navigation') {
+        // Show navigation content (already rendered by renderNavigation)
+        const navContent = document.querySelector('.nest-navigation-content');
+        if (navContent) {
+          tabContent.innerHTML = '';
+          tabContent.appendChild(navContent);
+        }
+      } else if (tabName === 'meta') {
+        // Show meta content
+        tabContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+      } else if (tabName === 'discussions') {
+        // Show discussions content
+        tabContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
+      }
+    };
+
+    // Tab click handlers
     const navToggle = document.querySelector('.nest-nav-item[href="#navigation"]');
     if (navToggle) {
       navToggle.addEventListener('click', (e) => {
         e.preventDefault();
-        const navContent = document.querySelector('.nest-navigation-content');
-        if (navContent) {
-          navContent.style.display = navContent.style.display === 'none' ? 'block' : 'none';
-        }
+        switchTab('navigation');
       });
     }
 
-    // Meta panel
     const metaToggle = document.querySelector('.nest-nav-item[href="#meta"]');
     if (metaToggle) {
       metaToggle.addEventListener('click', (e) => {
         e.preventDefault();
-        let metaContent = document.querySelector('.nest-meta-content');
-        if (!metaContent) {
-          metaContent = document.createElement('div');
-          metaContent.className = 'nest-navigation-content nest-meta-content';
-          metaContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
-          const nestNav = document.querySelector('.nest-nav');
-          if (nestNav && nestNav.parentElement) {
-            nestNav.parentElement.insertBefore(metaContent, nestNav.nextSibling.nextSibling || nestNav.nextSibling);
-          }
-        }
-        metaContent.style.display = metaContent.style.display === 'none' ? 'block' : 'none';
+        switchTab('meta');
       });
     }
 
-    // Discussions panel
     const discussionsToggle = document.querySelector('.nest-nav-item[href="#discussions"]');
     if (discussionsToggle) {
       discussionsToggle.addEventListener('click', (e) => {
         e.preventDefault();
-        let discussionsContent = document.querySelector('.nest-discussions-content');
-        if (!discussionsContent) {
-          discussionsContent = document.createElement('div');
-          discussionsContent.className = 'nest-navigation-content nest-discussions-content';
-          discussionsContent.innerHTML = '<div class="nav-empty">Пока пусто</div>';
-          const nestNav = document.querySelector('.nest-nav');
-          if (nestNav && nestNav.parentElement) {
-            nestNav.parentElement.appendChild(discussionsContent);
-          }
-        }
-        discussionsContent.style.display = discussionsContent.style.display === 'none' ? 'block' : 'none';
+        switchTab('discussions');
       });
     }
 

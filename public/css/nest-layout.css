@@ -83,13 +83,20 @@
   user-select: none;
 }
 
-/* Navigation content panel */
-.nest-navigation-content {
+/* Tabs content container (common for all tabs) */
+.nest-tabs-content {
   margin-top: 48px;
   padding: 0;
   background: transparent;
   border: none;
   max-width: 280px;
+}
+
+/* Navigation content panel */
+.nest-navigation-content {
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 /* Add section link */
