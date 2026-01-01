@@ -1075,49 +1075,78 @@ function alignUserHeader() {
       });
     };
 
+    // Store original content for restoring after filtering
+    let originalContent = null;
+
+    // Log to server file
+    const logToFile = async (message, level = 'INFO') => {
+      try {
+        await fetch('server/api/log.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, level })
+        });
+      } catch (e) {
+        // Silent fail - logging shouldn't break functionality
+      }
+    };
+
     // Apply filter to content
     const applyFilter = () => {
-      const editorEl = document.querySelector('.tiptap');
-      if (!editorEl) return;
-
-      const allNodes = Array.from(editorEl.children);
+      if (!editor) return;
 
       if (!currentFilter) {
-        // Show all
-        allNodes.forEach(node => node.style.display = '');
+        // Restore original content if we have it
+        if (originalContent) {
+          editor.commands.setContent(originalContent);
+          originalContent = null;
+        }
+        // Re-enable editing
+        if (nestConfig.isOwnNest) {
+          editor.setEditable(true);
+        }
         return;
       }
 
+      // Store original content if not already stored
+      if (!originalContent) {
+        originalContent = editor.getJSON();
+      }
+
+      // Get filtered node indices
       const sectionNames = getSections();
       const { sections } = parseContentStructure(sectionNames);
 
-      // Hide all first
-      allNodes.forEach(node => node.style.display = 'none');
+      let indicesToShow = new Set();
 
       if (currentFilter.type === 'section') {
-        // Show all posts in this section (from startIndex to endIndex for each post)
+        // Show all posts in this section
         const sectionPosts = sections[currentFilter.name] || [];
         sectionPosts.forEach(post => {
           for (let i = post.startIndex; i <= post.endIndex; i++) {
-            if (allNodes[i]) {
-              allNodes[i].style.display = '';
-            }
+            indicesToShow.add(i);
           }
         });
       } else if (currentFilter.type === 'post') {
-        // Show only this specific post (from startIndex to endIndex)
-        console.log('[Filter] Post filter:', {
-          startIndex: currentFilter.startIndex,
-          endIndex: currentFilter.endIndex,
-          totalNodes: allNodes.length
-        });
+        // Show only this specific post
         for (let i = currentFilter.startIndex; i <= currentFilter.endIndex; i++) {
-          if (allNodes[i]) {
-            console.log('[Filter] Showing node', i, allNodes[i].tagName, allNodes[i].textContent.substring(0, 30));
-            allNodes[i].style.display = '';
-          }
+          indicesToShow.add(i);
         }
       }
+
+      // Build filtered content from original
+      const filteredContent = {
+        type: 'doc',
+        content: originalContent.content.filter((node, index) => indicesToShow.has(index))
+      };
+
+      // Disable editing and set filtered content
+      if (nestConfig.isOwnNest) {
+        editor.setEditable(false);
+      }
+      editor.commands.setContent(filteredContent);
+
+      logToFile(`Filter applied: ${currentFilter.type} with ${indicesToShow.size} nodes visible`);
     };
 
     // Toggle navigation panel

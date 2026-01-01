@@ -25,7 +25,7 @@
   width: 320px;
   flex-shrink: 0;
   /* Align navigation with page title - 151px from top */
-  padding-top: 151px;
+  padding-top: 40px;
   /* Make sidebar sticky so it doesn't scroll with content */
   position: sticky;
   top: 0;
@@ -83,7 +83,7 @@
 
 /* Navigation content panel */
 .nest-navigation-content {
-  margin-top: 40px;
+  margin-top: 48px;
   padding: 0;
   background: transparent;
   border: none;
@@ -92,7 +92,8 @@
 
 /* Add section link */
 .nav-add-section {
-  margin-top: 40px;
+  position: fixed;
+  bottom: 32px;
 }
 
 .nav-add-section-link {
@@ -109,7 +110,7 @@
 
 /* Navigation section */
 .nav-section {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .nav-section:last-child {
@@ -147,13 +148,14 @@
   font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   color: var(--color-nimbus-dark);
+  margin-bottom: 8px;
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
 .nav-post:hover {
-  color: var(--color-cumulonimbus-light);
+  color: var(--color-cumulonimbus-medium);
 }
 
 .nav-post.active {
@@ -176,3 +178,5 @@
   font-style: italic;
   padding: 4px 8px;
 }
+
+/* Content filtering - handled by Tiptap content replacement */
