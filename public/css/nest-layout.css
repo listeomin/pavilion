@@ -90,6 +90,14 @@
   background: transparent;
   border: none;
   max-width: 280px;
+  /* Scrollable content */
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100vh - 200px);
+  padding-bottom: 80px;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 }
 
 /* Navigation content panel */
@@ -189,3 +197,8 @@
 }
 
 /* Content filtering - handled by Tiptap content replacement */
+
+/* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+.nest-tabs-content::-webkit-scrollbar {
+  display: none;
+}
