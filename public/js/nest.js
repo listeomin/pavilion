@@ -853,13 +853,14 @@ function alignUserHeader() {
               if (matchingSection) {
                 // Add post to section (only if not already added by another tag)
                 const alreadyAdded = Object.values(sections).some(posts =>
-                  posts.some(p => p.index === currentH1Index)
+                  posts.some(p => p.startIndex === currentH1Index)
                 );
 
                 if (!alreadyAdded) {
                   sections[matchingSection].push({
                     title: currentH1.title,
-                    index: currentH1Index,
+                    startIndex: currentH1Index,  // H1 position
+                    endIndex: index,              // Tag paragraph position
                     element: currentH1.element
                   });
                   posts.push(currentH1);
@@ -990,10 +991,11 @@ function alignUserHeader() {
             const postItem = document.createElement('div');
             postItem.className = 'nav-post';
             postItem.textContent = post.title;
-            postItem.dataset.postIndex = post.index;
+            postItem.dataset.postStartIndex = post.startIndex;
+            postItem.dataset.postEndIndex = post.endIndex;
 
             // Check if this post is active
-            if (currentFilter?.type === 'post' && currentFilter.index === post.index) {
+            if (currentFilter?.type === 'post' && currentFilter.startIndex === post.startIndex) {
               postItem.classList.add('active');
             }
 
@@ -1055,15 +1057,16 @@ function alignUserHeader() {
       // Posts
       document.querySelectorAll('.nav-post').forEach(postEl => {
         postEl.addEventListener('click', (e) => {
-          const postIndex = parseInt(e.target.dataset.postIndex);
+          const startIndex = parseInt(e.target.dataset.postStartIndex);
+          const endIndex = parseInt(e.target.dataset.postEndIndex);
 
           // Toggle filter
-          if (currentFilter?.type === 'post' && currentFilter.index === postIndex) {
+          if (currentFilter?.type === 'post' && currentFilter.startIndex === startIndex) {
             // Deactivate filter
             currentFilter = null;
           } else {
             // Activate post filter
-            currentFilter = { type: 'post', index: postIndex };
+            currentFilter = { type: 'post', startIndex, endIndex };
           }
 
           applyFilter();
@@ -1085,59 +1088,35 @@ function alignUserHeader() {
         return;
       }
 
-      const { sections } = parseContentStructure();
+      const sectionNames = getSections();
+      const { sections } = parseContentStructure(sectionNames);
+
+      // Hide all first
+      allNodes.forEach(node => node.style.display = 'none');
 
       if (currentFilter.type === 'section') {
-        // Show only posts in this section
+        // Show all posts in this section (from startIndex to endIndex for each post)
         const sectionPosts = sections[currentFilter.name] || [];
-        const postIndices = sectionPosts.map(p => p.index);
-
-        // Hide all nodes, then show relevant ones
-        allNodes.forEach((node, index) => {
-          // Find which post this node belongs to
-          let belongsToPost = -1;
-          for (let i = postIndices.length - 1; i >= 0; i--) {
-            if (index >= postIndices[i]) {
-              belongsToPost = postIndices[i];
-              break;
+        sectionPosts.forEach(post => {
+          for (let i = post.startIndex; i <= post.endIndex; i++) {
+            if (allNodes[i]) {
+              allNodes[i].style.display = '';
             }
-          }
-
-          // Determine next post index for boundary
-          const currentPostIdx = postIndices.indexOf(belongsToPost);
-          let nextPostIndex = allNodes.length;
-          if (currentPostIdx !== -1 && currentPostIdx < postIndices.length - 1) {
-            nextPostIndex = postIndices[currentPostIdx + 1];
-          }
-
-          // Show if belongs to a post in this section and before next post
-          if (belongsToPost !== -1 && index < nextPostIndex) {
-            node.style.display = '';
-          } else {
-            node.style.display = 'none';
           }
         });
       } else if (currentFilter.type === 'post') {
-        // Show only this specific post
-        const postIndex = currentFilter.index;
-
-        // Find next H1 to determine boundary
-        let nextH1Index = allNodes.length;
-        for (let i = postIndex + 1; i < allNodes.length; i++) {
-          if (allNodes[i].tagName === 'H1') {
-            nextH1Index = i;
-            break;
+        // Show only this specific post (from startIndex to endIndex)
+        console.log('[Filter] Post filter:', {
+          startIndex: currentFilter.startIndex,
+          endIndex: currentFilter.endIndex,
+          totalNodes: allNodes.length
+        });
+        for (let i = currentFilter.startIndex; i <= currentFilter.endIndex; i++) {
+          if (allNodes[i]) {
+            console.log('[Filter] Showing node', i, allNodes[i].tagName, allNodes[i].textContent.substring(0, 30));
+            allNodes[i].style.display = '';
           }
         }
-
-        // Show nodes from post H1 to next H1
-        allNodes.forEach((node, index) => {
-          if (index >= postIndex && index < nextH1Index) {
-            node.style.display = '';
-          } else {
-            node.style.display = 'none';
-          }
-        });
       }
     };
 
