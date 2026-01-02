@@ -350,6 +350,15 @@ export class NestPostsManager {
 
     contentEl.innerHTML = '';
 
+    // Hide view-mode elements (title, slug, dates)
+    const titleDisplay = postEl.querySelector('.nest-post-title-display');
+    const slugDisplay = postEl.querySelector('.nest-post-slug-display');
+    const viewDates = postEl.querySelector('.nest-post-dates');
+
+    if (titleDisplay) titleDisplay.style.display = 'none';
+    if (slugDisplay) slugDisplay.style.display = 'none';
+    if (viewDates) viewDates.style.display = 'none';
+
     // Create wrapper for editor + toolbar
     const wrapper = document.createElement('div');
     wrapper.className = 'tiptap-editor-wrapper';
@@ -518,6 +527,15 @@ export class NestPostsManager {
     this.editors.delete(postId);
     contentEl.innerHTML = html;
     postEl.classList.remove('nest-post-editing');
+
+    // Show view-mode elements again
+    const titleDisplay = postEl.querySelector('.nest-post-title-display');
+    const slugDisplay = postEl.querySelector('.nest-post-slug-display');
+    const viewDates = postEl.querySelector('.nest-post-dates');
+
+    if (titleDisplay) titleDisplay.style.display = '';
+    if (slugDisplay) slugDisplay.style.display = '';
+    if (viewDates) viewDates.style.display = '';
   }
 
   scheduleAutosave(postId, editor) {
@@ -541,6 +559,29 @@ export class NestPostsManager {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: postId, ...metadata })
     });
+
+    // Update post object in memory
+    const post = this.posts.find(p => p.id == postId);
+    if (post) {
+      Object.assign(post, metadata);
+    }
+
+    // Update display elements
+    const postEl = document.querySelector(`[data-post-id="${postId}"]`);
+    if (postEl) {
+      if (metadata.title !== undefined) {
+        const titleDisplay = postEl.querySelector('.nest-post-title-display');
+        if (titleDisplay) {
+          titleDisplay.textContent = metadata.title;
+        }
+      }
+      if (metadata.slug !== undefined) {
+        const slugDisplay = postEl.querySelector('.nest-post-slug-display');
+        if (slugDisplay) {
+          slugDisplay.textContent = metadata.slug;
+        }
+      }
+    }
   }
 
   async createNewPost(position) {
