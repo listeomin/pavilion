@@ -679,22 +679,49 @@ function alignUserHeader() {
     // Load content from server
     const loadContent = async () => {
       try {
-        const url = nestConfig.urlUsername
-          ? CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername)
-          : CONFIG.BASE_PATH + '/api/nest_content.php?action=get';
-        const response = await fetch(url);
-        const result = await response.json();
-
         let htmlContent = '';
 
-        if (result.success && result.content) {
-          // Check if content is Editor.js JSON format (has blocks property)
-          if (result.content.blocks) {
-            // Convert Editor.js blocks to HTML
-            htmlContent = convertEditorJsToHtml(result.content);
-          } else if (typeof result.content === 'string') {
-            // Already HTML
-            htmlContent = result.content;
+        // If viewing a specific post (postSlug is set)
+        if (nestConfig.postSlug) {
+          // Load single post from nest_posts
+          const url = CONFIG.BASE_PATH + '/api/nest_posts.php?action=get&username=' + 
+                     encodeURIComponent(nestConfig.urlUsername) + '&slug=' + encodeURIComponent(nestConfig.postSlug);
+          const response = await fetch(url);
+          const result = await response.json();
+
+          if (result.success && result.post) {
+            htmlContent = result.post.content;
+          } else {
+            console.error('[Nest] Post not found:', nestConfig.postSlug);
+          }
+        } else {
+          // Load all content: nest_content + nest_posts
+          // 1. Load legacy content from nest_content
+          const contentUrl = nestConfig.urlUsername
+            ? CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername)
+            : CONFIG.BASE_PATH + '/api/nest_content.php?action=get';
+          const contentResponse = await fetch(contentUrl);
+          const contentResult = await contentResponse.json();
+
+          if (contentResult.success && contentResult.content) {
+            if (contentResult.content.blocks) {
+              htmlContent = convertEditorJsToHtml(contentResult.content);
+            } else if (typeof contentResult.content === 'string') {
+              htmlContent = contentResult.content;
+            }
+          }
+
+          // 2. Load posts from nest_posts and prepend them
+          if (nestConfig.urlUsername) {
+            const postsUrl = CONFIG.BASE_PATH + '/api/nest_posts.php?action=list&username=' + encodeURIComponent(nestConfig.urlUsername);
+            const postsResponse = await fetch(postsUrl);
+            const postsResult = await postsResponse.json();
+
+            if (postsResult.success && postsResult.posts && postsResult.posts.length > 0) {
+              // Prepend posts (newest first)
+              const postsHtml = postsResult.posts.map(post => post.content).join('');
+              htmlContent = postsHtml + htmlContent;
+            }
           }
         }
 
@@ -1235,6 +1262,20 @@ function alignUserHeader() {
       // Posts
       document.querySelectorAll('.nav-post').forEach(postEl => {
         postEl.addEventListener('click', (e) => {
+          const postTitle = e.target.textContent.trim();
+          
+          // Check if this is a post from nest_posts (has individual page)
+          // For now, only "Ветер" - later we'll check via API
+          if (postTitle === 'Ветер') {
+            // Navigate to post page
+            const baseUrl = nestConfig.urlUsername 
+              ? CONFIG.BASE_PATH + '/nest/' + nestConfig.urlUsername
+              : CONFIG.BASE_PATH + '/nest';
+            window.location.href = baseUrl + '/veter';
+            return;
+          }
+
+          // Legacy posts - use filtering
           const startIndex = parseInt(e.target.dataset.postStartIndex);
           const endIndex = parseInt(e.target.dataset.postEndIndex);
 
