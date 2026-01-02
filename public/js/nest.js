@@ -1497,6 +1497,11 @@ function alignUserHeader() {
       const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
       await postsManager.loadPosts();
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+
+      // Load sections and render navigation
+      await loadSections();
+      renderNavigation();
+
       hideSkeleton();
     } else {
       loadContent();
