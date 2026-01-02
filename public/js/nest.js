@@ -1016,7 +1016,7 @@ function alignUserHeader() {
       cancelBtn.style.cssText = 'flex: 1; margin: 0;';
 
       const okBtn = document.createElement('button');
-      okBtn.textContent = 'OK';
+      okBtn.textContent = 'Создать';
       okBtn.className = 'context-menu-item';
       okBtn.style.cssText = 'flex: 1; margin: 0; background: rgba(255, 255, 255, 0.2);';
 
