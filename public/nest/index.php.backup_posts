@@ -21,18 +21,13 @@ $cleanPath = str_replace($basePath, '', $path);
 $segments = array_filter(explode('/', $cleanPath));
 $segments = array_values($segments); // Re-index array
 
-// Check if we have /nest/{user_id} or /nest/{user_id}/{post_slug} format
-// Now we're in /nest/index.php, so URL is /nest/ or /nest/{user_id} or /nest/{user_id}/{slug}
+// Check if we have /nest/{user_id} format
+// Now we're in /nest/index.php, so URL is /nest/ or /nest/{user_id}
 $urlUserId = null;
-$postSlug = null;
 if (count($segments) >= 1 && $segments[0] === 'nest') {
     // If there's a second segment, it's the user_id
     if (isset($segments[1]) && $segments[1] !== '') {
         $urlUserId = $segments[1];
-    }
-    // If there's a third segment, it's the post slug
-    if (isset($segments[2]) && $segments[2] !== '') {
-        $postSlug = $segments[2];
     }
 }
 
@@ -206,8 +201,7 @@ if ($telegramUserId && $urlUsername) {
     profileOwnerName: <?php echo $profileOwnerName ? json_encode($profileOwnerName) : 'null'; ?>,
     telegramUserId: <?php echo $telegramUserId ? json_encode($telegramUserId) : 'null'; ?>,
     telegramUsername: <?php echo $telegramUsername ? json_encode($telegramUsername) : 'null'; ?>,
-    isOwnNest: <?php echo $isOwnNest ? 'true' : 'false'; ?>,
-    postSlug: <?php echo $postSlug ? json_encode($postSlug) : 'null'; ?>
+    isOwnNest: <?php echo $isOwnNest ? 'true' : 'false'; ?>
   };
 </script>
 <link rel="icon" href="assets/favicon.png" sizes="any">
@@ -362,6 +356,6 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<script type="module" src="js/nest.js?v=60"></script>
+<script type="module" src="js/nest.js?v=57"></script>
 </body>
 </html>
