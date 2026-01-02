@@ -68,13 +68,11 @@
 }
 
 .tiptap-toolbar-button:hover {
-  background: transparent;
-  color: var(--color-iris);
+  background: rgba(138, 56, 245, 0.1);
 }
 
 .tiptap-toolbar-button.is-active {
-  background: transparent;
-  color: var(--color-iris);
+  background: rgba(138, 56, 245, 0.1);
 }
 
 /* Editor content */
