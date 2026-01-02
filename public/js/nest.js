@@ -677,7 +677,14 @@ function alignUserHeader() {
     };
 
     // Load content from server
-    const loadContent = async () => {
+    // Store full content globally for navigation
+    let fullContentForNav = '';
+
+    const loadContent = async (slug = null) => {
+      // Update nestConfig.postSlug if provided
+      if (slug !== null) {
+        nestConfig.postSlug = slug || undefined;
+      }
       try {
         let htmlContent = '';
 
@@ -691,11 +698,68 @@ function alignUserHeader() {
 
           if (result.success && result.post) {
             htmlContent = result.post.content;
+
+            // Also load all content for sidebar navigation
+            if (nestConfig.urlUsername) {
+              const contentUrl = CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername);
+              const contentResponse = await fetch(contentUrl);
+              const contentResult = await contentResponse.json();
+              let legacyContentHtml = '';
+              if (contentResult.success && contentResult.content) {
+                if (contentResult.content.blocks) {
+                  legacyContentHtml = convertEditorJsToHtml(contentResult.content);
+                } else if (typeof contentResult.content === 'string') {
+                  legacyContentHtml = contentResult.content;
+                }
+              }
+              const postsUrl = CONFIG.BASE_PATH + '/api/nest_posts.php?action=list&username=' + encodeURIComponent(nestConfig.urlUsername);
+              const postsResponse = await fetch(postsUrl);
+              const postsResult = await postsResponse.json();
+              let allPostsHtml = '';
+              if (postsResult.success && postsResult.posts && postsResult.posts.length > 0) {
+                allPostsHtml = postsResult.posts.map(post => post.content).join('');
+              }
+              fullContentForNav = allPostsHtml + legacyContentHtml;
+            }
           } else {
-            console.error('[Nest] Post not found:', nestConfig.postSlug);
+          // ALWAYS load all content first (for sidebar navigation)
+          let allPostsHtml = '';
+          let legacyContentHtml = '';
+
+          // 1. Load legacy content from nest_content
+          if (nestConfig.urlUsername) {
+            const contentUrl = CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername);
+            const contentResponse = await fetch(contentUrl);
+            const contentResult = await contentResponse.json();
+
+            if (contentResult.success && contentResult.content) {
+              if (contentResult.content.blocks) {
+                legacyContentHtml = convertEditorJsToHtml(contentResult.content);
+              } else if (typeof contentResult.content === 'string') {
+                legacyContentHtml = contentResult.content;
+              }
+            }
+
+            // 2. Load all posts from nest_posts
+            const postsUrl = CONFIG.BASE_PATH + '/api/nest_posts.php?action=list&username=' + encodeURIComponent(nestConfig.urlUsername);
+            const postsResponse = await fetch(postsUrl);
+            const postsResult = await postsResponse.json();
+
+            if (postsResult.success && postsResult.posts && postsResult.posts.length > 0) {
+              allPostsHtml = postsResult.posts.map(post => post.content).join('');
+            }
           }
-        } else {
-          // Load all content: nest_content + nest_posts
+
+          // Store full content for navigation
+          fullContentForNav = allPostsHtml + legacyContentHtml;
+          htmlContent = fullContentForNav;
+        }
+ else {
+          // Main page - load all content
+          // ALWAYS load all content first (for sidebar navigation)
+          let allPostsHtml = '';
+          let legacyContentHtml = '';
+
           // 1. Load legacy content from nest_content
           const contentUrl = nestConfig.urlUsername
             ? CONFIG.BASE_PATH + '/api/nest_content.php?action=get&username=' + encodeURIComponent(nestConfig.urlUsername)
@@ -705,24 +769,26 @@ function alignUserHeader() {
 
           if (contentResult.success && contentResult.content) {
             if (contentResult.content.blocks) {
-              htmlContent = convertEditorJsToHtml(contentResult.content);
+              legacyContentHtml = convertEditorJsToHtml(contentResult.content);
             } else if (typeof contentResult.content === 'string') {
-              htmlContent = contentResult.content;
+              legacyContentHtml = contentResult.content;
             }
           }
 
-          // 2. Load posts from nest_posts and prepend them
+          // 2. Load all posts from nest_posts
           if (nestConfig.urlUsername) {
             const postsUrl = CONFIG.BASE_PATH + '/api/nest_posts.php?action=list&username=' + encodeURIComponent(nestConfig.urlUsername);
             const postsResponse = await fetch(postsUrl);
             const postsResult = await postsResponse.json();
 
             if (postsResult.success && postsResult.posts && postsResult.posts.length > 0) {
-              // Prepend posts (newest first)
-              const postsHtml = postsResult.posts.map(post => post.content).join('');
-              htmlContent = postsHtml + htmlContent;
+              allPostsHtml = postsResult.posts.map(post => post.content).join('');
             }
           }
+
+          // Store full content for navigation and display
+          fullContentForNav = allPostsHtml + legacyContentHtml;
+          htmlContent = fullContentForNav;
         }
 
         await initEditor(htmlContent);
@@ -1267,11 +1333,18 @@ function alignUserHeader() {
           // Check if this is a post from nest_posts (has individual page)
           // For now, only "Ветер" - later we'll check via API
           if (postTitle === 'Ветер') {
-            // Navigate to post page
-            const baseUrl = nestConfig.urlUsername 
+            // SPA navigation to post page
+            e.preventDefault();
+            const baseUrl = nestConfig.urlUsername
               ? CONFIG.BASE_PATH + '/nest/' + nestConfig.urlUsername
               : CONFIG.BASE_PATH + '/nest';
-            window.location.href = baseUrl + '/veter';
+            const newUrl = baseUrl + '/veter';
+
+            // Update browser history
+            window.history.pushState({ slug: 'veter' }, '', newUrl);
+
+            // Load content without page refresh
+            await loadContent('veter');
             return;
           }
 
@@ -1473,6 +1546,16 @@ function alignUserHeader() {
 
     // Initialize editor with content
     loadContent();
+
+    // Handle browser back/forward buttons (SPA navigation)
+    window.addEventListener('popstate', (event) => {
+      const slug = event.state?.slug || null;
+      loadContent(slug);
+    });
+
+    // Set initial state
+    const currentSlug = nestConfig.postSlug || null;
+    window.history.replaceState({ slug: currentSlug }, '', window.location.href);
 
   }
 
