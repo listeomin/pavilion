@@ -87,18 +87,198 @@ export class NestPostsManager {
     return zone;
   }
 
+  createToolbar() {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'tiptap-toolbar';
+    toolbar.innerHTML = `
+      <div class="tiptap-toolbar-group">
+        <button type="button" class="tiptap-toolbar-button" data-action="bold" title="Bold (Ctrl+B)">B</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="italic" title="Italic (Ctrl+I)">I</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="code" title="Code (Ctrl+E)">&lt;&gt;</button>
+      </div>
+      <div class="tiptap-toolbar-separator"></div>
+      <div class="tiptap-toolbar-group">
+        <button type="button" class="tiptap-toolbar-button" data-action="h1" title="Heading 1">H1</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="h2" title="Heading 2">H2</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="h3" title="Heading 3">H3</button>
+      </div>
+      <div class="tiptap-toolbar-separator"></div>
+      <div class="tiptap-toolbar-group">
+        <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Bullet List">•</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Ordered List">1.</button>
+      </div>
+      <div class="tiptap-toolbar-separator"></div>
+      <div class="tiptap-toolbar-group">
+        <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Code Block">{ }</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">🔗</button>
+        <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">🖼</button>
+      </div>
+    `;
+    return toolbar;
+  }
+
+  setupToolbar(editor, toolbar) {
+    toolbar.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const action = btn.dataset.action;
+
+        switch (action) {
+          case 'bold':
+            editor.chain().focus().toggleBold().run();
+            break;
+          case 'italic':
+            editor.chain().focus().toggleItalic().run();
+            break;
+          case 'h1':
+            editor.chain().focus().toggleHeading({ level: 1 }).run();
+            break;
+          case 'h2':
+            editor.chain().focus().toggleHeading({ level: 2 }).run();
+            break;
+          case 'h3':
+            editor.chain().focus().toggleHeading({ level: 3 }).run();
+            break;
+          case 'bulletList':
+            editor.chain().focus().toggleBulletList().run();
+            break;
+          case 'orderedList':
+            editor.chain().focus().toggleOrderedList().run();
+            break;
+          case 'code':
+            editor.chain().focus().toggleCode().run();
+            break;
+          case 'codeBlock':
+            editor.chain().focus().toggleCodeBlock().run();
+            break;
+          case 'link':
+            const url = prompt('Enter URL:');
+            if (url) {
+              editor.chain().focus().setLink({ href: url }).run();
+            }
+            break;
+          case 'image':
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+
+              try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const response = await fetch(this.apiPath + '/api/upload_image.php', {
+                  method: 'POST',
+                  body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.file && result.file.url) {
+                  editor.chain().focus().setImage({ src: result.file.url }).run();
+                } else {
+                  alert('Ошибка загрузки изображения');
+                }
+              } catch (err) {
+                console.error('[NestPostsManager] Error uploading image:', err);
+                alert('Ошибка: ' + err.message);
+              }
+            };
+            input.click();
+            break;
+        }
+      });
+    });
+
+    // Update active states
+    editor.on('selectionUpdate', () => {
+      toolbar.querySelectorAll('button').forEach(btn => {
+        const action = btn.dataset.action;
+        let isActive = false;
+
+        switch (action) {
+          case 'bold':
+            isActive = editor.isActive('bold');
+            break;
+          case 'italic':
+            isActive = editor.isActive('italic');
+            break;
+          case 'h1':
+            isActive = editor.isActive('heading', { level: 1 });
+            break;
+          case 'h2':
+            isActive = editor.isActive('heading', { level: 2 });
+            break;
+          case 'h3':
+            isActive = editor.isActive('heading', { level: 3 });
+            break;
+          case 'bulletList':
+            isActive = editor.isActive('bulletList');
+            break;
+          case 'orderedList':
+            isActive = editor.isActive('orderedList');
+            break;
+          case 'code':
+            isActive = editor.isActive('code');
+            break;
+          case 'codeBlock':
+            isActive = editor.isActive('codeBlock');
+            break;
+          case 'link':
+            isActive = editor.isActive('link');
+            break;
+        }
+
+        if (isActive) {
+          btn.classList.add('is-active');
+        } else {
+          btn.classList.remove('is-active');
+        }
+      });
+    });
+  }
+
   activateEditor(post, postEl) {
     const contentEl = postEl.querySelector('.nest-post-content');
     const currentHtml = contentEl.innerHTML;
     contentEl.innerHTML = '';
 
+    // Create wrapper for editor + toolbar
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tiptap-editor-wrapper';
+
+    // Create and add toolbar
+    const toolbar = this.createToolbar();
+    wrapper.appendChild(toolbar);
+
+    // Create editor element
     const editorEl = document.createElement('div');
     editorEl.className = 'nest-post-editor';
-    contentEl.appendChild(editorEl);
+    wrapper.appendChild(editorEl);
+
+    contentEl.appendChild(wrapper);
 
     const editor = new Editor({
       element: editorEl,
-      extensions: [StarterKit, Link, Image, Placeholder.configure({ placeholder: 'Начните писать...' })],
+      extensions: [
+        StarterKit,
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'tiptap-link',
+          },
+        }),
+        Image.configure({
+          HTMLAttributes: {
+            class: 'tiptap-image',
+          },
+        }),
+        Placeholder.configure({
+          placeholder: 'Начните писать...',
+        }),
+      ],
       content: currentHtml,
       editable: true,
       autofocus: true,
@@ -108,6 +288,9 @@ export class NestPostsManager {
         setTimeout(() => this.deactivateEditor(post.id, postEl), 200);
       }
     });
+
+    // Setup toolbar functionality
+    this.setupToolbar(editor, toolbar);
 
     this.editors.set(post.id, editor);
     postEl.classList.add('nest-post-editing');

@@ -8,7 +8,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
-import { NestPostsManager } from './nest-posts-manager.js?v=1';
+import { NestPostsManager } from './nest-posts-manager.js?v=2';
 
 // Tiptap imports from CDN
 import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
