@@ -528,10 +528,18 @@ export class NestPostsManager {
     editor.destroy();
     this.editors.delete(postId);
 
-    // Reload posts and re-render to ensure all data is displayed correctly
+    // Reload post data
     await this.loadPosts();
-    const container = document.getElementById('nest-editor-container');
-    this.renderPostsList(container);
+    const post = this.posts.find(p => p.id == postId);
+
+    if (post) {
+      // Replace only this post element, don't re-render entire list
+      const newPostEl = this.createPostElement(post);
+      postEl.replaceWith(newPostEl);
+    } else {
+      // Post was deleted, remove element
+      postEl.remove();
+    }
 
     // Re-enable insert zones if no editors are active
     this.updateEditorActiveState();
@@ -590,17 +598,47 @@ export class NestPostsManager {
       }
 
       await this.loadPosts();
-      const container = document.getElementById('nest-editor-container');
-      this.renderPostsList(container);
+      const post = this.posts.find(p => p.id == result.post.id);
 
-      const postEl = container.querySelector(`[data-post-id="${result.post.id}"]`);
-      if (postEl) {
-        const post = this.posts.find(p => p.id == result.post.id);
-        if (post) {
-          // Ensure title is empty in memory
-          post.title = '';
-          this.activateEditor(post, postEl);
+      if (post) {
+        // Ensure title is empty in memory
+        post.title = '';
+
+        const container = document.getElementById('nest-editor-container');
+
+        // Create new post element
+        const postEl = this.createPostElement(post);
+
+        // Create insert zone after new post
+        const insertZone = this.createInsertZone(position + 1);
+
+        // Find where to insert based on position
+        if (position === 0) {
+          // Insert at the beginning (after first insert zone)
+          const firstZone = container.querySelector('.nest-insert-zone');
+          if (firstZone) {
+            firstZone.after(postEl, insertZone);
+          } else {
+            container.prepend(postEl, insertZone);
+          }
+        } else {
+          // Find the post or zone before this position and insert after it
+          const allPosts = Array.from(container.querySelectorAll('.nest-post'));
+          const prevPost = allPosts[position - 1];
+          if (prevPost) {
+            const prevZone = prevPost.nextElementSibling;
+            if (prevZone && prevZone.classList.contains('nest-insert-zone')) {
+              prevZone.after(postEl, insertZone);
+            } else {
+              prevPost.after(postEl, insertZone);
+            }
+          } else {
+            container.append(postEl, insertZone);
+          }
         }
+
+        // Activate editor for new post
+        this.activateEditor(post, postEl);
       }
     }
   }
