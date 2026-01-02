@@ -12,12 +12,21 @@
   border: 2px dashed #D1CFC5;
   border-radius: 8px;
   font-family: 'Cascadia Code', 'Cascadia Mono', monospace;
-  font-size: 28px;
+  font-size: 22px;
   font-style: italic;
-  color: #B0AEA5;
+  color: var(--color-nimbus-medium);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
+}
+
+/* Insert zones between posts - hidden by default, show on hover */
+.nest-insert-zone {
+  opacity: 0;
+}
+
+.nest-insert-zone:hover {
+  opacity: 1;
 }
 
 .nest-create-post-btn:hover,
