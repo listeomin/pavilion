@@ -184,8 +184,8 @@
   text-decoration: underline;
 }
 
-.nest-post-content img,
-.nest-post-editor img {
+.nest-post-content img:not(.nest-post-date-icon),
+.nest-post-editor img:not(.nest-post-date-icon) {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
