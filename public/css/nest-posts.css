@@ -116,6 +116,7 @@
   opacity: 0.7;
   display: block;
   flex-shrink: 0;
+  margin-top: 0;
 }
 
 /* Post content */
