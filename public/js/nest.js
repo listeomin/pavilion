@@ -700,19 +700,6 @@ function alignUserHeader() {
             }
           }
 
-          // 2. Load posts from nest_posts and prepend them
-          if (nestConfig.urlUsername) {
-            const postsUrl = CONFIG.BASE_PATH + '/api/nest_posts.php?action=list&username=' + encodeURIComponent(nestConfig.urlUsername);
-            const postsResponse = await fetch(postsUrl);
-            const postsResult = await postsResponse.json();
-
-            if (postsResult.success && postsResult.posts && postsResult.posts.length > 0) {
-              // Prepend posts (newest first)
-              const postsHtml = postsResult.posts.map(post => post.content).join('');
-              htmlContent = postsHtml + htmlContent;
-            }
-          }
-
         await initEditor(htmlContent);
 
         // If viewing a specific post, apply filter to show only that post
