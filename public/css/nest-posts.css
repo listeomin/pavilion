@@ -99,6 +99,7 @@
 /* Typography inside posts */
 .nest-post-content h1,
 .nest-post-editor h1 {
+  font-family: 'Noto Serif', serif;
   font-size: 32px;
   font-weight: 600;
   margin: 20px 0 10px 0;
@@ -123,6 +124,9 @@
 
 .nest-post-content p,
 .nest-post-editor p {
+  font-family: monospace;
+  font-size: 17px;
+  line-height: 1.6;
   margin: 10px 0;
 }
 
