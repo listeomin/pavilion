@@ -28,9 +28,11 @@
   opacity: 1;
 }
 
-/* Hide insert zones when editor is active */
+/* Disable insert zones when editor is active (don't hide to prevent layout shift) */
 body.editor-active .nest-insert-zone {
-  display: none;
+  pointer-events: none;
+  opacity: 0 !important;
+  cursor: default;
 }
 
 .nest-create-post-btn:hover,

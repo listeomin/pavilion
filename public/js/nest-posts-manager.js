@@ -14,6 +14,15 @@ export class NestPostsManager {
     this.saveTimers = new Map();
   }
 
+  // Update editor-active state based on active editors
+  updateEditorActiveState() {
+    if (this.editors.size > 0) {
+      document.body.classList.add('editor-active');
+    } else {
+      document.body.classList.remove('editor-active');
+    }
+  }
+
   async loadPosts() {
     const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
     const response = await fetch(url);
@@ -508,8 +517,8 @@ export class NestPostsManager {
     postEl.classList.add('nest-post-editing');
     postEl.classList.remove('nest-post-hover');
 
-    // Hide insert zones while editing
-    document.body.classList.add('editor-active');
+    // Disable insert zones while editing
+    this.updateEditorActiveState();
   }
 
   async deactivateEditor(postId, postEl) {
@@ -524,10 +533,8 @@ export class NestPostsManager {
     const container = document.getElementById('nest-editor-container');
     this.renderPostsList(container);
 
-    // Show insert zones again if no editors are active (after re-render)
-    if (this.editors.size === 0) {
-      document.body.classList.remove('editor-active');
-    }
+    // Re-enable insert zones if no editors are active
+    this.updateEditorActiveState();
   }
 
   scheduleAutosave(postId, editor) {
@@ -623,6 +630,9 @@ export class NestPostsManager {
       await this.loadPosts();
       const container = document.getElementById('nest-editor-container');
       this.renderPostsList(container);
+
+      // Re-enable insert zones if no editors are active
+      this.updateEditorActiveState();
     }
   }
 }
