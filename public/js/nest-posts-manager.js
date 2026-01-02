@@ -194,7 +194,7 @@ export class NestPostsManager {
             break;
           case 'delete':
             const postId = btn.dataset.postId;
-            if (postId && confirm('Удалить статью?')) {
+            if (postId) {
               this.deletePost(postId);
             }
             break;
@@ -294,8 +294,19 @@ export class NestPostsManager {
       autofocus: true,
       onUpdate: ({ editor }) => this.scheduleAutosave(post.id, editor),
       onBlur: ({ editor }) => {
-        this.savePost(post.id, editor);
-        setTimeout(() => this.deactivateEditor(post.id, postEl), 200);
+        // Check if editor is empty
+        const isEmpty = editor.isEmpty || editor.getText().trim() === '';
+
+        if (isEmpty) {
+          // Delete empty post automatically without confirmation
+          setTimeout(() => {
+            this.deletePost(post.id, true);
+          }, 200);
+        } else {
+          // Save non-empty post
+          this.savePost(post.id, editor);
+          setTimeout(() => this.deactivateEditor(post.id, postEl), 200);
+        }
       }
     });
 
@@ -355,7 +366,12 @@ export class NestPostsManager {
     }
   }
 
-  async deletePost(postId) {
+  async deletePost(postId, skipConfirm = false) {
+    // Show confirmation only if not auto-deleting empty post
+    if (!skipConfirm && !confirm('Удалить статью?')) {
+      return;
+    }
+
     const response = await fetch(`${this.apiPath}/api/nest_posts.php?action=delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
