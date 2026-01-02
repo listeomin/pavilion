@@ -109,12 +109,9 @@
 
 /* Add section link */
 .nav-add-section {
-  position: fixed;
-  bottom: 32px;
-  right: 20px;
-  z-index: 20;
-
-
+  margin-top: 32px;
+  padding: 12px 0;
+  text-align: left;
 }
 
 .nav-add-section-link {
