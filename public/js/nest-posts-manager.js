@@ -49,6 +49,31 @@ export class NestPostsManager {
     });
   }
 
+  convertJsonToHtml(jsonContent) {
+    if (!jsonContent || jsonContent === '{}' || jsonContent.trim() === '') {
+      return '<p><br></p>';
+    }
+
+    try {
+      // Try to parse as JSON
+      const parsed = JSON.parse(jsonContent);
+
+      // Create temporary editor to convert JSON to HTML
+      const tempDiv = document.createElement('div');
+      const tempEditor = new Editor({
+        element: tempDiv,
+        extensions: [StarterKit, Link, Image],
+        content: parsed,
+      });
+      const html = tempEditor.getHTML();
+      tempEditor.destroy();
+      return html;
+    } catch (e) {
+      // If not JSON, treat as HTML
+      return jsonContent;
+    }
+  }
+
   createPostElement(post) {
     const postEl = document.createElement('article');
     postEl.className = 'nest-post';
@@ -57,7 +82,8 @@ export class NestPostsManager {
 
     const contentEl = document.createElement('div');
     contentEl.className = 'nest-post-content';
-    contentEl.innerHTML = post.content || '<p><br></p>';
+    // Convert JSON to HTML for display
+    contentEl.innerHTML = this.convertJsonToHtml(post.content);
     postEl.appendChild(contentEl);
 
     if (this.config.isOwnNest) {
@@ -252,7 +278,13 @@ export class NestPostsManager {
 
   activateEditor(post, postEl) {
     const contentEl = postEl.querySelector('.nest-post-content');
-    const currentHtml = contentEl.innerHTML;
+    let currentHtml = contentEl.innerHTML;
+
+    // Don't use '{}' or empty JSON as content - leave editor empty to show placeholder
+    if (currentHtml === '{}' || currentHtml.trim() === '' || currentHtml === '<p><br></p>') {
+      currentHtml = '';
+    }
+
     contentEl.innerHTML = '';
 
     // Create wrapper for editor + toolbar
@@ -293,25 +325,35 @@ export class NestPostsManager {
       editable: true,
       autofocus: true,
       onUpdate: ({ editor }) => this.scheduleAutosave(post.id, editor),
-      onBlur: ({ editor }) => {
-        // Check if editor is empty
-        const isEmpty = editor.isEmpty || editor.getText().trim() === '';
-
-        if (isEmpty) {
-          // Delete empty post automatically without confirmation
-          setTimeout(() => {
-            this.deletePost(post.id, true);
-          }, 200);
-        } else {
-          // Save non-empty post
-          this.savePost(post.id, editor);
-          setTimeout(() => this.deactivateEditor(post.id, postEl), 200);
-        }
-      }
     });
 
     // Setup toolbar functionality
     this.setupToolbar(editor, toolbar);
+
+    // Handle clicks outside editor to close it
+    const handleClickOutside = (e) => {
+      const editorWrapper = postEl.querySelector('.tiptap-editor-wrapper');
+      if (!editorWrapper || !editorWrapper.contains(e.target)) {
+        // Clicked outside - check if empty and delete or save
+        const isEmpty = editor.isEmpty || editor.getText().trim() === '';
+
+        document.removeEventListener('click', handleClickOutside);
+
+        if (isEmpty) {
+          // Delete empty post automatically without confirmation
+          this.deletePost(post.id, true);
+        } else {
+          // Save non-empty post
+          this.savePost(post.id, editor);
+          this.deactivateEditor(post.id, postEl);
+        }
+      }
+    };
+
+    // Add click listener with a delay to avoid immediate trigger
+    setTimeout(() => {
+      document.addEventListener('click', handleClickOutside);
+    }, 100);
 
     this.editors.set(post.id, editor);
     postEl.classList.add('nest-post-editing');
