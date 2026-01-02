@@ -164,6 +164,15 @@
   padding: 0;
 }
 
+/* Delete button styling */
+.tiptap-toolbar-delete {
+  color: #d32f2f !important;
+}
+
+.tiptap-toolbar-delete:hover {
+  background: rgba(211, 47, 47, 0.1) !important;
+}
+
 /* Night shift mode */
 .night-shift .nest-create-post-btn {
   border-color: rgba(255, 255, 255, 0.2);

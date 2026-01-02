@@ -87,7 +87,7 @@ export class NestPostsManager {
     return zone;
   }
 
-  createToolbar() {
+  createToolbar(postId) {
     const toolbar = document.createElement('div');
     toolbar.className = 'tiptap-toolbar';
     toolbar.innerHTML = `
@@ -112,6 +112,10 @@ export class NestPostsManager {
         <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Code Block">{ }</button>
         <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">🔗</button>
         <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">🖼</button>
+      </div>
+      <div class="tiptap-toolbar-separator"></div>
+      <div class="tiptap-toolbar-group">
+        <button type="button" class="tiptap-toolbar-button tiptap-toolbar-delete" data-action="delete" data-post-id="${postId}" title="Удалить статью">🗑</button>
       </div>
     `;
     return toolbar;
@@ -188,6 +192,12 @@ export class NestPostsManager {
             };
             input.click();
             break;
+          case 'delete':
+            const postId = btn.dataset.postId;
+            if (postId && confirm('Удалить статью?')) {
+              this.deletePost(postId);
+            }
+            break;
         }
       });
     });
@@ -250,7 +260,7 @@ export class NestPostsManager {
     wrapper.className = 'tiptap-editor-wrapper';
 
     // Create and add toolbar
-    const toolbar = this.createToolbar();
+    const toolbar = this.createToolbar(post.id);
     wrapper.appendChild(toolbar);
 
     // Create editor element
@@ -342,6 +352,29 @@ export class NestPostsManager {
         const post = this.posts.find(p => p.id == result.post.id);
         if (post) this.activateEditor(post, postEl);
       }
+    }
+  }
+
+  async deletePost(postId) {
+    const response = await fetch(`${this.apiPath}/api/nest_posts.php?action=delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: postId })
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      // Close editor if it's open
+      const editor = this.editors.get(postId);
+      if (editor) {
+        editor.destroy();
+        this.editors.delete(postId);
+      }
+
+      // Reload and re-render posts list
+      await this.loadPosts();
+      const container = document.getElementById('nest-editor-container');
+      this.renderPostsList(container);
     }
   }
 }
