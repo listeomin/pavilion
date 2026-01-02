@@ -291,6 +291,76 @@ export class NestPostsManager {
     const wrapper = document.createElement('div');
     wrapper.className = 'tiptap-editor-wrapper';
 
+    // Create metadata section
+    const metaSection = document.createElement('div');
+    metaSection.className = 'nest-post-meta';
+
+    // Title input
+    const titleInput = document.createElement('input');
+    titleInput.type = 'text';
+    titleInput.className = 'nest-post-title-input';
+    titleInput.placeholder = 'Название статьи';
+    titleInput.value = post.title || '';
+    titleInput.dataset.postId = post.id;
+    metaSection.appendChild(titleInput);
+
+    // Slug input
+    const slugInput = document.createElement('input');
+    slugInput.type = 'text';
+    slugInput.className = 'nest-post-slug-input';
+    slugInput.placeholder = 'slug';
+    slugInput.value = post.slug || '';
+    slugInput.dataset.postId = post.id;
+    metaSection.appendChild(slugInput);
+
+    // Dates section
+    const datesSection = document.createElement('div');
+    datesSection.className = 'nest-post-dates';
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    };
+
+    // Created date
+    if (post.created_at) {
+      const createdDiv = document.createElement('div');
+      createdDiv.className = 'nest-post-date';
+      createdDiv.innerHTML = `
+        <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
+        <span>Создано ${formatDate(post.created_at)}</span>
+      `;
+      datesSection.appendChild(createdDiv);
+    }
+
+    // Published date (if different from created)
+    const publishedDiv = document.createElement('div');
+    publishedDiv.className = 'nest-post-date';
+    publishedDiv.innerHTML = `
+      <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+      <span>Опубликовано ${formatDate(post.created_at)}</span>
+    `;
+    datesSection.appendChild(publishedDiv);
+
+    // Updated date
+    if (post.updated_at) {
+      const updatedDiv = document.createElement('div');
+      updatedDiv.className = 'nest-post-date';
+      updatedDiv.innerHTML = `
+        <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
+        <span>Изменено ${formatDate(post.updated_at)}</span>
+      `;
+      datesSection.appendChild(updatedDiv);
+    }
+
+    metaSection.appendChild(datesSection);
+    wrapper.appendChild(metaSection);
+
     // Create and add toolbar
     const toolbar = this.createToolbar(post.id);
     wrapper.appendChild(toolbar);
@@ -329,6 +399,21 @@ export class NestPostsManager {
 
     // Setup toolbar functionality
     this.setupToolbar(editor, toolbar);
+
+    // Handle title and slug changes
+    titleInput.addEventListener('input', () => {
+      clearTimeout(titleInput.saveTimer);
+      titleInput.saveTimer = setTimeout(() => {
+        this.saveMetadata(post.id, { title: titleInput.value });
+      }, 1000);
+    });
+
+    slugInput.addEventListener('input', () => {
+      clearTimeout(slugInput.saveTimer);
+      slugInput.saveTimer = setTimeout(() => {
+        this.saveMetadata(post.id, { slug: slugInput.value });
+      }, 1000);
+    });
 
     // Handle clicks outside editor to close it
     const handleClickOutside = (e) => {
@@ -384,6 +469,14 @@ export class NestPostsManager {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: postId, content: JSON.stringify(content) })
+    });
+  }
+
+  async saveMetadata(postId, metadata) {
+    await fetch(`${this.apiPath}/api/nest_posts.php?action=update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: postId, ...metadata })
     });
   }
 

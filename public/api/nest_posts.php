@@ -132,6 +132,8 @@ try {
         $input = json_decode(file_get_contents('php://input'), true);
         $postId = $input['id'] ?? null;
         $content = $input['content'] ?? null;
+        $title = $input['title'] ?? null;
+        $slug = $input['slug'] ?? null;
 
         if (!$postId) {
             echo json_encode(['success' => false, 'error' => 'Post ID required']);
@@ -147,11 +149,43 @@ try {
             exit;
         }
 
-        $now = date('Y-m-d H:i:s');
-        $stmt = $db->prepare('UPDATE nest_posts SET content = :content, updated_at = :updated_at WHERE id = :id AND user_id = :user_id');
-        $stmt->execute([':content' => $content ?? $post['content'], ':updated_at' => $now, ':id' => $postId, ':user_id' => $telegramUserId]);
+        // Build dynamic update query
+        $updates = [];
+        $params = [':id' => $postId, ':user_id' => $telegramUserId];
 
-        echo json_encode(['success' => true, 'post' => ['id' => $postId, 'slug' => $post['slug'], 'title' => $post['title'], 'content' => $content ?? $post['content'], 'updated_at' => $now]]);
+        if ($content !== null) {
+            $updates[] = 'content = :content';
+            $params[':content'] = $content;
+        }
+
+        if ($title !== null) {
+            $updates[] = 'title = :title';
+            $params[':title'] = $title;
+        }
+
+        if ($slug !== null) {
+            $updates[] = 'slug = :slug';
+            $params[':slug'] = $slug;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $updates[] = 'updated_at = :updated_at';
+        $params[':updated_at'] = $now;
+
+        $sql = 'UPDATE nest_posts SET ' . implode(', ', $updates) . ' WHERE id = :id AND user_id = :user_id';
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+
+        echo json_encode([
+            'success' => true,
+            'post' => [
+                'id' => $postId,
+                'slug' => $slug ?? $post['slug'],
+                'title' => $title ?? $post['title'],
+                'content' => $content ?? $post['content'],
+                'updated_at' => $now
+            ]
+        ]);
 
     } elseif ($action === 'delete') {
         $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;

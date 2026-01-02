@@ -4,22 +4,23 @@
 .nest-create-post-btn {
   display: block;
   width: 100%;
+  max-width: 932px;
+  margin: 0 auto 20px;
   padding: 12px 20px;
-  margin-bottom: 20px;
   background: transparent;
-  border: 2px dashed rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  border: 2px dashed #D1CFC5;
+  border-radius: 5px;
   font-family: 'Ubuntu Sans', sans-serif;
   font-size: 16px;
-  color: rgba(0, 0, 0, 0.5);
+  color: #B0AEA5;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .nest-create-post-btn:hover {
-  border-color: rgba(0, 0, 0, 0.4);
-  color: rgba(0, 0, 0, 0.8);
-  background: rgba(0, 0, 0, 0.02);
+  border-color: #8A38F5;
+  color: #5A57D9;
+  background: rgba(138, 56, 245, 0.02);
 }
 
 /* Insert zones between posts */
@@ -51,24 +52,99 @@
 /* Post container */
 .nest-post {
   position: relative;
-  margin-bottom: 30px;
+  max-width: 932px;
+  margin: 0 auto 30px;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   transition: all 0.2s ease;
 }
 
 /* Hover state for editable posts */
 .nest-post-hover {
-  outline: 2px solid rgba(0, 0, 0, 0.2);
-  outline-offset: 4px;
+  border: 1px dashed #D1CFC5;
   cursor: pointer;
 }
 
 /* Active editing state */
 .nest-post-editing {
-  outline: 2px solid rgba(0, 0, 0, 0.4);
-  outline-offset: 4px;
-  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid #8A38F5;
+  background: #FAF9F5;
+}
+
+/* Metadata section */
+.nest-post-meta {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 2px dashed #D1CFC5;
+}
+
+/* Title input */
+.nest-post-title-input {
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  border: none;
+  border-bottom: 1px solid #D1CFC5;
+  background: transparent;
+  font-family: 'Noto Serif', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.nest-post-title-input:focus {
+  border-bottom-color: #8A38F5;
+}
+
+.nest-post-title-input::placeholder {
+  color: #B0AEA5;
+}
+
+/* Slug input */
+.nest-post-slug-input {
+  width: 100%;
+  padding: 6px 0;
+  margin-bottom: 16px;
+  border: none;
+  border-bottom: 1px solid #D1CFC5;
+  background: transparent;
+  font-family: monospace;
+  font-size: 14px;
+  color: #B0AEA5;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.nest-post-slug-input:focus {
+  border-bottom-color: #8A38F5;
+}
+
+.nest-post-slug-input::placeholder {
+  color: #B0AEA5;
+}
+
+/* Dates section */
+.nest-post-dates {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nest-post-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 13px;
+  color: #B0AEA5;
+}
+
+.nest-post-date-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
 }
 
 /* Post content */
