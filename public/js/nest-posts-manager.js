@@ -519,15 +519,15 @@ export class NestPostsManager {
     editor.destroy();
     this.editors.delete(postId);
 
-    // Show insert zones again if no editors are active
-    if (this.editors.size === 0) {
-      document.body.classList.remove('editor-active');
-    }
-
     // Reload posts and re-render to ensure all data is displayed correctly
     await this.loadPosts();
     const container = document.getElementById('nest-editor-container');
     this.renderPostsList(container);
+
+    // Show insert zones again if no editors are active (after re-render)
+    if (this.editors.size === 0) {
+      document.body.classList.remove('editor-active');
+    }
   }
 
   scheduleAutosave(postId, editor) {
@@ -577,6 +577,11 @@ export class NestPostsManager {
 
     const result = await response.json();
     if (result.success) {
+      // Force clear title if server set it to something
+      if (result.post && result.post.title && result.post.title.trim() !== '') {
+        await this.saveMetadata(result.post.id, { title: '' });
+      }
+
       await this.loadPosts();
       const container = document.getElementById('nest-editor-container');
       this.renderPostsList(container);
@@ -584,7 +589,11 @@ export class NestPostsManager {
       const postEl = container.querySelector(`[data-post-id="${result.post.id}"]`);
       if (postEl) {
         const post = this.posts.find(p => p.id == result.post.id);
-        if (post) this.activateEditor(post, postEl);
+        if (post) {
+          // Ensure title is empty in memory
+          post.title = '';
+          this.activateEditor(post, postEl);
+        }
       }
     }
   }
