@@ -28,12 +28,6 @@ export class NestPostsManager {
     container.innerHTML = '';
 
     if (this.config.isOwnNest) {
-      const createBtn = document.createElement('button');
-      createBtn.className = 'nest-create-post-btn';
-      createBtn.textContent = 'Напишите что-нибудь';
-      createBtn.addEventListener('click', () => this.createNewPost(0));
-      container.appendChild(createBtn);
-
       const beforeFirstZone = this.createInsertZone(0);
       container.appendChild(beforeFirstZone);
     }
