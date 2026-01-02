@@ -80,6 +80,69 @@ export class NestPostsManager {
     postEl.dataset.postId = post.id;
     postEl.dataset.position = post.position;
 
+    // Title display (read-only)
+    if (post.title && post.title.trim() !== '' && post.title !== 'Новая статья') {
+      const titleEl = document.createElement('h1');
+      titleEl.className = 'nest-post-title-display';
+      titleEl.textContent = post.title;
+      postEl.appendChild(titleEl);
+    }
+
+    // Slug display (read-only)
+    if (post.slug && post.slug.trim() !== '' && !post.slug.startsWith('post-')) {
+      const slugEl = document.createElement('div');
+      slugEl.className = 'nest-post-slug-display';
+      slugEl.textContent = post.slug;
+      postEl.appendChild(slugEl);
+    }
+
+    // Dates display (read-only)
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      });
+    };
+
+    const datesSection = document.createElement('div');
+    datesSection.className = 'nest-post-dates';
+
+    // Created date
+    if (post.created_at) {
+      const createdDiv = document.createElement('div');
+      createdDiv.className = 'nest-post-date';
+      createdDiv.innerHTML = `
+        <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
+        <span>Создано ${formatDate(post.created_at)}</span>
+      `;
+      datesSection.appendChild(createdDiv);
+    }
+
+    // Published date
+    const publishedDiv = document.createElement('div');
+    publishedDiv.className = 'nest-post-date';
+    publishedDiv.innerHTML = `
+      <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+      <span>Опубликовано ${formatDate(post.created_at)}</span>
+    `;
+    datesSection.appendChild(publishedDiv);
+
+    // Updated date
+    if (post.updated_at) {
+      const updatedDiv = document.createElement('div');
+      updatedDiv.className = 'nest-post-date';
+      updatedDiv.innerHTML = `
+        <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
+        <span>Изменено ${formatDate(post.updated_at)}</span>
+      `;
+      datesSection.appendChild(updatedDiv);
+    }
+
+    postEl.appendChild(datesSection);
+
     const contentEl = document.createElement('div');
     contentEl.className = 'nest-post-content';
     // Convert JSON to HTML for display

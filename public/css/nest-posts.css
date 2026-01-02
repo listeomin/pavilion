@@ -55,13 +55,13 @@
   max-width: 932px;
   margin: 0 auto 30px;
   padding: 20px;
-  border-radius: 5px;
+  border-radius: 16px;
   transition: all 0.2s ease;
 }
 
 /* Hover state for editable posts */
 .nest-post-hover {
-  border: 1px dashed #D1CFC5;
+  border: 3px dashed var(--color-nimbus-light);
   cursor: pointer;
 }
 
@@ -70,6 +70,27 @@
   border: 3px dashed #BCD1CA;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.8);
+}
+
+/* Title display (read-only view) */
+.nest-post-title-display {
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  font-family: 'Noto Serif', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Slug display (read-only view) */
+.nest-post-slug-display {
+  width: 100%;
+  padding: 6px 0;
+  margin-bottom: 16px;
+  font-family: monospace;
+  font-size: 14px;
+  color: #B0AEA5;
 }
 
 /* Title input */
