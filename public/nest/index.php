@@ -363,6 +363,6 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<script type="module" src="js/nest.js?v=72"></script>
+<script type="module" src="js/nest.js?v=73"></script>
 </body>
 </html>

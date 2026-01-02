@@ -481,7 +481,10 @@ export class NestPostsManager {
       const editorWrapper = postEl.querySelector('.tiptap-editor-wrapper');
       if (!editorWrapper || !editorWrapper.contains(e.target)) {
         // Clicked outside - check if empty and delete or save
-        const isEmpty = editor.isEmpty || editor.getText().trim() === '';
+        const titleInput = postEl.querySelector('.nest-post-title-input');
+        const title = titleInput ? titleInput.value.trim() : '';
+        const contentEmpty = editor.isEmpty || editor.getText().trim() === '';
+        const isEmpty = contentEmpty && title === '';
 
         document.removeEventListener('click', handleClickOutside);
 
@@ -506,23 +509,17 @@ export class NestPostsManager {
     postEl.classList.remove('nest-post-hover');
   }
 
-  deactivateEditor(postId, postEl) {
+  async deactivateEditor(postId, postEl) {
     const editor = this.editors.get(postId);
     if (!editor) return;
 
-    const contentEl = postEl.querySelector('.nest-post-content');
-    const html = editor.getHTML();
     editor.destroy();
     this.editors.delete(postId);
-    contentEl.innerHTML = html;
-    postEl.classList.remove('nest-post-editing');
 
-    // Show view-mode elements again
-    const titleDisplay = postEl.querySelector('.nest-post-title-display');
-    const viewDates = postEl.querySelector('.nest-post-dates');
-
-    if (titleDisplay) titleDisplay.style.display = '';
-    if (viewDates) viewDates.style.display = '';
+    // Reload posts and re-render to ensure all data is displayed correctly
+    await this.loadPosts();
+    const container = document.getElementById('nest-editor-container');
+    this.renderPostsList(container);
   }
 
   scheduleAutosave(postId, editor) {
