@@ -30,7 +30,7 @@ export class NestPostsManager {
     if (this.config.isOwnNest) {
       const createBtn = document.createElement('button');
       createBtn.className = 'nest-create-post-btn';
-      createBtn.textContent = '+ Создать статью';
+      createBtn.textContent = 'Напишите что-нибудь';
       createBtn.addEventListener('click', () => this.createNewPost(0));
       container.appendChild(createBtn);
 
@@ -160,10 +160,7 @@ export class NestPostsManager {
   createInsertZone(position) {
     const zone = document.createElement('div');
     zone.className = 'nest-insert-zone';
-    const hint = document.createElement('div');
-    hint.className = 'nest-insert-hint';
-    hint.textContent = 'Нажмите чтобы создать статью';
-    zone.appendChild(hint);
+    zone.textContent = 'Напишите что-нибудь';
     zone.addEventListener('click', () => this.createNewPost(position));
     return zone;
   }

@@ -1,7 +1,8 @@
 /* nest-posts.css - Styles for Nest blog post management */
 
-/* Create post button */
-.nest-create-post-btn {
+/* Create post button and insert zones - unified styling */
+.nest-create-post-btn,
+.nest-insert-zone {
   display: block;
   width: 100%;
   max-width: 932px;
@@ -10,43 +11,20 @@
   background: transparent;
   border: 2px dashed #D1CFC5;
   border-radius: 8px;
-  font-family: 'Ubuntu Sans', sans-serif;
-  font-size: 16px;
+  font-family: 'Cascadia Code', 'Cascadia Mono', monospace;
+  font-size: 28px;
+  font-style: italic;
   color: #B0AEA5;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
-.nest-create-post-btn:hover {
+.nest-create-post-btn:hover,
+.nest-insert-zone:hover {
   border-color: #8A38F5;
   color: #5A57D9;
   background: rgba(138, 56, 245, 0.02);
-}
-
-/* Insert zones between posts */
-.nest-insert-zone {
-  position: relative;
-  height: 40px;
-  margin: 10px 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nest-insert-hint {
-  display: none;
-  padding: 6px 12px;
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px dashed rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  font-family: 'Ubuntu Sans', sans-serif;
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.nest-insert-zone:hover .nest-insert-hint {
-  display: block;
 }
 
 /* Post container */
