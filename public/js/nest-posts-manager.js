@@ -88,14 +88,6 @@ export class NestPostsManager {
       postEl.appendChild(titleEl);
     }
 
-    // Slug display (read-only)
-    if (post.slug && post.slug.trim() !== '' && !post.slug.startsWith('post-')) {
-      const slugEl = document.createElement('div');
-      slugEl.className = 'nest-post-slug-display';
-      slugEl.textContent = post.slug;
-      postEl.appendChild(slugEl);
-    }
-
     // Dates display (read-only)
     const formatDate = (dateStr) => {
       if (!dateStr) return '';
@@ -350,13 +342,11 @@ export class NestPostsManager {
 
     contentEl.innerHTML = '';
 
-    // Hide view-mode elements (title, slug, dates)
+    // Hide view-mode elements (title, dates)
     const titleDisplay = postEl.querySelector('.nest-post-title-display');
-    const slugDisplay = postEl.querySelector('.nest-post-slug-display');
     const viewDates = postEl.querySelector('.nest-post-dates');
 
     if (titleDisplay) titleDisplay.style.display = 'none';
-    if (slugDisplay) slugDisplay.style.display = 'none';
     if (viewDates) viewDates.style.display = 'none';
 
     // Create wrapper for editor + toolbar
@@ -375,15 +365,6 @@ export class NestPostsManager {
     titleInput.value = post.title || '';
     titleInput.dataset.postId = post.id;
     metaSection.appendChild(titleInput);
-
-    // Slug input
-    const slugInput = document.createElement('input');
-    slugInput.type = 'text';
-    slugInput.className = 'nest-post-slug-input';
-    slugInput.placeholder = 'slug';
-    slugInput.value = post.slug || '';
-    slugInput.dataset.postId = post.id;
-    metaSection.appendChild(slugInput);
 
     // Dates section
     const datesSection = document.createElement('div');
@@ -472,18 +453,11 @@ export class NestPostsManager {
     // Setup toolbar functionality
     this.setupToolbar(editor, toolbar);
 
-    // Handle title and slug changes
+    // Handle title changes
     titleInput.addEventListener('input', () => {
       clearTimeout(titleInput.saveTimer);
       titleInput.saveTimer = setTimeout(() => {
         this.saveMetadata(post.id, { title: titleInput.value });
-      }, 1000);
-    });
-
-    slugInput.addEventListener('input', () => {
-      clearTimeout(slugInput.saveTimer);
-      slugInput.saveTimer = setTimeout(() => {
-        this.saveMetadata(post.id, { slug: slugInput.value });
       }, 1000);
     });
 
@@ -530,11 +504,9 @@ export class NestPostsManager {
 
     // Show view-mode elements again
     const titleDisplay = postEl.querySelector('.nest-post-title-display');
-    const slugDisplay = postEl.querySelector('.nest-post-slug-display');
     const viewDates = postEl.querySelector('.nest-post-dates');
 
     if (titleDisplay) titleDisplay.style.display = '';
-    if (slugDisplay) slugDisplay.style.display = '';
     if (viewDates) viewDates.style.display = '';
   }
 
@@ -568,18 +540,10 @@ export class NestPostsManager {
 
     // Update display elements
     const postEl = document.querySelector(`[data-post-id="${postId}"]`);
-    if (postEl) {
-      if (metadata.title !== undefined) {
-        const titleDisplay = postEl.querySelector('.nest-post-title-display');
-        if (titleDisplay) {
-          titleDisplay.textContent = metadata.title;
-        }
-      }
-      if (metadata.slug !== undefined) {
-        const slugDisplay = postEl.querySelector('.nest-post-slug-display');
-        if (slugDisplay) {
-          slugDisplay.textContent = metadata.slug;
-        }
+    if (postEl && metadata.title !== undefined) {
+      const titleDisplay = postEl.querySelector('.nest-post-title-display');
+      if (titleDisplay) {
+        titleDisplay.textContent = metadata.title;
       }
     }
   }

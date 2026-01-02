@@ -54,13 +54,13 @@
   position: relative;
   max-width: 932px;
   margin: 0 auto 30px;
-  padding: 20px;
   border-radius: 16px;
   transition: all 0.2s ease;
 }
 
 /* Hover state for editable posts */
 .nest-post-hover {
+  padding: 40px;
   border: 3px dashed var(--color-nimbus-light);
   cursor: pointer;
 }
@@ -72,6 +72,11 @@
   background: rgba(255, 255, 255, 0.8);
 }
 
+/* Metadata section in edit mode */
+.nest-post-meta {
+  margin-bottom: 20px;
+}
+
 /* Title display (read-only view) */
 .nest-post-title-display {
   width: 100%;
@@ -81,16 +86,6 @@
   font-size: 28px;
   font-weight: 600;
   color: #333;
-}
-
-/* Slug display (read-only view) */
-.nest-post-slug-display {
-  width: 100%;
-  padding: 6px 0;
-  margin-bottom: 16px;
-  font-family: monospace;
-  font-size: 14px;
-  color: #B0AEA5;
 }
 
 /* Title input */
@@ -111,23 +106,6 @@
   color: #B0AEA5;
 }
 
-/* Slug input */
-.nest-post-slug-input {
-  width: 100%;
-  padding: 6px 0;
-  margin-bottom: 16px;
-  border: none;
-  background: transparent;
-  font-family: monospace;
-  font-size: 14px;
-  color: #B0AEA5;
-  outline: none;
-}
-
-.nest-post-slug-input::placeholder {
-  color: #B0AEA5;
-}
-
 /* Dates section */
 .nest-post-dates {
   display: flex;
@@ -141,7 +119,7 @@
   gap: 6px;
   font-family: 'Ubuntu Sans', sans-serif;
   font-size: 13px;
-  color: #B0AEA5;
+  color: var(--color-cumulonimbus-light);
 }
 
 .nest-post-date-icon {
