@@ -8,6 +8,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
+import { NestPostsManager } from './nest-posts-manager.js?v=1';
 
 // Tiptap imports from CDN
 import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
@@ -1491,7 +1492,15 @@ function alignUserHeader() {
     }
 
     // Initialize editor with content
-    loadContent();
+    // If viewing own nest without a specific post, use posts manager for list view
+    if (nestConfig.isOwnNest && !nestConfig.postSlug) {
+      const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+      await postsManager.loadPosts();
+      postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+      hideSkeleton();
+    } else {
+      loadContent();
+    }
 
     // Handle browser back/forward buttons
     window.addEventListener('popstate', (event) => {

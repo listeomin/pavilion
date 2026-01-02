@@ -37,7 +37,7 @@ try {
         }
 
         // Get all posts for this user
-        $stmt = $db->prepare('SELECT id, slug, title, content, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY id ASC');
+        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC');
         $stmt->execute([':user_id' => $userId]);
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -75,7 +75,7 @@ try {
         }
 
         // Get post
-        $stmt = $db->prepare('SELECT id, slug, title, content, created_at, updated_at FROM nest_posts WHERE user_id = :user_id AND slug = :slug LIMIT 1');
+        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_at, updated_at FROM nest_posts WHERE user_id = :user_id AND slug = :slug LIMIT 1');
         $stmt->execute([':user_id' => $userId, ':slug' => $slug]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -90,6 +90,88 @@ try {
                 'error' => 'Post not found'
             ]);
         }
+
+    } elseif ($action === 'create') {
+        $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
+        if (!$telegramUserId) {
+            echo json_encode(['success' => false, 'error' => 'Authentication required']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $content = $input['content'] ?? '{}';
+        $position = $input['position'] ?? null;
+
+        $timestamp = time();
+        $slug = 'post-' . $timestamp;
+        $title = 'Новая статья';
+        $now = date('Y-m-d H:i:s');
+
+        if ($position !== null) {
+            $stmt = $db->prepare('UPDATE nest_posts SET position = position + 1 WHERE user_id = :user_id AND position >= :position');
+            $stmt->execute([':user_id' => $telegramUserId, ':position' => $position]);
+        } else {
+            $stmt = $db->prepare('SELECT MAX(position) as max_pos FROM nest_posts WHERE user_id = :user_id');
+            $stmt->execute([':user_id' => $telegramUserId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            $position = ($result['max_pos'] ?? -1) + 1;
+        }
+
+        $stmt = $db->prepare('INSERT INTO nest_posts (user_id, slug, title, content, position, created_at, updated_at) VALUES (:user_id, :slug, :title, :content, :position, :created_at, :updated_at)');
+        $stmt->execute([':user_id' => $telegramUserId, ':slug' => $slug, ':title' => $title, ':content' => $content, ':position' => $position, ':created_at' => $now, ':updated_at' => $now]);
+
+        echo json_encode(['success' => true, 'post' => ['id' => $db->lastInsertId(), 'slug' => $slug, 'title' => $title, 'content' => $content, 'position' => $position, 'created_at' => $now, 'updated_at' => $now]]);
+
+    } elseif ($action === 'update') {
+        $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
+        if (!$telegramUserId) {
+            echo json_encode(['success' => false, 'error' => 'Authentication required']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = $input['id'] ?? null;
+        $content = $input['content'] ?? null;
+
+        if (!$postId) {
+            echo json_encode(['success' => false, 'error' => 'Post ID required']);
+            exit;
+        }
+
+        $stmt = $db->prepare('SELECT id, slug, title, content FROM nest_posts WHERE id = :id AND user_id = :user_id');
+        $stmt->execute([':id' => $postId, ':user_id' => $telegramUserId]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$post) {
+            echo json_encode(['success' => false, 'error' => 'Post not found']);
+            exit;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $stmt = $db->prepare('UPDATE nest_posts SET content = :content, updated_at = :updated_at WHERE id = :id AND user_id = :user_id');
+        $stmt->execute([':content' => $content ?? $post['content'], ':updated_at' => $now, ':id' => $postId, ':user_id' => $telegramUserId]);
+
+        echo json_encode(['success' => true, 'post' => ['id' => $postId, 'slug' => $post['slug'], 'title' => $post['title'], 'content' => $content ?? $post['content'], 'updated_at' => $now]]);
+
+    } elseif ($action === 'delete') {
+        $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
+        if (!$telegramUserId) {
+            echo json_encode(['success' => false, 'error' => 'Authentication required']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $postId = $input['id'] ?? null;
+
+        if (!$postId) {
+            echo json_encode(['success' => false, 'error' => 'Post ID required']);
+            exit;
+        }
+
+        $stmt = $db->prepare('DELETE FROM nest_posts WHERE id = :id AND user_id = :user_id');
+        $stmt->execute([':id' => $postId, ':user_id' => $telegramUserId]);
+
+        echo json_encode(['success' => $stmt->rowCount() > 0]);
 
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
