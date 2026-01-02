@@ -1,5 +1,5 @@
 :root{--accent:#2ecc71;--muted:#666}
-body{font-family:Georgia,serif;padding:20px;background:#fff;color:#111}
+body{font-family:Georgia,serif;padding:20px;background:var(--color-cloud-light);color:#111}
 header{font-size:24px;font-weight:700;margin-bottom:12px}
 #chat{max-width:720px;margin:0 auto}
 .msg{margin:8px 0}

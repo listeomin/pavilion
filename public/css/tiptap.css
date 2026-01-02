@@ -13,7 +13,7 @@
   align-items: center;
   gap: 4px;
   padding: 12px 6px;
-  background: var(--color-cirrus);
+  background: rgba(255, 255, 255, 0.7);
   border-right: 1px solid var(--color-nimbus-light);
   box-shadow: 4px 0 8px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.05), 0 -4px 8px rgba(0, 0, 0, 0.05);
   position: fixed;
@@ -61,12 +61,13 @@
 }
 
 .tiptap-toolbar-button:hover {
-  background: var(--color-cloud-medium);
+  background: transparent;
+  color: var(--color-iris);
 }
 
 .tiptap-toolbar-button.is-active {
-  background: var(--color-nimbus-medium);
-  color: var(--color-cumulonimbus-dark);
+  background: transparent;
+  color: var(--color-iris);
 }
 
 /* Editor content */

@@ -5,16 +5,15 @@
 .nest-insert-zone {
   display: block;
   width: 100%;
-  max-width: 932px;
   margin: 0 auto 20px;
   padding: 12px 20px;
   background: transparent;
-  border: 2px dashed #D1CFC5;
-  border-radius: 8px;
+  border: 2px dashed var(--color-nimbus-light);
+  border-radius: 12px;
   font-family: 'Cascadia Code', 'Cascadia Mono', monospace;
-  font-size: 22px;
+  font-size: 18px;
   font-style: italic;
-  color: var(--color-nimbus-medium);
+  color: var(--color-nimbus-light);
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -31,9 +30,8 @@
 
 .nest-create-post-btn:hover,
 .nest-insert-zone:hover {
-  border-color: #8A38F5;
-  color: #5A57D9;
-  background: rgba(138, 56, 245, 0.02);
+  border-color: var(--color-nimbus-medium);
+  color: var(--color-nimbus-medium);
 }
 
 /* Post container */
@@ -41,34 +39,34 @@
   position: relative;
   max-width: 932px;
   margin: 0 auto 30px;
-  padding: 20px;
-  border-radius: 16px;
+  border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 /* Hover state for editable posts */
 .nest-post-hover {
-  outline: 3px dashed var(--color-nimbus-light);
+  outline: 2px dashed var(--color-nimbus-light);
   outline-offset: 20px;
   cursor: pointer;
 }
 
 /* Active editing state */
 .nest-post-editing {
-  outline: 3px dashed #BCD1CA;
-  outline-offset: 20px;
+  outline: 2px dashed #BCD1CA;
+  outline-offset: 30px;
+  box-shadow: 0 0 0 30px rgba(255, 255, 255, 0.8);
   background: rgba(255, 255, 255, 0.8);
 }
 
 /* Metadata section in edit mode */
 .nest-post-meta {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 /* Title display (read-only view) */
 .nest-post-title-display {
   width: 100%;
-  padding: 8px 0;
+  padding: 8px 0px 0px 0px;
   margin-bottom: 12px;
   font-family: 'Noto Serif', serif;
   font-size: 28px;
@@ -79,7 +77,7 @@
 /* Title input */
 .nest-post-title-input {
   width: 100%;
-  padding: 8px 0;
+  padding: 8px 0px 0px 0px;
   margin-bottom: 12px;
   border: none;
   background: transparent;
@@ -97,6 +95,7 @@
 /* Dates section */
 .nest-post-dates {
   display: flex;
+  margin-bottom: 10px;
   gap: 16px;
   flex-wrap: wrap;
 }
