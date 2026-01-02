@@ -109,9 +109,10 @@
 
 /* Add section link */
 .nav-add-section {
-  margin-top: 32px;
-  padding: 12px 0;
-  text-align: left;
+  position: fixed;
+  bottom: 40px;
+  right: 20px;
+  z-index: 20;
 }
 
 .nav-add-section-link {

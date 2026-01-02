@@ -1492,8 +1492,9 @@ function alignUserHeader() {
     }
 
     // Initialize editor with content
-    // If viewing own nest without a specific post, use posts manager for list view
-    if (nestConfig.isOwnNest && !nestConfig.postSlug) {
+    // If viewing a nest without a specific post slug, use posts manager for list view
+    // This applies to both own nest and viewing others' nests
+    if (!nestConfig.postSlug) {
       const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
       await postsManager.loadPosts();
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
