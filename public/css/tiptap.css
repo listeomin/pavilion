@@ -60,6 +60,13 @@
   white-space: nowrap;
 }
 
+.tiptap-toolbar-button img {
+  display: block;
+  width: 24px;
+  height: 24px;
+  transition: all 0.15s ease;
+}
+
 .tiptap-toolbar-button:hover {
   background: transparent;
   color: var(--color-iris);
