@@ -72,8 +72,6 @@
 /* Editor content */
 .tiptap {
   outline: none;
-  min-height: 400px;
-  padding: 16px;
   font-family: monospace;
   font-size: 17px;
   font-weight: 400;
