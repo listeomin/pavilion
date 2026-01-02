@@ -507,6 +507,9 @@ export class NestPostsManager {
     this.editors.set(post.id, editor);
     postEl.classList.add('nest-post-editing');
     postEl.classList.remove('nest-post-hover');
+
+    // Hide insert zones while editing
+    document.body.classList.add('editor-active');
   }
 
   async deactivateEditor(postId, postEl) {
@@ -515,6 +518,11 @@ export class NestPostsManager {
 
     editor.destroy();
     this.editors.delete(postId);
+
+    // Show insert zones again if no editors are active
+    if (this.editors.size === 0) {
+      document.body.classList.remove('editor-active');
+    }
 
     // Reload posts and re-render to ensure all data is displayed correctly
     await this.loadPosts();
@@ -564,7 +572,7 @@ export class NestPostsManager {
     const response = await fetch(`${this.apiPath}/api/nest_posts.php?action=create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: '{}', position })
+      body: JSON.stringify({ content: '{}', position, title: '' })
     });
 
     const result = await response.json();
