@@ -1520,6 +1520,11 @@ function alignUserHeader() {
         document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';
       }
 
+      // Load sections and render sidebar navigation (same as list view)
+      await loadSections();
+      renderNavigation();
+      postsManager.renderSidebarNavigation();
+
       hideSkeleton();
     }
 
