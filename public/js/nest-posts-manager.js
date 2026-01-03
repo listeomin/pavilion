@@ -88,6 +88,52 @@ export class NestPostsManager {
     return this.posts;
   }
 
+  // Get all unique tags from user's posts
+  getAllTags() {
+    const tags = new Set();
+    this.posts.forEach(post => {
+      if (post.tag && post.tag !== 'черновик' && post.tag !== 'лента') {
+        tags.add(post.tag);
+      }
+    });
+    return ['черновик', 'лента', ...Array.from(tags).sort()];
+  }
+
+  // Populate tag dropdown with available tags
+  populateTagDropdown(dropdown, postId, button) {
+    const availableTags = this.getAllTags();
+    const currentTag = button.dataset.currentTag;
+
+    dropdown.innerHTML = '';
+
+    availableTags.forEach(tag => {
+      const option = document.createElement('div');
+      option.className = 'nest-post-tag-option';
+      option.dataset.tag = tag;
+      option.textContent = tag;
+
+      if (tag === currentTag) {
+        option.classList.add('active');
+      }
+
+      option.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await this.saveMetadata(postId, { tag });
+        button.textContent = `#${tag}`;
+        button.dataset.currentTag = tag;
+        dropdown.style.display = 'none';
+
+        // Update all options active state
+        dropdown.querySelectorAll('.nest-post-tag-option').forEach(opt => {
+          opt.classList.remove('active');
+        });
+        option.classList.add('active');
+      });
+
+      dropdown.appendChild(option);
+    });
+  }
+
   renderPostsList(container) {
     container.innerHTML = '';
 
@@ -492,6 +538,25 @@ export class NestPostsManager {
     editorEl.className = 'nest-post-editor';
     wrapper.appendChild(editorEl);
 
+    // Create tag selector in footer
+    const tagFooter = document.createElement('div');
+    tagFooter.className = 'nest-post-tag-footer';
+
+    const tagButton = document.createElement('button');
+    tagButton.type = 'button';
+    tagButton.className = 'nest-post-tag-button';
+    tagButton.dataset.postId = post.id;
+    tagButton.dataset.currentTag = post.tag || 'черновик';
+    tagButton.textContent = `#${post.tag || 'черновик'}`;
+
+    const tagDropdown = document.createElement('div');
+    tagDropdown.className = 'nest-post-tag-dropdown';
+    tagDropdown.style.display = 'none';
+
+    tagFooter.appendChild(tagButton);
+    tagFooter.appendChild(tagDropdown);
+    wrapper.appendChild(tagFooter);
+
     contentEl.appendChild(wrapper);
 
     const editor = new Editor({
@@ -547,12 +612,30 @@ export class NestPostsManager {
       this.datePickers.set(post.id, picker);
     }
 
+    // Handle tag button click to show dropdown
+    tagButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = tagDropdown.style.display !== 'none';
+
+      if (isVisible) {
+        tagDropdown.style.display = 'none';
+      } else {
+        // Populate dropdown with available tags
+        this.populateTagDropdown(tagDropdown, post.id, tagButton);
+        tagDropdown.style.display = 'block';
+      }
+    });
+
     // Handle clicks outside editor to close it
     const handleClickOutside = (e) => {
       const editorWrapper = postEl.querySelector('.tiptap-editor-wrapper');
 
       // Check if click is inside editor
       if (editorWrapper && editorWrapper.contains(e.target)) {
+        // Close tag dropdown if clicking elsewhere in editor
+        if (!e.target.closest('.nest-post-tag-footer')) {
+          tagDropdown.style.display = 'none';
+        }
         return; // Click inside editor - do nothing
       }
 
@@ -561,6 +644,9 @@ export class NestPostsManager {
       if (flatpickrCalendar) {
         return; // Click on date picker - do nothing
       }
+
+      // Close tag dropdown
+      tagDropdown.style.display = 'none';
 
       // Clicked outside - check if empty and delete or save
       const titleInput = postEl.querySelector('.nest-post-title-input');
@@ -637,6 +723,24 @@ export class NestPostsManager {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: postId, content: JSON.stringify(content) })
     });
+
+    // Auto-switch from черновик to лента if post has title and content
+    const post = this.posts.find(p => p.id == postId);
+    if (post && post.tag === 'черновик') {
+      const titleInput = document.querySelector(`.nest-post-title-input[data-post-id="${postId}"]`);
+      const title = titleInput ? titleInput.value.trim() : post.title?.trim() || '';
+      const hasContent = !editor.isEmpty && editor.getText().trim() !== '';
+
+      if (title && hasContent) {
+        await this.saveMetadata(postId, { tag: 'лента' });
+        // Update tag button if exists
+        const tagButton = document.querySelector(`.nest-post-tag-button[data-post-id="${postId}"]`);
+        if (tagButton) {
+          tagButton.textContent = '#лента';
+          tagButton.dataset.currentTag = 'лента';
+        }
+      }
+    }
   }
 
   async saveMetadata(postId, metadata) {

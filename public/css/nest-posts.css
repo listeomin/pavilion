@@ -250,6 +250,95 @@ body.editor-active .nest-insert-zone {
   background: rgba(211, 47, 47, 0.1) !important;
 }
 
+/* Tag footer and selector */
+.nest-post-tag-footer {
+  position: relative;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-nimbus-light);
+}
+
+.nest-post-tag-button {
+  border: none;
+  background: transparent;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.nest-post-tag-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Tag colors */
+.nest-post-tag-button[data-current-tag="черновик"] {
+  color: var(--color-nimbus-dark);
+}
+
+.nest-post-tag-button[data-current-tag="лента"] {
+  color: var(--color-garden-sky);
+}
+
+.nest-post-tag-button[data-current-tag="стихи"] {
+  color: var(--color-garden-olive);
+}
+
+/* Tag dropdown */
+.nest-post-tag-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 4px;
+  background: white;
+  border: 1px solid var(--color-nimbus-light);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 1000;
+}
+
+.nest-post-tag-option {
+  padding: 8px 12px;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.nest-post-tag-option:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.nest-post-tag-option:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.nest-post-tag-option:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.nest-post-tag-option.active {
+  background: rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+}
+
+/* Tag option colors */
+.nest-post-tag-option[data-tag="черновик"] {
+  color: var(--color-nimbus-dark);
+}
+
+.nest-post-tag-option[data-tag="лента"] {
+  color: var(--color-garden-sky);
+}
+
+.nest-post-tag-option[data-tag="стихи"] {
+  color: var(--color-garden-olive);
+}
+
 /* Night shift mode */
 .night-shift .nest-create-post-btn {
   border-color: rgba(255, 255, 255, 0.2);
