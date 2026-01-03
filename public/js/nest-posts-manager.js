@@ -550,23 +550,33 @@ export class NestPostsManager {
     // Handle clicks outside editor to close it
     const handleClickOutside = (e) => {
       const editorWrapper = postEl.querySelector('.tiptap-editor-wrapper');
-      if (!editorWrapper || !editorWrapper.contains(e.target)) {
-        // Clicked outside - check if empty and delete or save
-        const titleInput = postEl.querySelector('.nest-post-title-input');
-        const title = titleInput ? titleInput.value.trim() : '';
-        const contentEmpty = editor.isEmpty || editor.getText().trim() === '';
-        const isEmpty = contentEmpty && title === '';
 
-        document.removeEventListener('click', handleClickOutside);
+      // Check if click is inside editor
+      if (editorWrapper && editorWrapper.contains(e.target)) {
+        return; // Click inside editor - do nothing
+      }
 
-        if (isEmpty) {
-          // Delete empty post automatically without confirmation
-          this.deletePost(post.id, true);
-        } else {
-          // Save non-empty post
-          this.savePost(post.id, editor);
-          this.deactivateEditor(post.id, postEl);
-        }
+      // Check if click is on Flatpickr calendar (it's rendered outside editor in body)
+      const flatpickrCalendar = e.target.closest('.flatpickr-calendar');
+      if (flatpickrCalendar) {
+        return; // Click on date picker - do nothing
+      }
+
+      // Clicked outside - check if empty and delete or save
+      const titleInput = postEl.querySelector('.nest-post-title-input');
+      const title = titleInput ? titleInput.value.trim() : '';
+      const contentEmpty = editor.isEmpty || editor.getText().trim() === '';
+      const isEmpty = contentEmpty && title === '';
+
+      document.removeEventListener('click', handleClickOutside);
+
+      if (isEmpty) {
+        // Delete empty post automatically without confirmation
+        this.deletePost(post.id, true);
+      } else {
+        // Save non-empty post
+        this.savePost(post.id, editor);
+        this.deactivateEditor(post.id, postEl);
       }
     };
 
