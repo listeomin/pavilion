@@ -196,45 +196,60 @@ export class NestPostsManager {
     return categories;
   }
 
-  // Render sidebar navigation with categories
+  // Render sidebar navigation - populate existing sections with posts
   renderSidebarNavigation() {
-    const sidebar = document.getElementById('nest-navigation-content');
-    if (!sidebar) return;
+    // Find all existing nav sections
+    const navSections = document.querySelectorAll('.nav-section-header');
+    if (navSections.length === 0) return;
 
     const categories = this.getPostsByCategory();
 
-    if (Object.keys(categories).length === 0) {
-      sidebar.innerHTML = '<p style="color: var(--color-nimbus-medium); font-size: 13px; padding: 12px 0;">Нет опубликованных категорий</p>';
-      return;
-    }
+    // Update each section with matching posts
+    navSections.forEach(sectionHeader => {
+      const sectionName = sectionHeader.dataset.section;
+      if (!sectionName) return;
 
-    sidebar.innerHTML = '';
+      // Find the nav-posts container for this section
+      const section = sectionHeader.parentElement;
+      let postsContainer = section.querySelector('.nav-posts');
 
-    Object.entries(categories).forEach(([categoryName, posts]) => {
-      const categorySection = document.createElement('div');
-      categorySection.className = 'nest-category-section';
-      categorySection.dataset.section = categoryName;
+      // Create nav-posts container if it doesn't exist
+      if (!postsContainer) {
+        postsContainer = document.createElement('div');
+        postsContainer.className = 'nav-posts';
+        section.appendChild(postsContainer);
+      }
 
-      const categoryTitle = document.createElement('h3');
-      categoryTitle.className = 'nest-category-title';
-      categoryTitle.textContent = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
-      categorySection.appendChild(categoryTitle);
+      // Get posts for this section (case-insensitive match)
+      const sectionNameLower = sectionName.toLowerCase();
+      const posts = categories[sectionNameLower] || [];
 
-      const postsList = document.createElement('ul');
-      postsList.className = 'nest-category-posts';
+      // Clear and populate
+      postsContainer.innerHTML = '';
 
-      posts.forEach(post => {
-        const postItem = document.createElement('li');
-        const postLink = document.createElement('a');
-        postLink.href = `nest/${this.config.urlUsername}/${post.slug}`;
-        postLink.textContent = post.title;
-        postLink.className = 'nest-post-link';
-        postItem.appendChild(postLink);
-        postsList.appendChild(postItem);
-      });
+      if (posts.length === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'nav-post-empty';
+        emptyMsg.textContent = 'Нет статей';
+        postsContainer.appendChild(emptyMsg);
+      } else {
+        posts.forEach(post => {
+          const postItem = document.createElement('div');
+          postItem.className = 'nav-post';
+          postItem.textContent = post.title;
+          postItem.dataset.postSlug = post.slug;
 
-      categorySection.appendChild(postsList);
-      sidebar.appendChild(categorySection);
+          // Add click handler to navigate to post page
+          postItem.addEventListener('click', () => {
+            const baseUrl = this.config.urlUsername
+              ? `${this.apiPath}/nest/${this.config.urlUsername}`
+              : `${this.apiPath}/nest`;
+            window.location.href = `${baseUrl}/${post.slug}`;
+          });
+
+          postsContainer.appendChild(postItem);
+        });
+      }
     });
   }
 
