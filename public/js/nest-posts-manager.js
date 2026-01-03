@@ -219,7 +219,7 @@ export class NestPostsManager {
           if (!a.created_at && !b.created_at) return 0;
           if (!a.created_at) return 1;
           if (!b.created_at) return -1;
-          return new Date(b.created_at) - new Date(a.created_at);
+          return new Date(a.created_at) - new Date(b.created_at);
         });
         break;
 
@@ -229,7 +229,7 @@ export class NestPostsManager {
           if (!a.created_date && !b.created_date) return 0;
           if (!a.created_date) return 1;
           if (!b.created_date) return -1;
-          return new Date(b.created_date) - new Date(a.created_date);
+          return new Date(a.created_date) - new Date(b.created_date);
         });
         break;
 
@@ -241,7 +241,7 @@ export class NestPostsManager {
           if (!aDate && !bDate) return 0;
           if (!aDate) return 1;
           if (!bDate) return -1;
-          return new Date(bDate) - new Date(aDate);
+          return new Date(aDate) - new Date(bDate);
         });
         break;
     }
