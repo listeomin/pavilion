@@ -365,12 +365,21 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
+
+<!-- Sort Context Menu -->
+<div id="nest-sort-menu" class="context-menu">
+  <div class="context-menu-item" data-sort="author">Как задумал автор</div>
+  <div class="context-menu-item" data-sort="created">По дате создания</div>
+  <div class="context-menu-item" data-sort="published">По дате публикации</div>
+  <div class="context-menu-item" data-sort="modified">По дате изменения</div>
+</div>
+
 <!-- Date/time libraries -->
 <script src="libs/dayjs.min.js"></script>
 <script src="libs/dayjs-relativeTime.min.js"></script>
 <script src="libs/dayjs-ru.js"></script>
 <script src="libs/flatpickr.min.js"></script>
 <script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=97"></script>
+<script type="module" src="js/nest.js?v=98"></script>
 </body>
 </html>

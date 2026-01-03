@@ -13,12 +13,16 @@ export class NestPostsManager {
     this.editors = new Map();
     this.saveTimers = new Map();
     this.datePickers = new Map();
+    this.currentSort = localStorage.getItem('nest-sort-mode') || 'author';
 
     // Initialize Day.js with Russian locale and relativeTime
     if (window.dayjs) {
       dayjs.extend(dayjs_plugin_relativeTime);
       dayjs.locale('ru');
     }
+
+    // Initialize sort context menu
+    this.initSortMenu();
   }
 
   // Format date using Day.js with live format
@@ -156,15 +160,107 @@ export class NestPostsManager {
     });
   }
 
+  // Initialize sort context menu
+  initSortMenu() {
+    const menu = document.getElementById('nest-sort-menu');
+    if (!menu) return;
+
+    // Add click handlers to menu items
+    menu.querySelectorAll('.context-menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const sortMode = item.dataset.sort;
+        this.currentSort = sortMode;
+        localStorage.setItem('nest-sort-mode', sortMode);
+        menu.classList.remove('active');
+
+        // Re-render posts with new sort
+        const container = document.getElementById('nest-editor-container');
+        if (container) {
+          this.renderPostsList(container);
+        }
+      });
+    });
+
+    // Show menu on right-click in wrap area
+    document.addEventListener('contextmenu', (e) => {
+      const wrap = e.target.closest('.wrap');
+      if (!wrap) return;
+
+      // Only show on empty areas (not on posts or insert zones)
+      if (e.target.closest('.nest-post') || e.target.closest('.nest-insert-zone')) {
+        return;
+      }
+
+      e.preventDefault();
+      menu.style.left = `${e.clientX}px`;
+      menu.style.top = `${e.clientY}px`;
+      menu.classList.add('active');
+    });
+
+    // Hide menu on click outside
+    document.addEventListener('click', () => {
+      menu.classList.remove('active');
+    });
+  }
+
+  // Sort posts based on current sort mode
+  sortPosts() {
+    const sorted = [...this.posts];
+
+    switch (this.currentSort) {
+      case 'author':
+        // Sort by position (as author intended)
+        sorted.sort((a, b) => (a.position || 0) - (b.position || 0));
+        break;
+
+      case 'created':
+        // Sort by created_at (newest first, null at end)
+        sorted.sort((a, b) => {
+          if (!a.created_at && !b.created_at) return 0;
+          if (!a.created_at) return 1;
+          if (!b.created_at) return -1;
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        break;
+
+      case 'published':
+        // Sort by created_date (newest first, null at end)
+        sorted.sort((a, b) => {
+          if (!a.created_date && !b.created_date) return 0;
+          if (!a.created_date) return 1;
+          if (!b.created_date) return -1;
+          return new Date(b.created_date) - new Date(a.created_date);
+        });
+        break;
+
+      case 'modified':
+        // Sort by updated_at (newest first, null at end, fallback to created_at)
+        sorted.sort((a, b) => {
+          const aDate = a.updated_at || a.created_at;
+          const bDate = b.updated_at || b.created_at;
+          if (!aDate && !bDate) return 0;
+          if (!aDate) return 1;
+          if (!bDate) return -1;
+          return new Date(bDate) - new Date(aDate);
+        });
+        break;
+    }
+
+    return sorted;
+  }
+
   renderPostsList(container) {
     container.innerHTML = '';
+
+    // Sort posts before rendering
+    const sortedPosts = this.sortPosts();
 
     if (this.config.isOwnNest) {
       const beforeFirstZone = this.createInsertZone(0);
       container.appendChild(beforeFirstZone);
     }
 
-    this.posts.forEach((post) => {
+    sortedPosts.forEach((post) => {
       const postEl = this.createPostElement(post);
       container.appendChild(postEl);
 
