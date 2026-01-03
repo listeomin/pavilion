@@ -1503,6 +1503,9 @@ function alignUserHeader() {
       await loadSections();
       renderNavigation();
 
+      // Populate sidebar sections with posts from nest_posts
+      postsManager.renderSidebarNavigation();
+
       hideSkeleton();
     } else {
       loadContent();

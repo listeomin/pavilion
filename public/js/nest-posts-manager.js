@@ -160,9 +160,6 @@ export class NestPostsManager {
         container.appendChild(insertZone);
       }
     });
-
-    // Render sidebar navigation
-    this.renderSidebarNavigation();
   }
 
   // Get posts grouped by category tags
