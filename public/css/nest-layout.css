@@ -209,13 +209,13 @@
 .discussion-whale {
   position: fixed;
   bottom: 40px;
-  right: 40px;
+  right: -27px;
   z-index: 100;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .discussion-whale img {
-  width: 280px;
+  width: 100%;
   height: auto;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
