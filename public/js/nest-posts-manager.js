@@ -160,6 +160,82 @@ export class NestPostsManager {
         container.appendChild(insertZone);
       }
     });
+
+    // Render sidebar navigation
+    this.renderSidebarNavigation();
+  }
+
+  // Get posts grouped by category tags
+  getPostsByCategory() {
+    const categories = {};
+    const sidebarCategories = ['стихи', 'рассказы'];
+
+    // Initialize sidebar categories
+    sidebarCategories.forEach(cat => {
+      categories[cat] = [];
+    });
+
+    // Group posts by tag
+    this.posts.forEach(post => {
+      // Only include posts with category tags (not черновик or лента)
+      if (post.tag && sidebarCategories.includes(post.tag)) {
+        // Only include posts with titles
+        if (post.title && post.title.trim() !== '' && post.title !== 'Новая статья') {
+          categories[post.tag].push(post);
+        }
+      }
+    });
+
+    // Remove empty categories
+    Object.keys(categories).forEach(cat => {
+      if (categories[cat].length === 0) {
+        delete categories[cat];
+      }
+    });
+
+    return categories;
+  }
+
+  // Render sidebar navigation with categories
+  renderSidebarNavigation() {
+    const sidebar = document.getElementById('nest-navigation-content');
+    if (!sidebar) return;
+
+    const categories = this.getPostsByCategory();
+
+    if (Object.keys(categories).length === 0) {
+      sidebar.innerHTML = '<p style="color: var(--color-nimbus-medium); font-size: 13px; padding: 12px 0;">Нет опубликованных категорий</p>';
+      return;
+    }
+
+    sidebar.innerHTML = '';
+
+    Object.entries(categories).forEach(([categoryName, posts]) => {
+      const categorySection = document.createElement('div');
+      categorySection.className = 'nest-category-section';
+      categorySection.dataset.section = categoryName;
+
+      const categoryTitle = document.createElement('h3');
+      categoryTitle.className = 'nest-category-title';
+      categoryTitle.textContent = categoryName.charAt(0).toUpperCase() + categoryName.slice(1);
+      categorySection.appendChild(categoryTitle);
+
+      const postsList = document.createElement('ul');
+      postsList.className = 'nest-category-posts';
+
+      posts.forEach(post => {
+        const postItem = document.createElement('li');
+        const postLink = document.createElement('a');
+        postLink.href = `nest/${this.config.urlUsername}/${post.slug}`;
+        postLink.textContent = post.title;
+        postLink.className = 'nest-post-link';
+        postItem.appendChild(postLink);
+        postsList.appendChild(postItem);
+      });
+
+      categorySection.appendChild(postsList);
+      sidebar.appendChild(categorySection);
+    });
   }
 
   convertJsonToHtml(jsonContent) {
