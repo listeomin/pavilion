@@ -88,10 +88,23 @@ export class NestPostsManager {
     return this.posts;
   }
 
+  // Get sidebar categories dynamically from DOM
+  getSidebarCategories() {
+    const categories = [];
+    const navSections = document.querySelectorAll('.nav-section-header[data-section]');
+    navSections.forEach(header => {
+      const sectionName = header.dataset.section;
+      if (sectionName) {
+        categories.push(sectionName.toLowerCase());
+      }
+    });
+    return categories;
+  }
+
   // Get all unique tags from user's posts
   getAllTags() {
-    // Predefined categories for sidebar sections
-    const sidebarCategories = ['стихи', 'рассказы'];
+    // Get sidebar categories dynamically from DOM
+    const sidebarCategories = this.getSidebarCategories();
 
     // Get custom tags from posts (excluding system tags and sidebar categories)
     const customTags = new Set();
@@ -99,7 +112,7 @@ export class NestPostsManager {
       if (post.tag &&
           post.tag !== 'черновик' &&
           post.tag !== 'лента' &&
-          !sidebarCategories.includes(post.tag)) {
+          !sidebarCategories.includes(post.tag.toLowerCase())) {
         customTags.add(post.tag);
       }
     });
@@ -175,7 +188,8 @@ export class NestPostsManager {
   // Get posts grouped by category tags
   getPostsByCategory() {
     const categories = {};
-    const sidebarCategories = ['стихи', 'рассказы'];
+    // Get sidebar categories dynamically from DOM
+    const sidebarCategories = this.getSidebarCategories();
 
     // Initialize sidebar categories
     sidebarCategories.forEach(cat => {
