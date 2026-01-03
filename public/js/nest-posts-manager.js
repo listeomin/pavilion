@@ -175,13 +175,17 @@ export class NestPostsManager {
       categories[cat] = [];
     });
 
-    // Group posts by tag
+    // Group posts by tag (case-insensitive)
     this.posts.forEach(post => {
+      if (!post.tag) return;
+
+      const tagLower = post.tag.toLowerCase();
+
       // Only include posts with category tags (not черновик or лента)
-      if (post.tag && sidebarCategories.includes(post.tag)) {
+      if (sidebarCategories.includes(tagLower)) {
         // Only include posts with titles
         if (post.title && post.title.trim() !== '' && post.title !== 'Новая статья') {
-          categories[post.tag].push(post);
+          categories[tagLower].push(post);
         }
       }
     });
