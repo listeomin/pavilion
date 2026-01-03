@@ -388,7 +388,8 @@ export class NestPostsManager {
     const zone = document.createElement('div');
     zone.className = 'nest-insert-zone';
     zone.textContent = 'Напишите что-нибудь';
-    zone.addEventListener('click', () => this.createNewPost(position));
+    zone.dataset.position = position;
+    zone.addEventListener('click', (e) => this.createNewPost(position, e.currentTarget));
     return zone;
   }
 
@@ -897,7 +898,7 @@ export class NestPostsManager {
     }
   }
 
-  async createNewPost(position) {
+  async createNewPost(position, clickedZone) {
     const response = await fetch(`${this.apiPath}/api/nest_posts.php?action=create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -918,37 +919,23 @@ export class NestPostsManager {
         // Ensure title is empty in memory
         post.title = '';
 
-        const container = document.getElementById('nest-editor-container');
-
         // Create new post element
         const postEl = this.createPostElement(post);
 
         // Create insert zone after new post
-        const insertZone = this.createInsertZone(position + 1);
+        const insertZoneAfter = this.createInsertZone(position + 1);
 
-        // Find where to insert based on position
-        if (position === 0) {
-          // Insert at the beginning (after first insert zone)
-          const firstZone = container.querySelector('.nest-insert-zone');
-          if (firstZone) {
-            firstZone.after(postEl, insertZone);
-          } else {
-            container.prepend(postEl, insertZone);
-          }
+        // Insert new post and zone EXACTLY after the clicked zone
+        if (clickedZone && clickedZone.parentNode) {
+          // Insert new post right after the clicked zone
+          clickedZone.after(postEl);
+          // Insert new zone right after the new post
+          postEl.after(insertZoneAfter);
+          // The clicked zone stays in place before the new post
         } else {
-          // Find the post or zone before this position and insert after it
-          const allPosts = Array.from(container.querySelectorAll('.nest-post'));
-          const prevPost = allPosts[position - 1];
-          if (prevPost) {
-            const prevZone = prevPost.nextElementSibling;
-            if (prevZone && prevZone.classList.contains('nest-insert-zone')) {
-              prevZone.after(postEl, insertZone);
-            } else {
-              prevPost.after(postEl, insertZone);
-            }
-          } else {
-            container.append(postEl, insertZone);
-          }
+          // Fallback: append to container (should not happen)
+          const container = document.getElementById('nest-editor-container');
+          container.append(postEl, insertZoneAfter);
         }
 
         // Activate editor for new post
