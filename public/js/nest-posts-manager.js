@@ -175,20 +175,37 @@ export class NestPostsManager {
       categories[cat] = [];
     });
 
+    console.log('[DEBUG] Total posts:', this.posts.length);
+    console.log('[DEBUG] All posts:', this.posts.map(p => ({ id: p.id, title: p.title, tag: p.tag })));
+
     // Group posts by tag (case-insensitive)
     this.posts.forEach(post => {
-      if (!post.tag) return;
+      console.log('[DEBUG] Processing post:', { id: post.id, title: post.title, tag: post.tag });
+
+      if (!post.tag) {
+        console.log('[DEBUG] Post has no tag, skipping');
+        return;
+      }
 
       const tagLower = post.tag.toLowerCase();
+      console.log('[DEBUG] Tag lowercase:', tagLower);
 
       // Only include posts with category tags (not черновик or лента)
       if (sidebarCategories.includes(tagLower)) {
+        console.log('[DEBUG] Tag matches category:', tagLower);
         // Only include posts with titles
         if (post.title && post.title.trim() !== '' && post.title !== 'Новая статья') {
+          console.log('[DEBUG] Adding post to category:', tagLower);
           categories[tagLower].push(post);
+        } else {
+          console.log('[DEBUG] Post has no valid title, skipping');
         }
+      } else {
+        console.log('[DEBUG] Tag does not match any category');
       }
     });
+
+    console.log('[DEBUG] Final categories:', categories);
 
     // Remove empty categories
     Object.keys(categories).forEach(cat => {
@@ -202,16 +219,29 @@ export class NestPostsManager {
 
   // Render sidebar navigation - populate existing sections with posts
   renderSidebarNavigation() {
+    console.log('[DEBUG] renderSidebarNavigation called');
+
     // Find all existing nav sections
     const navSections = document.querySelectorAll('.nav-section-header');
-    if (navSections.length === 0) return;
+    console.log('[DEBUG] Found nav sections:', navSections.length);
+
+    if (navSections.length === 0) {
+      console.log('[DEBUG] No nav sections found, exiting');
+      return;
+    }
 
     const categories = this.getPostsByCategory();
+    console.log('[DEBUG] Categories from getPostsByCategory:', categories);
 
     // Update each section with matching posts
     navSections.forEach(sectionHeader => {
       const sectionName = sectionHeader.dataset.section;
-      if (!sectionName) return;
+      console.log('[DEBUG] Processing section:', sectionName);
+
+      if (!sectionName) {
+        console.log('[DEBUG] Section has no name, skipping');
+        return;
+      }
 
       // Find the nav-posts container for this section
       const section = sectionHeader.parentElement;
