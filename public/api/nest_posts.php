@@ -37,7 +37,7 @@ try {
         }
 
         // Get all posts for this user
-        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC');
+        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_date, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC');
         $stmt->execute([':user_id' => $userId]);
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -75,7 +75,7 @@ try {
         }
 
         // Get post
-        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_at, updated_at FROM nest_posts WHERE user_id = :user_id AND slug = :slug LIMIT 1');
+        $stmt = $db->prepare('SELECT id, slug, title, content, position, created_date, created_at, updated_at FROM nest_posts WHERE user_id = :user_id AND slug = :slug LIMIT 1');
         $stmt->execute([':user_id' => $userId, ':slug' => $slug]);
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -134,6 +134,7 @@ try {
         $content = $input['content'] ?? null;
         $title = $input['title'] ?? null;
         $slug = $input['slug'] ?? null;
+        $createdDate = isset($input['created_date']) ? $input['created_date'] : null;
 
         if (!$postId) {
             echo json_encode(['success' => false, 'error' => 'Post ID required']);
@@ -166,6 +167,11 @@ try {
         if ($slug !== null) {
             $updates[] = 'slug = :slug';
             $params[':slug'] = $slug;
+        }
+
+        if (isset($input['created_date'])) {
+            $updates[] = 'created_date = :created_date';
+            $params[':created_date'] = $createdDate;
         }
 
         $now = date('Y-m-d H:i:s');

@@ -125,6 +125,24 @@ body.editor-active .nest-insert-zone {
   margin-top: 0;
 }
 
+/* Created date input (Flatpickr) */
+.nest-post-created-date-input {
+  border: none;
+  background: transparent;
+  font-family: 'Ubuntu Sans', sans-serif;
+  font-size: 13px;
+  color: var(--color-cumulonimbus-light);
+  outline: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+.nest-post-created-date-input::placeholder {
+  color: var(--color-nimbus-medium);
+  font-style: italic;
+}
+
 /* Post content */
 .nest-post-content {
   font-family: 'Ubuntu Sans', sans-serif;

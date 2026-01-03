@@ -12,6 +12,61 @@ export class NestPostsManager {
     this.posts = [];
     this.editors = new Map();
     this.saveTimers = new Map();
+    this.datePickers = new Map();
+
+    // Initialize Day.js with Russian locale and relativeTime
+    if (window.dayjs) {
+      dayjs.extend(dayjs_plugin_relativeTime);
+      dayjs.locale('ru');
+    }
+  }
+
+  // Format date using Day.js with live format
+  formatLiveDate(dateStr) {
+    if (!dateStr || !window.dayjs) return '';
+
+    const date = dayjs(dateStr);
+    const now = dayjs();
+    const diffHours = now.diff(date, 'hour');
+    const diffDays = now.diff(date, 'day');
+
+    // Less than 24 hours ago: "2 часа назад", "30 минут назад"
+    if (diffHours < 24) {
+      return date.fromNow();
+    }
+
+    // Yesterday: "вчера, в 15:30"
+    if (diffDays === 1) {
+      return `вчера, в ${date.format('HH:mm')}`;
+    }
+
+    // Less than 7 days: "2 дня назад"
+    if (diffDays < 7) {
+      return date.fromNow();
+    }
+
+    // This year: "15 января, в 15:30"
+    if (date.year() === now.year()) {
+      return date.format('D MMMM, [в] HH:mm');
+    }
+
+    // Different year: "15 января 2024г., в 15:30"
+    return date.format('D MMMM YYYY[г., в] HH:mm');
+  }
+
+  // Format static date (for created_date)
+  formatStaticDate(dateStr) {
+    if (!dateStr || !window.dayjs) return '';
+    const date = dayjs(dateStr);
+    const now = dayjs();
+
+    // Same year: "15 января"
+    if (date.year() === now.year()) {
+      return date.format('D MMMM');
+    }
+
+    // Different year: "15 января 2020г."
+    return date.format('D MMMM YYYY[г.]');
   }
 
   // Update editor-active state based on active editors
@@ -92,46 +147,38 @@ export class NestPostsManager {
     }
 
     // Dates display (read-only)
-    const formatDate = (dateStr) => {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    };
-
     const datesSection = document.createElement('div');
     datesSection.className = 'nest-post-dates';
 
-    // Created date
-    if (post.created_at) {
+    // Created date (custom date set by author) - only show if set
+    if (post.created_date) {
       const createdDiv = document.createElement('div');
       createdDiv.className = 'nest-post-date';
       createdDiv.innerHTML = `
         <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
-        <span>Создано ${formatDate(post.created_at)}</span>
+        <span>Создано ${this.formatStaticDate(post.created_date)}</span>
       `;
       datesSection.appendChild(createdDiv);
     }
 
-    // Published date
-    const publishedDiv = document.createElement('div');
-    publishedDiv.className = 'nest-post-date';
-    publishedDiv.innerHTML = `
-      <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
-      <span>Опубликовано ${formatDate(post.created_at)}</span>
-    `;
-    datesSection.appendChild(publishedDiv);
+    // Published date (when post was created in system) - always show
+    if (post.created_at) {
+      const publishedDiv = document.createElement('div');
+      publishedDiv.className = 'nest-post-date';
+      publishedDiv.innerHTML = `
+        <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+        <span>Опубликовано ${this.formatLiveDate(post.created_at)}</span>
+      `;
+      datesSection.appendChild(publishedDiv);
+    }
 
-    // Updated date
+    // Updated date (last edit time) - always show
     if (post.updated_at) {
       const updatedDiv = document.createElement('div');
       updatedDiv.className = 'nest-post-date';
       updatedDiv.innerHTML = `
         <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
-        <span>Изменено ${formatDate(post.updated_at)}</span>
+        <span>Изменено ${this.formatLiveDate(post.updated_at)}</span>
       `;
       datesSection.appendChild(updatedDiv);
     }
@@ -390,47 +437,45 @@ export class NestPostsManager {
     titleInput.dataset.postId = post.id;
     metaSection.appendChild(titleInput);
 
-    // Dates section
+    // Dates section in edit mode
     const datesSection = document.createElement('div');
     datesSection.className = 'nest-post-dates';
 
-    const formatDate = (dateStr) => {
-      if (!dateStr) return '';
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-    };
+    // Created date - EDITABLE with Flatpickr date picker
+    const createdDiv = document.createElement('div');
+    createdDiv.className = 'nest-post-date';
+    const createdInput = document.createElement('input');
+    createdInput.type = 'text';
+    createdInput.className = 'nest-post-created-date-input';
+    createdInput.placeholder = 'Дата создания (опционально)';
+    createdInput.dataset.postId = post.id;
+    if (post.created_date) {
+      createdInput.value = this.formatStaticDate(post.created_date);
+    }
+    createdDiv.innerHTML = `
+      <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
+    `;
+    createdDiv.appendChild(createdInput);
+    datesSection.appendChild(createdDiv);
 
-    // Created date
+    // Published date - READ-ONLY with live format
     if (post.created_at) {
-      const createdDiv = document.createElement('div');
-      createdDiv.className = 'nest-post-date';
-      createdDiv.innerHTML = `
-        <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
-        <span>Создано ${formatDate(post.created_at)}</span>
+      const publishedDiv = document.createElement('div');
+      publishedDiv.className = 'nest-post-date';
+      publishedDiv.innerHTML = `
+        <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+        <span>Опубликовано ${this.formatLiveDate(post.created_at)}</span>
       `;
-      datesSection.appendChild(createdDiv);
+      datesSection.appendChild(publishedDiv);
     }
 
-    // Published date (if different from created)
-    const publishedDiv = document.createElement('div');
-    publishedDiv.className = 'nest-post-date';
-    publishedDiv.innerHTML = `
-      <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
-      <span>Опубликовано ${formatDate(post.created_at)}</span>
-    `;
-    datesSection.appendChild(publishedDiv);
-
-    // Updated date
+    // Updated date - READ-ONLY with live format
     if (post.updated_at) {
       const updatedDiv = document.createElement('div');
       updatedDiv.className = 'nest-post-date';
       updatedDiv.innerHTML = `
         <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
-        <span>Изменено ${formatDate(post.updated_at)}</span>
+        <span>Изменено ${this.formatLiveDate(post.updated_at)}</span>
       `;
       datesSection.appendChild(updatedDiv);
     }
@@ -485,6 +530,23 @@ export class NestPostsManager {
       }, 1000);
     });
 
+    // Initialize Flatpickr date picker for created_date
+    if (window.flatpickr && createdInput) {
+      const picker = flatpickr(createdInput, {
+        dateFormat: 'j F Y',
+        locale: 'ru',
+        allowInput: true,
+        onClose: (selectedDates, dateStr, instance) => {
+          // Save as ISO date string to database
+          const isoDate = selectedDates.length > 0
+            ? selectedDates[0].toISOString()
+            : null;
+          this.saveMetadata(post.id, { created_date: isoDate });
+        }
+      });
+      this.datePickers.set(post.id, picker);
+    }
+
     // Handle clicks outside editor to close it
     const handleClickOutside = (e) => {
       const editorWrapper = postEl.querySelector('.tiptap-editor-wrapper');
@@ -527,6 +589,13 @@ export class NestPostsManager {
 
     editor.destroy();
     this.editors.delete(postId);
+
+    // Cleanup date picker if exists
+    const picker = this.datePickers.get(postId);
+    if (picker) {
+      picker.destroy();
+      this.datePickers.delete(postId);
+    }
 
     // Reload post data
     await this.loadPosts();

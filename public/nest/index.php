@@ -231,12 +231,14 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=27">
 <link rel="stylesheet" href="css/nest-layout.css?v=27">
-<link rel="stylesheet" href="css/nest-posts.css?v=18">
+<link rel="stylesheet" href="css/nest-posts.css?v=19">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=14">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=5">
+<!-- Flatpickr date picker -->
+<link rel="stylesheet" href="libs/flatpickr.min.css">
 </head>
 <body<?php
   $classes = ['no-js']; // Remove via JavaScript when loaded
@@ -363,6 +365,12 @@ if ($telegramUserId && $urlUsername) {
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <?php endif; ?>
-<script type="module" src="js/nest.js?v=77"></script>
+<!-- Date/time libraries -->
+<script src="libs/dayjs.min.js"></script>
+<script src="libs/dayjs-relativeTime.min.js"></script>
+<script src="libs/dayjs-ru.js"></script>
+<script src="libs/flatpickr.min.js"></script>
+<script src="libs/flatpickr-ru.js"></script>
+<script type="module" src="js/nest.js?v=78"></script>
 </body>
 </html>
