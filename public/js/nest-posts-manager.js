@@ -90,13 +90,22 @@ export class NestPostsManager {
 
   // Get all unique tags from user's posts
   getAllTags() {
-    const tags = new Set();
+    // Predefined categories for sidebar sections
+    const sidebarCategories = ['стихи', 'рассказы'];
+
+    // Get custom tags from posts (excluding system tags and sidebar categories)
+    const customTags = new Set();
     this.posts.forEach(post => {
-      if (post.tag && post.tag !== 'черновик' && post.tag !== 'лента') {
-        tags.add(post.tag);
+      if (post.tag &&
+          post.tag !== 'черновик' &&
+          post.tag !== 'лента' &&
+          !sidebarCategories.includes(post.tag)) {
+        customTags.add(post.tag);
       }
     });
-    return ['черновик', 'лента', ...Array.from(tags).sort()];
+
+    // Return: system tags, sidebar categories, custom tags
+    return ['черновик', 'лента', ...sidebarCategories, ...Array.from(customTags).sort()];
   }
 
   // Populate tag dropdown with available tags

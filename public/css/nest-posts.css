@@ -103,17 +103,19 @@ body.editor-active .nest-insert-zone {
 .nest-post-dates {
   display: flex;
   margin-bottom: 10px;
-  gap: 16px;
+  gap: 12px 16px; /* row-gap 12px, column-gap 16px */
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .nest-post-date {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: 'Ubuntu Sans', sans-serif;
   font-size: 13px;
   color: var(--color-cumulonimbus-light);
+  white-space: nowrap;
 }
 
 .nest-post-date-icon {
@@ -254,8 +256,6 @@ body.editor-active .nest-insert-zone {
 .nest-post-tag-footer {
   position: relative;
   margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-nimbus-light);
 }
 
 .nest-post-tag-button {
@@ -283,7 +283,14 @@ body.editor-active .nest-insert-zone {
   color: var(--color-garden-sky);
 }
 
-.nest-post-tag-button[data-current-tag="стихи"] {
+/* All category tags (sidebar sections) get Garden Olive color */
+.nest-post-tag-button[data-current-tag="стихи"],
+.nest-post-tag-button[data-current-tag="рассказы"] {
+  color: var(--color-garden-olive);
+}
+
+/* Default color for any other custom tag */
+.nest-post-tag-button:not([data-current-tag="черновик"]):not([data-current-tag="лента"]):not([data-current-tag="стихи"]):not([data-current-tag="рассказы"]) {
   color: var(--color-garden-olive);
 }
 
@@ -335,7 +342,14 @@ body.editor-active .nest-insert-zone {
   color: var(--color-garden-sky);
 }
 
-.nest-post-tag-option[data-tag="стихи"] {
+/* All category tags get Garden Olive color */
+.nest-post-tag-option[data-tag="стихи"],
+.nest-post-tag-option[data-tag="рассказы"] {
+  color: var(--color-garden-olive);
+}
+
+/* Default color for any other custom tag */
+.nest-post-tag-option:not([data-tag="черновик"]):not([data-tag="лента"]):not([data-tag="стихи"]):not([data-tag="рассказы"]) {
   color: var(--color-garden-olive);
 }
 
