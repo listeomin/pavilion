@@ -214,12 +214,12 @@ export class NestPostsManager {
         break;
 
       case 'created':
-        // Sort by created_at (newest first, null at end)
+        // Sort by created_date (newest first, null at end)
         sorted.sort((a, b) => {
-          if (!a.created_at && !b.created_at) return 0;
-          if (!a.created_at) return 1;
-          if (!b.created_at) return -1;
-          return new Date(a.created_at) - new Date(b.created_at);
+          if (!a.created_date && !b.created_date) return 0;
+          if (!a.created_date) return 1;
+          if (!b.created_date) return -1;
+          return new Date(b.created_date) - new Date(a.created_date);
         });
         break;
 
@@ -229,7 +229,7 @@ export class NestPostsManager {
           if (!a.created_date && !b.created_date) return 0;
           if (!a.created_date) return 1;
           if (!b.created_date) return -1;
-          return new Date(a.created_date) - new Date(b.created_date);
+          return new Date(b.created_date) - new Date(a.created_date);
         });
         break;
 
