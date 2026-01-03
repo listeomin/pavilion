@@ -348,7 +348,7 @@ if ($telegramUserId && $urlUsername) {
       <a href="#discussions" class="nest-nav-item">Обсуждения</a>
     </nav>
     <div id="discussion-whale" class="discussion-whale" style="display: none;">
-      <img src="assets/whale.png" alt="Кит приглашает написать">
+      <img src="assets/motivation.png" alt="Кит приглашает написать">
     </div>
   </aside>
 </div><!-- .page-layout -->
