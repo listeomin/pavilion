@@ -1508,7 +1508,19 @@ function alignUserHeader() {
 
       hideSkeleton();
     } else {
-      loadContent();
+      // Load single post from nest_posts by slug
+      const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+      await postsManager.loadPosts();
+      const post = postsManager.posts.find(p => p.slug === nestConfig.postSlug);
+
+      if (post) {
+        postsManager.renderSinglePost(document.getElementById('nest-editor-container'), post);
+      } else {
+        // Post not found, show 404 or redirect
+        document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';
+      }
+
+      hideSkeleton();
     }
 
     // Handle browser back/forward buttons

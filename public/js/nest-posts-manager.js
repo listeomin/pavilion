@@ -162,6 +162,16 @@ export class NestPostsManager {
     });
   }
 
+  // Render single post view (read-only, no edit mode)
+  renderSinglePost(container, post) {
+    container.innerHTML = '';
+    const postEl = this.createPostElement(post);
+    // Remove hover/click handlers for single post view
+    postEl.classList.remove('nest-post-hover');
+    postEl.style.cursor = 'default';
+    container.appendChild(postEl);
+  }
+
   // Get posts grouped by category tags
   getPostsByCategory() {
     const categories = {};
