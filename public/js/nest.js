@@ -1488,6 +1488,26 @@ function alignUserHeader() {
       discussionsToggle.addEventListener('click', (e) => {
         e.preventDefault();
         switchTab('discussions');
+        // Show whale on discussions tab
+        const whale = document.getElementById('discussion-whale');
+        if (whale) whale.style.display = 'block';
+      });
+    }
+
+    // Hide whale on other tabs
+    const navToggleWhale = document.querySelector('.nest-nav-item[href="#navigation"]');
+    if (navToggleWhale) {
+      navToggleWhale.addEventListener('click', () => {
+        const whale = document.getElementById('discussion-whale');
+        if (whale) whale.style.display = 'none';
+      });
+    }
+
+    const metaToggleWhale = document.querySelector('.nest-nav-item[href="#meta"]');
+    if (metaToggleWhale) {
+      metaToggleWhale.addEventListener('click', () => {
+        const whale = document.getElementById('discussion-whale');
+        if (whale) whale.style.display = 'none';
       });
     }
 
