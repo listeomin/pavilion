@@ -431,8 +431,12 @@ export class NestPostsManager {
 
     // Helper to check if dates are the same (compare to minute precision)
     const isSameDate = (date1, date2) => {
-      if (!date1 || !date2) return false;
-      return dayjs(date1).format('YYYY-MM-DD HH:mm') === dayjs(date2).format('YYYY-MM-DD HH:mm');
+      if (!date1 || !date2 || !window.dayjs) return false;
+      try {
+        return dayjs(date1).format('YYYY-MM-DD HH:mm') === dayjs(date2).format('YYYY-MM-DD HH:mm');
+      } catch (e) {
+        return false;
+      }
     };
 
     const hasCreated = post.created_date;
