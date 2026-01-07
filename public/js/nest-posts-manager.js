@@ -259,20 +259,72 @@ export class NestPostsManager {
     // Sort posts before rendering
     const sortedPosts = this.sortPosts();
 
-    if (this.config.isOwnNest) {
+    // Virtual scrolling - only render visible posts
+    this.virtualScrollContainer = container;
+    this.sortedPosts = sortedPosts;
+    this.estimatedPostHeight = 400; // Estimated height per post + insert zone
+    this.buffer = 5; // Number of posts to render above/below viewport
+
+    // Create spacer to maintain scroll height
+    this.topSpacer = document.createElement('div');
+    this.bottomSpacer = document.createElement('div');
+    container.appendChild(this.topSpacer);
+
+    // Container for visible posts
+    this.visibleContainer = document.createElement('div');
+    container.appendChild(this.visibleContainer);
+    container.appendChild(this.bottomSpacer);
+
+    // Initial render
+    this.updateVisiblePosts();
+
+    // Update on scroll
+    if (this.scrollListener) {
+      window.removeEventListener('scroll', this.scrollListener);
+    }
+    this.scrollListener = () => {
+      if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = setTimeout(() => this.updateVisiblePosts(), 50);
+    };
+    window.addEventListener('scroll', this.scrollListener, { passive: true });
+  }
+
+  updateVisiblePosts() {
+    if (!this.virtualScrollContainer || !this.sortedPosts) return;
+
+    const scrollTop = window.scrollY;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate which posts are visible
+    const startIndex = Math.max(0, Math.floor(scrollTop / this.estimatedPostHeight) - this.buffer);
+    const endIndex = Math.min(
+      this.sortedPosts.length,
+      Math.ceil((scrollTop + viewportHeight) / this.estimatedPostHeight) + this.buffer
+    );
+
+    // Update spacers
+    this.topSpacer.style.height = `${startIndex * this.estimatedPostHeight}px`;
+    this.bottomSpacer.style.height = `${(this.sortedPosts.length - endIndex) * this.estimatedPostHeight}px`;
+
+    // Render visible posts
+    this.visibleContainer.innerHTML = '';
+
+    // Add first insert zone if own nest and at start
+    if (this.config.isOwnNest && startIndex === 0) {
       const beforeFirstZone = this.createInsertZone(0);
-      container.appendChild(beforeFirstZone);
+      this.visibleContainer.appendChild(beforeFirstZone);
     }
 
-    sortedPosts.forEach((post) => {
+    for (let i = startIndex; i < endIndex; i++) {
+      const post = this.sortedPosts[i];
       const postEl = this.createPostElement(post);
-      container.appendChild(postEl);
+      this.visibleContainer.appendChild(postEl);
 
       if (this.config.isOwnNest) {
         const insertZone = this.createInsertZone(post.position + 1);
-        container.appendChild(insertZone);
+        this.visibleContainer.appendChild(insertZone);
       }
-    });
+    }
   }
 
   // Render single post view (read-only, no edit mode)
@@ -514,7 +566,15 @@ export class NestPostsManager {
     const contentEl = document.createElement('div');
     contentEl.className = 'nest-post-content';
     // Convert JSON to HTML for display
-    contentEl.innerHTML = this.convertJsonToHtml(post.content);
+    const html = this.convertJsonToHtml(post.content);
+    contentEl.innerHTML = html;
+
+    // Add lazy loading to all images in content
+    contentEl.querySelectorAll('img').forEach(img => {
+      img.loading = 'lazy';
+      img.decoding = 'async';
+    });
+
     postEl.appendChild(contentEl);
 
     if (this.config.isOwnNest) {

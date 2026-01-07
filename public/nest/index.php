@@ -383,6 +383,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="libs/dayjs-ru.js"></script>
 <script src="libs/flatpickr.min.js"></script>
 <script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=104"></script>
+<script type="module" src="js/nest.js?v=105"></script>
 </body>
 </html>
