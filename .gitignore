@@ -21,6 +21,10 @@ venv/
 public/assets/images/*
 !public/assets/images/.gitkeep
 
+# Загруженные через API изображения
+public/uploads/images/*
+!public/uploads/images/.gitkeep
+
 # Аудиофайлы
 public/assets/music/*
 !public/assets/music/.gitkeep
