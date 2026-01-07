@@ -241,7 +241,7 @@ export class NestPostsManager {
           if (!aDate && !bDate) return 0;
           if (!aDate) return 1;
           if (!bDate) return -1;
-          return new Date(aDate) - new Date(bDate);
+          return new Date(bDate) - new Date(aDate);
         });
         break;
     }
