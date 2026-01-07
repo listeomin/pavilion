@@ -15,6 +15,7 @@ export class NestPostsManager {
     this.datePickers = new Map();
     this.currentSort = localStorage.getItem('nest-sort-mode') || 'author';
     this.sortMenuInitialized = false;
+    this.currentFilter = null; // { type: 'section', name: 'стихи' } or null
 
     // Initialize Day.js with Russian locale and relativeTime
     if (window.dayjs) {
@@ -247,6 +248,30 @@ export class NestPostsManager {
     return sorted;
   }
 
+  // Set filter for posts
+  setFilter(filterType, filterValue) {
+    if (!filterType) {
+      this.currentFilter = null;
+    } else {
+      this.currentFilter = { type: filterType, name: filterValue };
+    }
+  }
+
+  // Get filtered and sorted posts
+  getFilteredPosts() {
+    let posts = this.sortPosts();
+
+    // Apply filter if active
+    if (this.currentFilter && this.currentFilter.type === 'section') {
+      const sectionName = this.currentFilter.name.toLowerCase();
+      posts = posts.filter(post => {
+        return post.tag && post.tag.toLowerCase() === sectionName;
+      });
+    }
+
+    return posts;
+  }
+
   renderPostsList(container) {
     container.innerHTML = '';
 
@@ -256,8 +281,8 @@ export class NestPostsManager {
       this.sortMenuInitialized = true;
     }
 
-    // Sort posts before rendering
-    const sortedPosts = this.sortPosts();
+    // Get filtered and sorted posts
+    const sortedPosts = this.getFilteredPosts();
 
     if (this.config.isOwnNest) {
       const beforeFirstZone = this.createInsertZone(0);

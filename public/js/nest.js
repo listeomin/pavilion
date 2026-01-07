@@ -98,6 +98,7 @@ function alignUserHeader() {
   const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
+  let postsManager = null; // Global postsManager instance for filtering
   const userEmojiEl = document.getElementById('user-emoji');
 
   // Инициализация NightShift
@@ -1277,17 +1278,36 @@ function alignUserHeader() {
         header.addEventListener('click', (e) => {
           const sectionName = e.target.dataset.section;
 
-          // Toggle filter
-          if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
-            // Deactivate filter
-            currentFilter = null;
-          } else {
-            // Activate section filter
-            currentFilter = { type: 'section', name: sectionName };
-          }
+          // If postsManager is available (nest_posts mode), use it for filtering
+          if (postsManager) {
+            // Toggle filter
+            if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+              // Deactivate filter
+              currentFilter = null;
+              postsManager.setFilter(null, null);
+            } else {
+              // Activate section filter
+              currentFilter = { type: 'section', name: sectionName };
+              postsManager.setFilter('section', sectionName);
+            }
 
-          applyFilter();
-          renderNavigation(); // Re-render to update active states
+            // Re-render posts list and navigation
+            postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+            renderNavigation(); // Re-render to update active states
+          } else {
+            // Legacy mode (old content with TipTap)
+            // Toggle filter
+            if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+              // Deactivate filter
+              currentFilter = null;
+            } else {
+              // Activate section filter
+              currentFilter = { type: 'section', name: sectionName };
+            }
+
+            applyFilter();
+            renderNavigation(); // Re-render to update active states
+          }
         });
       });
 
@@ -1527,7 +1547,7 @@ function alignUserHeader() {
     // If viewing a nest without a specific post slug, use posts manager for list view
     // This applies to both own nest and viewing others' nests
     if (!nestConfig.postSlug) {
-      const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+      postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
       await postsManager.loadPosts();
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
 
@@ -1541,7 +1561,7 @@ function alignUserHeader() {
       hideSkeleton();
     } else {
       // Load single post from nest_posts by slug
-      const postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+      postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
       await postsManager.loadPosts();
       const post = postsManager.posts.find(p => p.slug === nestConfig.postSlug);
 
