@@ -117,11 +117,11 @@ try {
             $position = ($result['max_pos'] ?? -1) + 1;
         }
 
-        // created_date defaults to created_at, updated_at is NULL on creation
-        $stmt = $db->prepare('INSERT INTO nest_posts (user_id, slug, title, content, position, created_date, created_at) VALUES (:user_id, :slug, :title, :content, :position, :created_date, :created_at)');
-        $stmt->execute([':user_id' => $telegramUserId, ':slug' => $slug, ':title' => $title, ':content' => $content, ':position' => $position, ':created_date' => $now, ':created_at' => $now]);
+        // created_date defaults to created_at, updated_at same as created_at on creation
+        $stmt = $db->prepare('INSERT INTO nest_posts (user_id, slug, title, content, position, created_date, created_at, updated_at) VALUES (:user_id, :slug, :title, :content, :position, :created_date, :created_at, :updated_at)');
+        $stmt->execute([':user_id' => $telegramUserId, ':slug' => $slug, ':title' => $title, ':content' => $content, ':position' => $position, ':created_date' => $now, ':created_at' => $now, ':updated_at' => $now]);
 
-        echo json_encode(['success' => true, 'post' => ['id' => $db->lastInsertId(), 'slug' => $slug, 'title' => $title, 'content' => $content, 'position' => $position, 'created_date' => $now, 'created_at' => $now, 'updated_at' => null]]);
+        echo json_encode(['success' => true, 'post' => ['id' => $db->lastInsertId(), 'slug' => $slug, 'title' => $title, 'content' => $content, 'position' => $position, 'created_date' => $now, 'created_at' => $now, 'updated_at' => $now]]);
 
     } elseif ($action === 'update') {
         $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
