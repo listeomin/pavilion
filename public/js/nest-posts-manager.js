@@ -421,12 +421,26 @@ export class NestPostsManager {
       postEl.appendChild(titleEl);
     }
 
-    // Dates display (read-only)
+    // Smart dates display (read-only) - hide duplicate dates
     const datesSection = document.createElement('div');
     datesSection.className = 'nest-post-dates';
 
-    // Created date (custom date set by author) - only show if set
-    if (post.created_date) {
+    // Helper to check if dates are the same (compare to minute precision)
+    const isSameDate = (date1, date2) => {
+      if (!date1 || !date2) return false;
+      return dayjs(date1).format('YYYY-MM-DD HH:mm') === dayjs(date2).format('YYYY-MM-DD HH:mm');
+    };
+
+    const hasCreated = post.created_date;
+    const hasPublished = post.created_at;
+    const hasModified = post.updated_at;
+
+    const createdSameAsPublished = isSameDate(post.created_date, post.created_at);
+    const publishedSameAsModified = isSameDate(post.created_at, post.updated_at);
+    const allSame = createdSameAsPublished && publishedSameAsModified;
+
+    // Scenario a) All dates same -> show only "Создано"
+    if (allSame && hasCreated) {
       const createdDiv = document.createElement('div');
       createdDiv.className = 'nest-post-date';
       createdDiv.innerHTML = `
@@ -435,27 +449,56 @@ export class NestPostsManager {
       `;
       datesSection.appendChild(createdDiv);
     }
-
-    // Published date (when post was created in system) - always show
-    if (post.created_at) {
-      const publishedDiv = document.createElement('div');
-      publishedDiv.className = 'nest-post-date';
-      publishedDiv.innerHTML = `
-        <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
-        <span>Опубликовано ${this.formatLiveDate(post.created_at)}</span>
-      `;
-      datesSection.appendChild(publishedDiv);
+    // Scenario b) created != published, published == modified -> show created + published
+    else if (!createdSameAsPublished && publishedSameAsModified) {
+      if (hasCreated) {
+        const createdDiv = document.createElement('div');
+        createdDiv.className = 'nest-post-date';
+        createdDiv.innerHTML = `
+          <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
+          <span>Создано ${this.formatStaticDate(post.created_date)}</span>
+        `;
+        datesSection.appendChild(createdDiv);
+      }
+      if (hasPublished) {
+        const publishedDiv = document.createElement('div');
+        publishedDiv.className = 'nest-post-date';
+        publishedDiv.innerHTML = `
+          <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+          <span>Опубликовано ${this.formatLiveDate(post.created_at)}</span>
+        `;
+        datesSection.appendChild(publishedDiv);
+      }
     }
-
-    // Updated date (last edit time) - always show
-    if (post.updated_at) {
-      const updatedDiv = document.createElement('div');
-      updatedDiv.className = 'nest-post-date';
-      updatedDiv.innerHTML = `
-        <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
-        <span>Изменено ${this.formatLiveDate(post.updated_at)}</span>
-      `;
-      datesSection.appendChild(updatedDiv);
+    // Scenario c) All different -> show all three
+    else {
+      if (hasCreated && !createdSameAsPublished) {
+        const createdDiv = document.createElement('div');
+        createdDiv.className = 'nest-post-date';
+        createdDiv.innerHTML = `
+          <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
+          <span>Создано ${this.formatStaticDate(post.created_date)}</span>
+        `;
+        datesSection.appendChild(createdDiv);
+      }
+      if (hasPublished) {
+        const publishedDiv = document.createElement('div');
+        publishedDiv.className = 'nest-post-date';
+        publishedDiv.innerHTML = `
+          <img src="assets/date-publish.svg" alt="Опубликовано" class="nest-post-date-icon">
+          <span>Опубликовано ${this.formatLiveDate(post.created_at)}</span>
+        `;
+        datesSection.appendChild(publishedDiv);
+      }
+      if (hasModified && !publishedSameAsModified) {
+        const updatedDiv = document.createElement('div');
+        updatedDiv.className = 'nest-post-date';
+        updatedDiv.innerHTML = `
+          <img src="assets/date-edit.svg" alt="Изменено" class="nest-post-date-icon">
+          <span>Изменено ${this.formatLiveDate(post.updated_at)}</span>
+        `;
+        datesSection.appendChild(updatedDiv);
+      }
     }
 
     postEl.appendChild(datesSection);
