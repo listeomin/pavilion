@@ -1,9 +1,9 @@
 // nest-posts-manager.js
-import { Editor } from 'https://cdn.skypack.dev/@tiptap/core@2.1.13';
-import StarterKit from 'https://cdn.skypack.dev/@tiptap/starter-kit@2.1.13';
-import Link from 'https://cdn.skypack.dev/@tiptap/extension-link@2.1.13';
-import Image from 'https://cdn.skypack.dev/@tiptap/extension-image@2.1.13';
-import Placeholder from 'https://cdn.skypack.dev/@tiptap/extension-placeholder@2.1.13';
+import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
+import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
+import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
 
 export class NestPostsManager {
   constructor(config, apiPath) {
