@@ -1285,16 +1285,26 @@ function alignUserHeader() {
               // Deactivate filter
               currentFilter = null;
               postsManager.setFilter(null, null);
+
+              // Remove section from URL
+              const url = new URL(window.location);
+              url.searchParams.delete('section');
+              window.history.pushState({ section: null }, '', url);
             } else {
               // Activate section filter
               currentFilter = { type: 'section', name: sectionName };
               postsManager.setFilter('section', sectionName);
+
+              // Add section to URL
+              const url = new URL(window.location);
+              url.searchParams.set('section', sectionName);
+              window.history.pushState({ section: sectionName }, '', url);
             }
 
-            // Re-render posts list, sidebar, and navigation
+            // Re-render posts list, navigation, and sidebar
             postsManager.renderPostsList(document.getElementById('nest-editor-container'));
-            postsManager.renderSidebarNavigation(); // Update sidebar to show all posts
-            renderNavigation(); // Re-render to update active states
+            renderNavigation(); // Re-render navigation to update active states (creates sidebar structure)
+            postsManager.renderSidebarNavigation(); // Populate sidebar with all posts
           } else {
             // Legacy mode (old content with TipTap)
             // Toggle filter
@@ -1550,6 +1560,15 @@ function alignUserHeader() {
     if (!nestConfig.postSlug) {
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
       await postsManager.loadPosts();
+
+      // Check for section filter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const sectionParam = urlParams.get('section');
+      if (sectionParam) {
+        currentFilter = { type: 'section', name: sectionParam };
+        postsManager.setFilter('section', sectionParam);
+      }
+
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
 
       // Load sections and render navigation
@@ -1583,12 +1602,35 @@ function alignUserHeader() {
 
     // Handle browser back/forward buttons
     window.addEventListener('popstate', (event) => {
-      const slug = event.state?.slug || null;
-      loadContent(slug);
+      // If we have postsManager (list view), handle section filtering
+      if (postsManager && !nestConfig.postSlug) {
+        const sectionParam = event.state?.section || null;
+
+        if (sectionParam) {
+          currentFilter = { type: 'section', name: sectionParam };
+          postsManager.setFilter('section', sectionParam);
+        } else {
+          currentFilter = null;
+          postsManager.setFilter(null, null);
+        }
+
+        postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+        renderNavigation();
+        postsManager.renderSidebarNavigation();
+      } else {
+        // Single post view - use slug navigation
+        const slug = event.state?.slug || null;
+        loadContent(slug);
+      }
     });
 
     // Set initial state
-    window.history.replaceState({ slug: nestConfig.postSlug || null }, '', window.location.href);
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialSection = urlParams.get('section');
+    window.history.replaceState({
+      slug: nestConfig.postSlug || null,
+      section: initialSection || null
+    }, '', window.location.href);
 
   }
 
