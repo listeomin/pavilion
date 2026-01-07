@@ -14,15 +14,13 @@ export class NestPostsManager {
     this.saveTimers = new Map();
     this.datePickers = new Map();
     this.currentSort = localStorage.getItem('nest-sort-mode') || 'author';
+    this.sortMenuInitialized = false;
 
     // Initialize Day.js with Russian locale and relativeTime
     if (window.dayjs) {
       dayjs.extend(dayjs_plugin_relativeTime);
       dayjs.locale('ru');
     }
-
-    // Initialize sort context menu
-    this.initSortMenu();
   }
 
   // Format date using Day.js with live format
@@ -251,6 +249,12 @@ export class NestPostsManager {
 
   renderPostsList(container) {
     container.innerHTML = '';
+
+    // Initialize sort menu once (only after DOM is ready)
+    if (!this.sortMenuInitialized) {
+      this.initSortMenu();
+      this.sortMenuInitialized = true;
+    }
 
     // Sort posts before rendering
     const sortedPosts = this.sortPosts();

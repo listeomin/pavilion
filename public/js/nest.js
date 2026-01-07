@@ -41,7 +41,11 @@ if (staticContent) {
 }
 
 // Function to hide skeleton loading screen
+let skeletonHidden = false;
 function hideSkeleton() {
+  if (skeletonHidden) return;
+  skeletonHidden = true;
+
   const skeletonContainer = document.getElementById('skeleton-content');
   if (!skeletonContainer) return;
 
@@ -61,6 +65,14 @@ function hideSkeleton() {
     });
   }, 300);
 }
+
+// Fallback: force hide skeleton after 3 seconds if not hidden yet
+setTimeout(() => {
+  if (!skeletonHidden) {
+    console.warn('[Nest] Skeleton timeout - forcing hide');
+    hideSkeleton();
+  }
+}, 3000);
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
