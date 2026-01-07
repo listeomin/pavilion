@@ -357,6 +357,9 @@ export class NestPostsManager {
       const sectionNameLower = sectionName.toLowerCase();
       const posts = categories[sectionNameLower] || [];
 
+      // Sort posts alphabetically by title (Russian locale)
+      posts.sort((a, b) => a.title.localeCompare(b.title, 'ru'));
+
       // Clear and populate
       postsContainer.innerHTML = '';
 
