@@ -1,6 +1,7 @@
 <?php
 // public/api/nest_posts.php - API for managing Nest posts
 session_start();
+date_default_timezone_set('Europe/Moscow');
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../server/db.php';
