@@ -11,11 +11,11 @@ import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
 import { NestPostsManager } from './nest-posts-manager.js?v=7';
 
 // Tiptap imports from CDN
-import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
-import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
+import { Editor } from 'https://cdn.skypack.dev/@tiptap/core@2.1.13';
+import StarterKit from 'https://cdn.skypack.dev/@tiptap/starter-kit@2.1.13';
+import Link from 'https://cdn.skypack.dev/@tiptap/extension-link@2.1.13';
+import Image from 'https://cdn.skypack.dev/@tiptap/extension-image@2.1.13';
+import Placeholder from 'https://cdn.skypack.dev/@tiptap/extension-placeholder@2.1.13';
 
 // Suppress YouTube postMessage errors globally
 const originalError = console.error.bind(console);
