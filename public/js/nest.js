@@ -1291,8 +1291,9 @@ function alignUserHeader() {
               postsManager.setFilter('section', sectionName);
             }
 
-            // Re-render posts list and navigation
+            // Re-render posts list, sidebar, and navigation
             postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+            postsManager.renderSidebarNavigation(); // Update sidebar to show all posts
             renderNavigation(); // Re-render to update active states
           } else {
             // Legacy mode (old content with TipTap)
