@@ -3,6 +3,7 @@ export class ImageZoom {
   constructor() {
     this.overlay = null;
     this.isOpen = false;
+    this.isAnimating = false;
     this.init();
   }
 
@@ -23,19 +24,11 @@ export class ImageZoom {
   }
 
   attachListeners() {
-    // Close on overlay click
+    // Close on any click inside overlay (using event delegation)
     this.overlay.addEventListener('click', (e) => {
-      if (e.target === this.overlay) {
-        this.close();
-      }
-    });
-
-    // Close on image click
-    const zoomedImage = this.overlay.querySelector('.image-zoom-content');
-    zoomedImage.addEventListener('click', (e) => {
-      e.stopPropagation();
+      // Always close on any click in the overlay
       this.close();
-    });
+    }, true); // Use capture phase
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
@@ -43,103 +36,133 @@ export class ImageZoom {
         this.close();
       }
     });
-
-    // Prevent body scroll when overlay is open
-    this.overlay.addEventListener('wheel', (e) => {
-      e.preventDefault();
-    });
   }
 
   open(imageSrc, originalImage) {
-    if (this.isOpen) return;
+    if (this.isOpen || this.isAnimating) return;
 
     // Store reference to original image
     this.originalImage = originalImage;
 
-    // Check if zoomed image would be larger than 90vh
-    const img = new Image();
-    img.onload = () => {
-      const maxHeight = window.innerHeight * 0.9;
-      const maxWidth = window.innerWidth * 0.9;
-      
-      // Calculate if image would be larger when displayed at original size
-      const aspectRatio = img.naturalWidth / img.naturalHeight;
-      let displayWidth = img.naturalWidth;
-      let displayHeight = img.naturalHeight;
-      
-      // Constrain to max dimensions
-      if (displayHeight > maxHeight) {
-        displayHeight = maxHeight;
-        displayWidth = displayHeight * aspectRatio;
-      }
-      if (displayWidth > maxWidth) {
-        displayWidth = maxWidth;
-        displayHeight = displayWidth / aspectRatio;
-      }
-      
-      // Only zoom if the final display size is significantly larger than current size
-      const currentRect = originalImage.getBoundingClientRect();
-      const zoomFactor = Math.min(displayWidth / currentRect.width, displayHeight / currentRect.height);
-      
-      if (zoomFactor > 1.5) { // Only zoom if at least 50% larger
-        this.showZoom(imageSrc);
-      }
-    };
-    img.src = imageSrc;
+    // Remove hover transform from original image before measuring position
+    if (originalImage) {
+      originalImage.style.transform = 'none';
+    }
+
+    // Always show zoom, don't check size
+    this.showZoom(imageSrc);
   }
 
   showZoom(imageSrc) {
     this.isOpen = true;
+    this.isAnimating = true;
     const content = this.overlay.querySelector('.image-zoom-content');
-    content.src = imageSrc;
 
     // Calculate scrollbar width before hiding it
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
 
-    // Prevent body scroll and compensate for scrollbar width
-    document.body.style.overflow = 'hidden';
+    // Store scrollbar width for later restoration
+    this.scrollbarWidth = scrollbarWidth;
+
+    // Apply padding FIRST to prevent content jump
     if (scrollbarWidth > 0) {
+      // Add padding to body to prevent content jump
       document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+      // Compensate fixed elements that span full width
+      const fixedElements = [
+        '.main-nav',           // Main navigation
+        '.page-header',        // Page header on nest
+        '.nest-sidebar',       // Sidebar on nest page
+        '#animal-profile-btn', // Animal profile button
+        '#nightshift-toggle',  // Night shift toggle button
+        '#dev-nest-btn'        // Developer nest button
+      ];
+
+      fixedElements.forEach(selector => {
+        const el = document.querySelector(selector);
+        if (el) {
+          el.style.marginRight = `${scrollbarWidth}px`;
+        }
+      });
     }
 
-    this.overlay.classList.add('active');
-    
-    // If we have original image, animate from its position
-    if (this.originalImage) {
-      const originalRect = this.originalImage.getBoundingClientRect();
-      
-      // Wait for image to load and calculate final position
-      content.onload = () => {
+    // THEN hide overflow - this prevents visual jump
+    document.body.style.overflow = 'hidden';
+
+    // Set initial image state BEFORE showing overlay
+    content.style.opacity = '0';
+    content.style.transform = 'none';
+    content.style.transition = 'none';
+
+    // Animation function to avoid duplication
+    let animationTriggered = false;
+    const animate = () => {
+      // Prevent double animation
+      if (animationTriggered) return;
+      animationTriggered = true;
+
+      // Clear onload handler to prevent it from firing again
+      content.onload = null;
+
+      // Show overlay AFTER image is loaded to prevent flicker
+      this.overlay.classList.add('active');
+
+      if (this.originalImage) {
+        const originalRect = this.originalImage.getBoundingClientRect();
         const contentRect = content.getBoundingClientRect();
-        
+
         // Calculate initial transform (from original position to center)
         const scaleX = originalRect.width / contentRect.width;
         const scaleY = originalRect.height / contentRect.height;
         const scale = Math.min(scaleX, scaleY);
-        
+
         const translateX = originalRect.left + originalRect.width/2 - (contentRect.left + contentRect.width/2);
         const translateY = originalRect.top + originalRect.height/2 - (contentRect.top + contentRect.height/2);
-        
+
         // Set initial state (at original position)
         content.style.transition = 'none';
         content.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         content.style.opacity = '0';
-        
+
         // Force reflow
         content.offsetHeight;
-        
+
         // Animate to final state
         content.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         content.style.transform = 'translate(0, 0) scale(1)';
         content.style.opacity = '1';
-      };
+      } else {
+        // No original image, just fade in
+        content.style.transition = 'opacity 0.3s ease';
+        content.style.opacity = '1';
+      }
+
+      // Reset animation flag after animation completes
+      setTimeout(() => {
+        this.isAnimating = false;
+      }, 300);
+    };
+
+    // Set up onload handler BEFORE setting src
+    content.onload = animate;
+
+    // Check if image is the same (already loaded)
+    if (content.src === imageSrc && content.complete && content.naturalHeight !== 0) {
+      // Same image already loaded, animate immediately and clear onload
+      content.onload = null;
+      requestAnimationFrame(animate);
+    } else {
+      // Set new image src (will trigger onload if needed)
+      content.src = imageSrc;
     }
   }
 
   close() {
-    if (!this.isOpen) return;
-    
+    if (!this.isOpen || this.isAnimating) return;
+
     this.isOpen = false;
+    this.isAnimating = true;
     
     // Get current image element
     const zoomedImage = this.overlay.querySelector('.image-zoom-content');
@@ -174,27 +197,94 @@ export class ImageZoom {
     setTimeout(() => {
       this.overlay.classList.remove('active', 'closing');
       this.overlay.style.opacity = '';
-      
+
       // Reset image styles
       zoomedImage.style.transition = '';
       zoomedImage.style.transform = '';
       zoomedImage.style.opacity = '';
-      
+
       // Restore body scroll and remove padding compensation
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
 
+      // Remove padding/margin from all fixed elements
+      if (this.scrollbarWidth > 0) {
+        const fixedElements = [
+          '.main-nav',
+          '.page-header',
+          '.nest-sidebar',
+          '#animal-profile-btn',
+          '#nightshift-toggle',
+          '#dev-nest-btn'
+        ];
+
+        fixedElements.forEach(selector => {
+          const el = document.querySelector(selector);
+          if (el) {
+            el.style.paddingRight = '';
+            el.style.marginRight = '';
+          }
+        });
+      }
+
+      // Restore original image's transform (for hover effects)
+      if (this.originalImage) {
+        this.originalImage.style.transform = '';
+      }
+
       this.originalImage = null;
+      this.scrollbarWidth = 0;
+      this.isAnimating = false;
     }, 300);
   }
 
   // Method to make images zoomable
   makeZoomable(img) {
+    // Don't make the overlay's image zoomable - that would create infinite loop
+    if (img.classList.contains('image-zoom-content')) {
+      return;
+    }
+
+    // Don't re-add if already zoomable (using data attribute as definitive flag)
+    if (img.dataset.zoomEnabled === 'true') {
+      return;
+    }
+
+    // Exclude button images, icons, and UI elements
+    const parentButton = img.closest('button, a.button, .btn, .icon-button, #animal-profile-btn, #nightshift-toggle, #dev-nest-btn');
+    const hasExcludeClass = img.classList.contains('icon') ||
+                            img.classList.contains('avatar') ||
+                            img.classList.contains('logo') ||
+                            img.classList.contains('emoji');
+    const isSVG = img.src && img.src.endsWith('.svg');
+
+    if (parentButton || hasExcludeClass || isSVG) {
+      return;
+    }
+
+    // Mark as processed before adding event listeners
+    img.dataset.zoomEnabled = 'true';
     img.classList.add('zoomable-image');
-    img.addEventListener('click', (e) => {
+    img.style.cursor = 'zoom-in'; // Force cursor style
+
+    // Create handler function with reference to avoid duplicates
+    const clickHandler = (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
       this.open(img.src, img);
-    });
+    };
+
+    const mousedownHandler = (e) => {
+      if (e.button === 0) { // Left click only
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Use capture phase to catch event before it bubbles
+    img.addEventListener('click', clickHandler, true);
+    img.addEventListener('mousedown', mousedownHandler, true);
   }
 }
 
@@ -205,12 +295,21 @@ export function initImageZoom() {
   if (!imageZoom) {
     imageZoom = new ImageZoom();
   }
-  
-  // Make all existing images zoomable
-  document.querySelectorAll('#chat-log img').forEach(img => {
-    if (!img.classList.contains('zoomable-image')) {
-      imageZoom.makeZoomable(img);
-    }
+
+  // Make all existing images zoomable (in both chat-log and nest-editor)
+  const selectors = [
+    '#chat-log img',
+    '#nest-editor img',
+    '#nest-static-content img',
+    '.tiptap img',
+    '.ProseMirror img'
+  ];
+  selectors.forEach(selector => {
+    document.querySelectorAll(selector).forEach(img => {
+      if (!img.classList.contains('zoomable-image')) {
+        imageZoom.makeZoomable(img);
+      }
+    });
   });
 }
 
@@ -219,4 +318,46 @@ export function makeImageZoomable(img) {
     imageZoom = new ImageZoom();
   }
   imageZoom.makeZoomable(img);
+}
+
+// Auto-watch for new images using MutationObserver
+export function watchForImages() {
+  if (!imageZoom) {
+    imageZoom = new ImageZoom();
+  }
+
+  // Watch for images added to the page
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          // Check if the node itself is an image
+          if (node.tagName === 'IMG' && !node.classList.contains('zoomable-image')) {
+            imageZoom.makeZoomable(node);
+          }
+          // Check for images inside the added node
+          if (node.querySelectorAll) {
+            node.querySelectorAll('img').forEach(img => {
+              if (!img.classList.contains('zoomable-image')) {
+                imageZoom.makeZoomable(img);
+              }
+            });
+          }
+        }
+      });
+    });
+  });
+
+  // Start observing the document
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // Also make existing images zoomable
+  document.querySelectorAll('img').forEach(img => {
+    if (!img.classList.contains('zoomable-image')) {
+      imageZoom.makeZoomable(img);
+    }
+  });
 }

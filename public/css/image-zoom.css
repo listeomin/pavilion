@@ -9,6 +9,31 @@
   transform: scale(1.02);
 }
 
+/* Ensure buttons themselves have pointer cursor */
+#animal-profile-btn,
+#nightshift-toggle,
+#dev-nest-btn {
+  cursor: pointer !important;
+}
+
+/* Prevent zoom on button images, icons, and SVGs */
+button img,
+a.button img,
+.btn img,
+.icon-button img,
+img.icon,
+img.avatar,
+img.logo,
+img.emoji,
+img[src$=".svg"],
+#animal-profile-btn img,
+#nightshift-toggle img,
+#dev-nest-btn img {
+  cursor: inherit;
+  transform: none !important;
+  transition: none !important;
+}
+
 .image-zoom-overlay {
   position: fixed;
   top: 0;

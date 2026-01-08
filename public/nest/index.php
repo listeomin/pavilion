@@ -288,7 +288,7 @@ if ($telegramUserId && $urlUsername) {
   </div>
   <?php endif; ?>
 
-  <?php if ($urlUsername && !$isOwnNest): ?>
+  <?php if ($urlUsername && !$isOwnNest && !$postSlug): ?>
   <div class="nest-description">
     <?php if ($urlUsername === 'developer'): ?>
       <div id="github-preview-container" data-url="https://github.com/listeomin/pavilion"></div>
@@ -383,6 +383,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="libs/dayjs-ru.js"></script>
 <script src="libs/flatpickr.min.js"></script>
 <script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=110"></script>
+<script type="module" src="js/nest.js?v=121"></script>
 </body>
 </html>
