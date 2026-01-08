@@ -10,7 +10,45 @@ $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 $db = get_db();
 
 try {
-    if ($action === 'list') {
+    if ($action === 'list_metadata') {
+        // Get only metadata (id, slug, title, tag) for navigation - no content
+        $username = $_GET['username'] ?? null;
+
+        if (!$username) {
+            echo json_encode(['success' => false, 'error' => 'Username required']);
+            exit;
+        }
+
+        // Get user_id by username
+        if (!is_numeric($username)) {
+            $stmt = $db->prepare('SELECT id FROM users WHERE telegram_username = :username LIMIT 1');
+            $stmt->execute([':username' => $username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $userId = $user ? $user['id'] : null;
+        } else {
+            $stmt = $db->prepare('SELECT id FROM users WHERE telegram_id = :telegram_id LIMIT 1');
+            $stmt->execute([':telegram_id' => $username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $userId = $user ? $user['id'] : null;
+        }
+
+        if (!$userId) {
+            echo json_encode(['success' => true, 'posts' => []]);
+            exit;
+        }
+
+        // Get only metadata, no content
+        $stmt = $db->prepare('SELECT id, slug, title, tag, position, created_date, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC');
+        $stmt->execute([':user_id' => $userId]);
+        $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'posts' => $posts,
+            'total' => count($posts)
+        ]);
+
+    } elseif ($action === 'list') {
         // Get all posts for a user
         $username = $_GET['username'] ?? null;
         

@@ -88,16 +88,32 @@ export class NestPostsManager {
     }
   }
 
+  async loadMetadata() {
+    // Load only metadata (no content) for sidebar navigation
+    const url = `${this.apiPath}/api/nest_posts.php?action=list_metadata&username=${encodeURIComponent(this.config.urlUsername)}`;
+    console.log('[PostsManager] Loading metadata:', url);
+    const response = await fetch(url);
+    const result = await response.json();
+    if (result.success && result.posts) {
+      this.allPostsMetadata = result.posts;
+      this.totalPosts = result.total || result.posts.length;
+      console.log('[PostsManager] Metadata loaded:', this.allPostsMetadata.length, 'posts');
+    }
+    return this.allPostsMetadata;
+  }
+
   async loadPosts(reset = false) {
     // If own nest, load all posts without pagination
     if (this.config.isOwnNest) {
       const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
+      console.log('[PostsManager] Loading all posts for editing:', url);
       const response = await fetch(url);
       const result = await response.json();
       if (result.success && result.posts) {
         this.posts = result.posts;
         this.totalPosts = result.total || result.posts.length;
       }
+      console.log('[PostsManager] Loaded', this.posts.length, 'posts for editing');
       return this.posts;
     }
 
@@ -109,11 +125,13 @@ export class NestPostsManager {
     }
 
     if (this.isLoading || !this.hasMorePosts) {
+      console.log('[PostsManager] Skipping load - isLoading:', this.isLoading, 'hasMorePosts:', this.hasMorePosts);
       return this.posts;
     }
 
     this.isLoading = true;
     const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}&limit=${this.postsPerPage}&offset=${this.currentOffset}`;
+    console.log('[PostsManager] Fetching paginated posts:', url);
 
     try {
       const response = await fetch(url);
@@ -124,6 +142,7 @@ export class NestPostsManager {
         this.totalPosts = result.total || 0;
         this.currentOffset += result.posts.length;
         this.hasMorePosts = this.posts.length < this.totalPosts;
+        console.log('[PostsManager] Loaded', result.posts.length, 'posts. Total so far:', this.posts.length, 'of', this.totalPosts);
       }
     } finally {
       this.isLoading = false;
@@ -414,8 +433,11 @@ export class NestPostsManager {
       categories[cat] = [];
     });
 
+    // Use metadata if available (for viewing mode), otherwise use full posts
+    const postsSource = this.allPostsMetadata || this.posts;
+
     // Group posts by tag (case-insensitive)
-    this.posts.forEach(post => {
+    postsSource.forEach(post => {
       if (!post.tag) {
         return;
       }

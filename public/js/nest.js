@@ -8,14 +8,12 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
-import { NestPostsManager } from './nest-posts-manager.js?v=8';
+import { NestPostsManager } from './nest-posts-manager.js?v=9';
 
-// Tiptap imports from CDN
-import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
-import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
+// Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
+// This prevents blocking the page load for list view
+let Editor, StarterKit, Link, Image, Placeholder;
+let tiptapLoaded = false;
 
 // Suppress YouTube postMessage errors globally
 const originalError = console.error.bind(console);
@@ -32,6 +30,7 @@ console.error = (...args) => {
 };
 
 // Remove no-js class immediately (JavaScript is available)
+console.log('[Nest] JavaScript starting at:', performance.now().toFixed(2), 'ms');
 document.body.classList.remove('no-js');
 
 // Hide static content (for SEO/Instant View only)
@@ -72,6 +71,28 @@ setTimeout(() => {
     hideSkeleton();
   }
 }, 2000);
+
+// Load TipTap modules dynamically (only when needed for single post TipTap editor)
+async function loadTipTap() {
+  if (tiptapLoaded) return;
+
+  console.log('[Nest] Loading TipTap modules...');
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
+    import('https://esm.sh/@tiptap/core@2.1.13'),
+    import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-link@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-image@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
+  ]);
+
+  Editor = editorModule.Editor;
+  StarterKit = starterKitModule.default;
+  Link = linkModule.default;
+  Image = imageModule.default;
+  Placeholder = placeholderModule.default;
+  tiptapLoaded = true;
+  console.log('[Nest] TipTap modules loaded');
+}
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
@@ -464,6 +485,9 @@ function alignUserHeader() {
 
     // Configure Tiptap
     const initEditor = async (initialContent = '') => {
+      // Load TipTap modules if not already loaded
+      await loadTipTap();
+
       // Create wrapper for editor
       const wrapper = document.createElement('div');
       wrapper.className = 'tiptap-editor-wrapper';
@@ -1558,8 +1582,22 @@ function alignUserHeader() {
     // If viewing a nest without a specific post slug, use posts manager for list view
     // This applies to both own nest and viewing others' nests
     if (!nestConfig.postSlug) {
+      console.log('[Nest] Initializing list view...');
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+
+      // For viewing mode: load metadata first for navigation, then paginated posts
+      // For own nest: load all posts
+      if (!nestConfig.isOwnNest) {
+        console.log('[Nest] Loading metadata...');
+        // Load metadata for sidebar navigation (lightweight)
+        await postsManager.loadMetadata();
+        console.log('[Nest] Metadata loaded:', postsManager.totalPosts, 'total posts');
+      }
+
+      console.log('[Nest] Loading posts...');
+      // Load posts (paginated for viewing, all for own nest)
       await postsManager.loadPosts();
+      console.log('[Nest] Posts loaded:', postsManager.posts.length, 'of', postsManager.totalPosts);
 
       // Check for section filter in URL
       const urlParams = new URLSearchParams(window.location.search);
@@ -1569,19 +1607,22 @@ function alignUserHeader() {
         postsManager.setFilter('section', sectionParam);
       }
 
+      console.log('[Nest] Loading sections...');
+      // Load sections and render navigation
+      await loadSections();
+      renderNavigation();
+      console.log('[Nest] Sections loaded');
+
+      // Populate sidebar sections with posts from nest_posts (uses metadata)
+      postsManager.renderSidebarNavigation();
+
+      // Render posts list
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
 
       // Setup infinite scroll for viewing mode
       if (!nestConfig.isOwnNest) {
         postsManager.setupInfiniteScroll(document.getElementById('nest-editor-container'));
       }
-
-      // Load sections and render navigation
-      await loadSections();
-      renderNavigation();
-
-      // Populate sidebar sections with posts from nest_posts
-      postsManager.renderSidebarNavigation();
 
       hideSkeleton();
 
