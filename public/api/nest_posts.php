@@ -37,14 +37,36 @@ try {
             exit;
         }
 
-        // Get all posts for this user
-        $stmt = $db->prepare('SELECT id, slug, title, content, position, tag, created_date, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC');
-        $stmt->execute([':user_id' => $userId]);
+        // Get posts with optional pagination
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : null;
+        $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
+        // Get total count
+        $countStmt = $db->prepare('SELECT COUNT(*) as total FROM nest_posts WHERE user_id = :user_id');
+        $countStmt->execute([':user_id' => $userId]);
+        $totalCount = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+        // Build query with optional limit
+        $sql = 'SELECT id, slug, title, content, position, tag, created_date, created_at, updated_at FROM nest_posts WHERE user_id = :user_id ORDER BY position ASC';
+        if ($limit !== null) {
+            $sql .= ' LIMIT :limit OFFSET :offset';
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        if ($limit !== null) {
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        }
+        $stmt->execute();
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode([
             'success' => true,
-            'posts' => $posts
+            'posts' => $posts,
+            'total' => $totalCount,
+            'offset' => $offset,
+            'limit' => $limit
         ]);
 
     } elseif ($action === 'get') {

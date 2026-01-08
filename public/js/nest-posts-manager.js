@@ -17,6 +17,13 @@ export class NestPostsManager {
     this.sortMenuInitialized = false;
     this.currentFilter = null; // { type: 'section', name: 'стихи' } or null
 
+    // Pagination for viewing mode
+    this.postsPerPage = 20;
+    this.currentOffset = 0;
+    this.totalPosts = 0;
+    this.isLoading = false;
+    this.hasMorePosts = true;
+
     // Initialize Day.js with Russian locale and relativeTime
     if (window.dayjs) {
       dayjs.extend(dayjs_plugin_relativeTime);
@@ -81,13 +88,47 @@ export class NestPostsManager {
     }
   }
 
-  async loadPosts() {
-    const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
-    const response = await fetch(url);
-    const result = await response.json();
-    if (result.success && result.posts) {
-      this.posts = result.posts;
+  async loadPosts(reset = false) {
+    // If own nest, load all posts without pagination
+    if (this.config.isOwnNest) {
+      const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
+      const response = await fetch(url);
+      const result = await response.json();
+      if (result.success && result.posts) {
+        this.posts = result.posts;
+        this.totalPosts = result.total || result.posts.length;
+      }
+      return this.posts;
     }
+
+    // For viewing mode, use pagination
+    if (reset) {
+      this.currentOffset = 0;
+      this.posts = [];
+      this.hasMorePosts = true;
+    }
+
+    if (this.isLoading || !this.hasMorePosts) {
+      return this.posts;
+    }
+
+    this.isLoading = true;
+    const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}&limit=${this.postsPerPage}&offset=${this.currentOffset}`;
+
+    try {
+      const response = await fetch(url);
+      const result = await response.json();
+
+      if (result.success && result.posts) {
+        this.posts = [...this.posts, ...result.posts];
+        this.totalPosts = result.total || 0;
+        this.currentOffset += result.posts.length;
+        this.hasMorePosts = this.posts.length < this.totalPosts;
+      }
+    } finally {
+      this.isLoading = false;
+    }
+
     return this.posts;
   }
 
@@ -272,8 +313,10 @@ export class NestPostsManager {
     return posts;
   }
 
-  renderPostsList(container) {
-    container.innerHTML = '';
+  renderPostsList(container, append = false) {
+    if (!append) {
+      container.innerHTML = '';
+    }
 
     // Initialize sort menu once (only after DOM is ready)
     if (!this.sortMenuInitialized) {
@@ -284,12 +327,21 @@ export class NestPostsManager {
     // Get filtered and sorted posts
     const sortedPosts = this.getFilteredPosts();
 
-    if (this.config.isOwnNest) {
+    // Remove loading indicator if exists
+    const loadingIndicator = container.querySelector('.posts-loading');
+    if (loadingIndicator) {
+      loadingIndicator.remove();
+    }
+
+    if (!append && this.config.isOwnNest) {
       const beforeFirstZone = this.createInsertZone(0);
       container.appendChild(beforeFirstZone);
     }
 
-    sortedPosts.forEach((post) => {
+    const startIndex = append ? container.querySelectorAll('.nest-post').length : 0;
+    const postsToRender = append ? sortedPosts.slice(startIndex) : sortedPosts;
+
+    postsToRender.forEach((post) => {
       const postEl = this.createPostElement(post);
       container.appendChild(postEl);
 
@@ -298,6 +350,47 @@ export class NestPostsManager {
         container.appendChild(insertZone);
       }
     });
+
+    // Add loading indicator if more posts available
+    if (!this.config.isOwnNest && this.hasMorePosts) {
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'posts-loading';
+      loadingEl.innerHTML = '<div class="posts-loading-text">Загрузка...</div>';
+      container.appendChild(loadingEl);
+    }
+  }
+
+  // Setup infinite scroll for viewing mode
+  setupInfiniteScroll(container) {
+    if (this.config.isOwnNest) return; // Only for viewing mode
+
+    const observer = new IntersectionObserver(async (entries) => {
+      const loadingEl = entries[0];
+      if (loadingEl.isIntersecting && !this.isLoading && this.hasMorePosts) {
+        await this.loadPosts();
+        this.renderPostsList(container, true);
+      }
+    }, {
+      rootMargin: '200px' // Start loading 200px before reaching bottom
+    });
+
+    // Observe loading indicator
+    const checkAndObserve = () => {
+      const loadingIndicator = container.querySelector('.posts-loading');
+      if (loadingIndicator) {
+        observer.observe(loadingIndicator);
+      }
+    };
+
+    // Initial observation
+    checkAndObserve();
+
+    // Re-observe after each render
+    const originalRender = this.renderPostsList.bind(this);
+    this.renderPostsList = function(cont, app) {
+      originalRender(cont, app);
+      checkAndObserve();
+    };
   }
 
   // Render single post view (read-only, no edit mode)
@@ -561,7 +654,8 @@ export class NestPostsManager {
         postEl.classList.remove('nest-post-hover');
       });
       postEl.addEventListener('click', (e) => {
-        if (e.target.tagName === 'A') return;
+        // Don't activate editor when clicking on links or images
+        if (e.target.tagName === 'A' || e.target.tagName === 'IMG') return;
         if (!this.editors.has(post.id)) this.activateEditor(post, postEl);
       });
     }

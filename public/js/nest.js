@@ -1571,6 +1571,11 @@ function alignUserHeader() {
 
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
 
+      // Setup infinite scroll for viewing mode
+      if (!nestConfig.isOwnNest) {
+        postsManager.setupInfiniteScroll(document.getElementById('nest-editor-container'));
+      }
+
       // Load sections and render navigation
       await loadSections();
       renderNavigation();
