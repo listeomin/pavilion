@@ -12,14 +12,37 @@
   min-width: 0;
   /* Add right margin to prevent overlap with fixed sidebar */
   margin-right: 360px; /* sidebar width (320px) + gap (40px) */
+  /* Prevent content from overflowing */
+  max-width: calc(100vw - 360px - 40px); /* viewport - sidebar - gap */
+  overflow-x: hidden;
   /* Visual separation from sidebar */
   border-right: 1px solid #D1CFC5;
   box-shadow: 16px 0px 32px #E8E6DC;
 }
 
-/* Keep wrap max-width for content alignment */
+/* Keep wrap max-width for content alignment, but respect viewport */
 .page-layout .wrap {
-  max-width: 980px !important;
+  max-width: min(980px, calc(100% - 40px)) !important;
+  box-sizing: border-box;
+}
+
+/* Ensure all content inside main-column respects boundaries */
+.main-column * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure images don't overflow */
+.main-column img {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Ensure pre/code blocks don't overflow */
+.main-column pre {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
 /* Sidebar - fixed width 320px, full height, fixed position */
@@ -219,4 +242,39 @@
   width: 100%;
   height: auto;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1400px) {
+  .main-column {
+    max-width: calc(100vw - 360px - 20px);
+  }
+}
+
+@media (max-width: 1200px) {
+  .nest-sidebar {
+    width: 280px;
+  }
+
+  .main-column {
+    margin-right: 320px; /* 280px + 40px gap */
+    max-width: calc(100vw - 320px - 20px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .nest-sidebar {
+    display: none;
+  }
+
+  .main-column {
+    margin-right: 40px;
+    max-width: calc(100vw - 80px);
+    border-right: none;
+    box-shadow: none;
+  }
+
+  .page-layout {
+    gap: 20px;
+  }
 }
