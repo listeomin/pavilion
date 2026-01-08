@@ -1108,6 +1108,12 @@ export class NestPostsManager {
     postEl.classList.add('nest-post-editing');
     postEl.classList.remove('nest-post-hover');
 
+    // Setup image drag & drop and paste
+    setTimeout(() => {
+      this.setupImageDragAndDrop(editorEl, editor);
+      this.setupImagePaste(editorEl, editor);
+    }, 100);
+
     // Disable insert zones while editing
     this.updateEditorActiveState();
   }
@@ -1274,5 +1280,110 @@ export class NestPostsManager {
       // Re-enable insert zones if no editors are active
       this.updateEditorActiveState();
     }
+  }
+
+  // Helper function to upload image file
+  async uploadImageFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      return null;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(this.apiPath + '/api/upload_image.php', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.file && result.file.url) {
+        return result.file.url;
+      } else {
+        console.error('[PostsManager] Image upload failed:', result.error);
+        return null;
+      }
+    } catch (err) {
+      console.error('[PostsManager] Error uploading image:', err);
+      return null;
+    }
+  }
+
+  // Setup drag and drop for images
+  setupImageDragAndDrop(editorEl, editor) {
+    const proseMirrorEl = editorEl.querySelector('.ProseMirror') || editorEl;
+
+    // Prevent default drag behavior
+    proseMirrorEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      proseMirrorEl.classList.add('drag-over');
+    });
+
+    proseMirrorEl.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      proseMirrorEl.classList.remove('drag-over');
+    });
+
+    proseMirrorEl.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      proseMirrorEl.classList.remove('drag-over');
+
+      const files = e.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+
+      // Process all dropped image files
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file.type.startsWith('image/')) continue;
+
+        console.log('[PostsManager] Uploading dropped image:', file.name);
+        const url = await this.uploadImageFile(file);
+
+        if (url) {
+          // Insert image at cursor position
+          editor.chain().focus().setImage({ src: url }).run();
+        } else {
+          alert('Ошибка загрузки изображения: ' + file.name);
+        }
+      }
+    });
+  }
+
+  // Setup paste for images from clipboard
+  setupImagePaste(editorEl, editor) {
+    const proseMirrorEl = editorEl.querySelector('.ProseMirror') || editorEl;
+
+    proseMirrorEl.addEventListener('paste', async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      // Check if clipboard contains image
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const file = item.getAsFile();
+          if (!file) continue;
+
+          console.log('[PostsManager] Uploading pasted image from clipboard');
+          const url = await this.uploadImageFile(file);
+
+          if (url) {
+            // Insert image at cursor position
+            editor.chain().focus().setImage({ src: url }).run();
+          } else {
+            alert('Ошибка загрузки изображения из буфера обмена');
+          }
+        }
+      }
+    });
   }
 }
