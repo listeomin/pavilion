@@ -316,24 +316,11 @@ if ($telegramUserId && $urlUsername) {
   <?php endif; ?>
 
   <?php if ($urlUsername): ?>
-  <!-- Skeleton loading (only on personal pages) -->
+  <!-- Loading indicator (only on personal pages) -->
   <div id="skeleton-content" class="skeleton-container">
-    <div class="skeleton-content-block">
-      <div class="skeleton skeleton-heading"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-    </div>
-    <div class="skeleton-content-block">
-      <div class="skeleton skeleton-heading"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-    </div>
-    <div class="skeleton-content-block">
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
-      <div class="skeleton skeleton-paragraph"></div>
+    <div class="skeleton-loader">
+      <div class="skeleton-spinner"></div>
+      <div class="skeleton-text">Загрузка...</div>
     </div>
   </div>
   <!-- Static HTML content for SEO and Instant View (hidden by JavaScript) -->

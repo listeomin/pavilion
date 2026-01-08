@@ -7,8 +7,8 @@ import { TelegramAuth } from './telegramAuth.js?v=2';
 import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
-import { initImageZoom, makeImageZoomable } from './image-zoom.js?v=2';
-import { NestPostsManager } from './nest-posts-manager.js?v=7';
+import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
+import { NestPostsManager } from './nest-posts-manager.js?v=8';
 
 // Tiptap imports from CDN
 import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
@@ -50,8 +50,7 @@ function hideSkeleton() {
   if (!skeletonContainer) return;
 
   // Fade out skeleton
-  const skeletonBlocks = skeletonContainer.querySelectorAll('.skeleton-content-block');
-  skeletonBlocks.forEach(block => block.classList.add('fade-out'));
+  skeletonContainer.classList.add('fade-out');
 
   // Remove skeleton-active class and delete skeleton after animation
   setTimeout(() => {
@@ -66,13 +65,13 @@ function hideSkeleton() {
   }, 300);
 }
 
-// Fallback: force hide skeleton after 3 seconds if not hidden yet
+// Fallback: force hide skeleton after 2 seconds if not hidden yet
 setTimeout(() => {
   if (!skeletonHidden) {
     console.warn('[Nest] Skeleton timeout - forcing hide');
     hideSkeleton();
   }
-}, 3000);
+}, 2000);
 
 // Function to align user header to the right edge of the title
 function alignUserHeader() {
@@ -504,6 +503,23 @@ function alignUserHeader() {
         ],
         content: initialContent,
         editable: nestConfig.isOwnNest,
+        onCreate: ({ editor }) => {
+          // Enable image zoom in read-only mode after content is rendered
+          if (!nestConfig.isOwnNest) {
+            setTimeout(() => {
+              initImageZoom();
+              // Make all images in editor zoomable (using multiple selectors)
+              const selectors = ['.ProseMirror img', '.tiptap img', '#nest-editor img'];
+              selectors.forEach(selector => {
+                document.querySelectorAll(selector).forEach(img => {
+                  if (!img.classList.contains('zoomable-image')) {
+                    makeImageZoomable(img);
+                  }
+                });
+              });
+            }, 100);
+          }
+        },
         onUpdate: ({ editor }) => {
           if (!nestConfig.isOwnNest) return;
 
@@ -544,22 +560,6 @@ function alignUserHeader() {
       // Setup toolbar buttons
       if (nestConfig.isOwnNest) {
         setupToolbar();
-      }
-
-      // Enable image zoom in read-only mode
-      if (!nestConfig.isOwnNest) {
-        // Wait for DOM to be ready before initializing zoom
-        requestAnimationFrame(() => {
-          initImageZoom();
-        });
-        requestAnimationFrame(() => {
-          const editorImages = document.querySelectorAll('#nest-editor img');
-          editorImages.forEach(img => {
-            if (!img.classList.contains('zoomable-image')) {
-              makeImageZoomable(img);
-            }
-          });
-        }, 100);
       }
     };
 
@@ -1579,6 +1579,11 @@ function alignUserHeader() {
       postsManager.renderSidebarNavigation();
 
       hideSkeleton();
+
+      // Enable image zoom for viewing (watch for dynamically added images)
+      if (!nestConfig.isOwnNest) {
+        watchForImages();
+      }
     } else {
       // Load single post from nest_posts by slug
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
@@ -1598,6 +1603,11 @@ function alignUserHeader() {
       postsManager.renderSidebarNavigation();
 
       hideSkeleton();
+
+      // Enable image zoom for viewing (watch for dynamically added images)
+      if (!nestConfig.isOwnNest) {
+        watchForImages();
+      }
     }
 
     // Handle browser back/forward buttons
