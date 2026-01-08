@@ -1,9 +1,29 @@
 // nest-posts-manager.js
-import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
-import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
+// TipTap modules will be loaded dynamically to avoid blocking page load
+let Editor, StarterKit, Link, Image, Placeholder;
+let tiptapModulesLoaded = false;
+
+// Load TipTap modules dynamically (only when needed for editing)
+async function loadTipTapModules() {
+  if (tiptapModulesLoaded) return;
+
+  console.log('[PostsManager] Loading TipTap modules...');
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
+    import('https://esm.sh/@tiptap/core@2.1.13'),
+    import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-link@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-image@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
+  ]);
+
+  Editor = editorModule.Editor;
+  StarterKit = starterKitModule.default;
+  Link = linkModule.default;
+  Image = imageModule.default;
+  Placeholder = placeholderModule.default;
+  tiptapModulesLoaded = true;
+  console.log('[PostsManager] TipTap modules loaded');
+}
 
 // Create custom Image extension with resize, delete, and caption
 function createCustomImage() {
@@ -1144,7 +1164,10 @@ export class NestPostsManager {
     });
   }
 
-  activateEditor(post, postEl) {
+  async activateEditor(post, postEl) {
+    // Load TipTap modules if not already loaded
+    await loadTipTapModules();
+
     const contentEl = postEl.querySelector('.nest-post-content');
     let currentHtml = contentEl.innerHTML;
 
@@ -1505,7 +1528,7 @@ export class NestPostsManager {
         }
 
         // Activate editor for new post
-        this.activateEditor(post, postEl);
+        await this.activateEditor(post, postEl);
       }
     }
   }
