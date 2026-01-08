@@ -52,6 +52,18 @@ function createCustomImage() {
       };
     },
 
+    parseHTML() {
+      return [
+        {
+          tag: 'img[src]',
+        },
+      ];
+    },
+
+    renderHTML({ HTMLAttributes }) {
+      return ['img', HTMLAttributes];
+    },
+
     addCommands() {
       return {
         ...this.parent?.(),
