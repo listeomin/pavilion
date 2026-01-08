@@ -126,6 +126,6 @@ if ($telegramUserId && !$urlUserId) {
 </button>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
-<script type="module" src="js/nest.js?v=5"></script>
+<script type="module" src="js/nest.js?v=6"></script>
 </body>
 </html>
