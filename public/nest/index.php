@@ -37,6 +37,9 @@ if (count($segments) >= 1 && $segments[0] === 'nest') {
 }
 
 // Check Telegram authorization
+// Configure session to last longer (30 days)
+ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
+ini_set('session.cookie_lifetime', 2592000); // 30 days
 session_start();
 $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
 $telegramUsername = $_SESSION['telegram_user']['telegram_username'] ?? null;
@@ -288,7 +291,17 @@ if ($telegramUserId && $urlUsername) {
   </div>
   <?php endif; ?>
 
-  <?php if ($urlUsername && !$isOwnNest && !$postSlug): ?>
+  <?php
+  // Check if user has any posts
+  $hasAnyPosts = false;
+  if ($actualUserId) {
+    $stmt = $db->prepare('SELECT COUNT(*) as count FROM nest_posts WHERE user_id = :user_id');
+    $stmt->execute([':user_id' => $actualUserId]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $hasAnyPosts = $result && $result['count'] > 0;
+  }
+  ?>
+  <?php if ($urlUsername && !$isOwnNest && !$postSlug && !$hasAnyPosts): ?>
   <div class="nest-description">
     <?php if ($urlUsername === 'developer'): ?>
       <div id="github-preview-container" data-url="https://github.com/listeomin/pavilion"></div>

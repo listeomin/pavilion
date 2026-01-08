@@ -1,6 +1,9 @@
 <?php
 // messages/index.php - Direct messages between users
 
+// Configure session to last longer (30 days)
+ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
+ini_set('session.cookie_lifetime', 2592000); // 30 days
 session_start();
 
 // Auto-detect BASE_PATH from request URI
