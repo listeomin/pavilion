@@ -237,7 +237,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/nest-posts.css?v=21">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
 <!-- Tiptap Editor -->
-<link rel="stylesheet" href="css/tiptap.css?v=14">
+<link rel="stylesheet" href="css/tiptap.css?v=15">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=5">
 <!-- Flatpickr date picker -->
@@ -383,6 +383,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="libs/dayjs-ru.js"></script>
 <script src="libs/flatpickr.min.js"></script>
 <script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=122"></script>
+<script type="module" src="js/nest.js?v=123"></script>
 </body>
 </html>

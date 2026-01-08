@@ -203,3 +203,11 @@
   color: var(--color-iris);
   font-weight: 500;
 }
+
+/* Drag and drop visual feedback */
+.ProseMirror.drag-over {
+  background: rgba(124, 119, 238, 0.05);
+  border: 2px dashed var(--color-iris);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}

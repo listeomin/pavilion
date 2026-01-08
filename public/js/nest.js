@@ -581,9 +581,14 @@ function alignUserHeader() {
         }
       });
 
-      // Setup toolbar buttons
+      // Setup toolbar buttons and image handling
       if (nestConfig.isOwnNest) {
         setupToolbar();
+        // Wait for DOM to be ready before setting up image handlers
+        setTimeout(() => {
+          setupImageDragAndDrop();
+          setupImagePaste();
+        }, 100);
       }
     };
 
@@ -711,6 +716,115 @@ function alignUserHeader() {
             btn.classList.remove('is-active');
           }
         });
+      });
+    };
+
+    // Helper function to upload image file
+    const uploadImageFile = async (file) => {
+      if (!file || !file.type.startsWith('image/')) {
+        return null;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch(CONFIG.BASE_PATH + '/api/upload_image.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.file && result.file.url) {
+          return result.file.url;
+        } else {
+          console.error('[Nest] Image upload failed:', result.error);
+          return null;
+        }
+      } catch (err) {
+        console.error('[Nest] Error uploading image:', err);
+        return null;
+      }
+    };
+
+    // Setup drag and drop for images
+    const setupImageDragAndDrop = () => {
+      const editorEl = document.querySelector('.ProseMirror');
+      if (!editorEl) return;
+
+      // Prevent default drag behavior
+      editorEl.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        editorEl.classList.add('drag-over');
+      });
+
+      editorEl.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        editorEl.classList.remove('drag-over');
+      });
+
+      editorEl.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        editorEl.classList.remove('drag-over');
+
+        const files = e.dataTransfer?.files;
+        if (!files || files.length === 0) return;
+
+        // Process all dropped image files
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          if (!file.type.startsWith('image/')) continue;
+
+          console.log('[Nest] Uploading dropped image:', file.name);
+          const url = await uploadImageFile(file);
+
+          if (url) {
+            // Insert image at cursor position
+            editor.chain().focus().setImage({ src: url }).run();
+          } else {
+            alert('Ошибка загрузки изображения: ' + file.name);
+          }
+        }
+      });
+    };
+
+    // Setup paste for images from clipboard
+    const setupImagePaste = () => {
+      const editorEl = document.querySelector('.ProseMirror');
+      if (!editorEl) return;
+
+      editorEl.addEventListener('paste', async (e) => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        // Check if clipboard contains image
+        let hasImage = false;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+
+          if (item.type.startsWith('image/')) {
+            hasImage = true;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const file = item.getAsFile();
+            if (!file) continue;
+
+            console.log('[Nest] Uploading pasted image from clipboard');
+            const url = await uploadImageFile(file);
+
+            if (url) {
+              // Insert image at cursor position
+              editor.chain().focus().setImage({ src: url }).run();
+            } else {
+              alert('Ошибка загрузки изображения из буфера обмена');
+            }
+          }
+        }
       });
     };
 
