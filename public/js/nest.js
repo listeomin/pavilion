@@ -8,7 +8,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
-import { NestPostsManager } from './nest-posts-manager.js?v=11';
+import { NestPostsManager } from './nest-posts-manager.js?v=12';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -97,7 +97,7 @@ async function loadTipTap() {
 // Create custom Image extension with resize, delete, and caption
 function createCustomImage() {
   return Image.extend({
-    name: 'customImage',
+    name: 'image',
 
     addAttributes() {
       return {
@@ -264,7 +264,7 @@ function createCustomImage() {
               // Save new width
               if (typeof getPos === 'function') {
                 const pos = getPos();
-                editor.commands.updateAttributes('customImage', { width: img.style.width });
+                editor.commands.updateAttributes('image', { width: img.style.width });
               }
             };
 
@@ -307,7 +307,7 @@ function createCustomImage() {
 
           captionInput.addEventListener('blur', () => {
             if (typeof getPos === 'function') {
-              editor.commands.updateAttributes('customImage', { caption: captionInput.value });
+              editor.commands.updateAttributes('image', { caption: captionInput.value });
             }
           });
 

@@ -8,7 +8,7 @@ import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
 // Create custom Image extension with resize, delete, and caption
 function createCustomImage() {
   return Image.extend({
-    name: 'customImage',
+    name: 'image',
 
     addAttributes() {
       return {
@@ -175,7 +175,7 @@ function createCustomImage() {
               // Save new width
               if (typeof getPos === 'function') {
                 const pos = getPos();
-                editor.commands.updateAttributes('customImage', { width: img.style.width });
+                editor.commands.updateAttributes('image', { width: img.style.width });
               }
             };
 
@@ -218,7 +218,7 @@ function createCustomImage() {
 
           captionInput.addEventListener('blur', () => {
             if (typeof getPos === 'function') {
-              editor.commands.updateAttributes('customImage', { caption: captionInput.value });
+              editor.commands.updateAttributes('image', { caption: captionInput.value });
             }
           });
 
