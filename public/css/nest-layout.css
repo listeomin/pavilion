@@ -10,6 +10,10 @@
   /* Reserve space for sidebar (420px) + minimum gap (80px) */
   margin-right: 500px;
   overflow-x: hidden;
+  /* Visual separation from sidebar */
+  background: #FAF9F5;
+  border-right: 1px solid #D1CFC5;
+  box-shadow: 16px 0px 32px #E8E6DC;
 }
 
 /* Sidebar - always pinned to right side of screen */
@@ -131,10 +135,10 @@
 
 .category-tile-image {
   width: 160px;
-  height: 160px;
+  height: 110px;
   object-fit: cover;
   position: absolute;
-  top: 0;
+  top: 16px;
   left: 0;
   z-index: 1;
 }
@@ -150,11 +154,15 @@
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  position: relative;
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 2;
   background: rgba(255, 255, 255, 0.9);
   padding: 4px 8px;
   border-radius: 8px;
+  white-space: nowrap;
 }
 
 .category-tile-count {

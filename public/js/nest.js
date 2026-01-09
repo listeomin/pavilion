@@ -1288,10 +1288,12 @@ function alignUserHeader() {
         { name: 'Черновики', image: 'черновики.png' }
       ];
 
-      // Count posts per category
+      // Count posts per category (use metadata for counts, it has all posts)
       const categoryCounts = {};
-      if (postsManager && postsManager.posts) {
-        postsManager.posts.forEach(post => {
+      if (postsManager) {
+        // Use allPostsMetadata if available (has all posts), otherwise fallback to posts
+        const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
+        postsData.forEach(post => {
           if (post.tag) {
             categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
           }
