@@ -4,7 +4,7 @@ import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
 import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
 import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
 import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
-import ImageFigure from 'https://esm.sh/@pentestpad/tiptap-extension-figure@1.1.0';
+import ImageFigure from 'https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12';
 
 export class NestPostsManager {
   constructor(config, apiPath) {

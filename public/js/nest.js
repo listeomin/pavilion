@@ -8,7 +8,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
-import { NestPostsManager } from './nest-posts-manager.js?v=17';
+import { NestPostsManager } from './nest-posts-manager.js?v=18';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -83,7 +83,7 @@ async function loadTipTap() {
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
     import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
-    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.1.0')
+    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12')
   ]);
 
   Editor = editorModule.Editor;
