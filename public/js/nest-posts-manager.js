@@ -543,7 +543,7 @@ export class NestPostsManager {
       const tempDiv = document.createElement('div');
       const tempEditor = new Editor({
         element: tempDiv,
-        extensions: [StarterKit, Link, ImageFigure],
+        extensions: [StarterKit, Link, Image, ImageFigure],
         content: parsed,
       });
       const html = tempEditor.getHTML();
@@ -1003,9 +1003,21 @@ export class NestPostsManager {
             class: 'tiptap-link',
           },
         }),
-        ImageFigure.configure({
+        Image.configure({
           HTMLAttributes: {
             class: 'tiptap-image',
+          },
+          resize: {
+            enabled: true,
+            directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+            minWidth: 100,
+            minHeight: 100,
+            alwaysPreserveAspectRatio: false,
+          },
+        }),
+        ImageFigure.configure({
+          HTMLAttributes: {
+            class: 'tiptap-figure',
           },
         }),
         Placeholder.configure({
