@@ -225,7 +225,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/inline-input.css?v=3">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
-<link rel="stylesheet" href="css/audio-player.css?v=3">
+<link rel="stylesheet" href="css/audio-player.css?v=4">
 <link rel="stylesheet" href="css/nightshift.css?v=3">
 <link rel="stylesheet" href="css/animalProfile.css?v=19">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">

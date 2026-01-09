@@ -38,7 +38,7 @@
   flex-shrink: 0;
   transition: background 0.2s;
   position: absolute;
-  left: -6px;
+  left: -11px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
