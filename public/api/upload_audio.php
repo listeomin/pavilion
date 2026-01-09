@@ -73,13 +73,13 @@ try {
     // Create filename
     $filename = $cleanName . '.' . $extension;
 
-    // Upload to /collection/music/ directory (in root, outside pavilion)
-    $uploadDir = __DIR__ . '/../../../collection/music/';
+    // Upload to public/assets/music/ directory (accessible via web)
+    $uploadDir = __DIR__ . '/../assets/music/';
     // Normalize path
     $uploadDir = realpath($uploadDir);
     if ($uploadDir === false) {
         // If realpath fails, try to create the directory first
-        $uploadDir = __DIR__ . '/../../../collection/music/';
+        $uploadDir = __DIR__ . '/../assets/music/';
         if (!is_dir($uploadDir)) {
             if (!mkdir($uploadDir, 0777, true)) {
                 echo json_encode(['success' => 0, 'error' => 'Failed to create directory: ' . $uploadDir]);
@@ -126,14 +126,18 @@ try {
         $metadata['track'] = trim($parts[1]);
     }
 
-    // Collection is in root, not in pavilion
-    // So URL is always /collection/music/ without basePath
+    // Auto-detect BASE_PATH from request URI
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $basePath = '';
+    if (strpos($uri, '/pavilion/') === 0) {
+        $basePath = '/pavilion';
+    }
 
     // Return success response
     echo json_encode([
         'success' => 1,
         'file' => [
-            'url' => '/collection/music/' . $filename,
+            'url' => $basePath . '/assets/music/' . $filename,
             'name' => $file['name'],
             'size' => $file['size'],
             'artist' => $metadata['artist'],
