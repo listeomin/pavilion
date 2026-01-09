@@ -8,11 +8,11 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
-import { NestPostsManager } from './nest-posts-manager.js?v=16';
+import { NestPostsManager } from './nest-posts-manager.js?v=17';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
-let Editor, StarterKit, Link, Image, Placeholder;
+let Editor, StarterKit, Link, Image, Placeholder, ImageFigure;
 let tiptapLoaded = false;
 
 // Suppress YouTube postMessage errors globally
@@ -77,12 +77,13 @@ async function loadTipTap() {
   if (tiptapLoaded) return;
 
   console.log('[Nest] Loading TipTap modules...');
-  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, imageFigureModule] = await Promise.all([
     import('https://esm.sh/@tiptap/core@2.1.13'),
     import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
+    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.1.0')
   ]);
 
   Editor = editorModule.Editor;
@@ -90,6 +91,7 @@ async function loadTipTap() {
   Link = linkModule.default;
   Image = imageModule.default;
   Placeholder = placeholderModule.default;
+  ImageFigure = imageFigureModule.default;
   tiptapLoaded = true;
   console.log('[Nest] TipTap modules loaded');
 }
@@ -516,16 +518,9 @@ function alignUserHeader() {
               class: 'tiptap-link',
             },
           }),
-          Image.configure({
+          ImageFigure.configure({
             HTMLAttributes: {
               class: 'tiptap-image',
-            },
-            resize: {
-              enabled: true,
-              directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
-              minWidth: 100,
-              minHeight: 100,
-              alwaysPreserveAspectRatio: false, // Shift+drag preserves aspect ratio
             },
           }),
           Placeholder.configure({

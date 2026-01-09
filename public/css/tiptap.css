@@ -287,3 +287,53 @@
 .tiptap[contenteditable="false"] .tiptap-resizable-handle {
   display: none;
 }
+
+/* Figure and figcaption styles (for image captions) */
+.tiptap figure {
+  margin: 16px 0;
+  max-width: 100%;
+}
+
+.tiptap figure img {
+  display: block;
+  margin: 0;
+}
+
+.tiptap figcaption {
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-nimbus-dark);
+  font-style: italic;
+  background: var(--color-nimbus-light);
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Editable figcaption */
+.tiptap[contenteditable="true"] figcaption {
+  outline: none;
+  cursor: text;
+}
+
+.tiptap[contenteditable="true"] figcaption:hover {
+  background: rgba(124, 119, 238, 0.05);
+}
+
+.tiptap[contenteditable="true"] figcaption:focus {
+  background: rgba(124, 119, 238, 0.1);
+  border: 1px solid var(--color-iris);
+}
+
+/* Empty figcaption placeholder */
+.tiptap figcaption:empty::before {
+  content: 'Добавить подпись к изображению...';
+  color: var(--color-nimbus-medium);
+  font-style: italic;
+  pointer-events: none;
+}
+
+.tiptap[contenteditable="false"] figcaption:empty {
+  display: none;
+}

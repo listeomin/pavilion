@@ -4,6 +4,7 @@ import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
 import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
 import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
 import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
+import ImageFigure from 'https://esm.sh/@pentestpad/tiptap-extension-figure@1.1.0';
 
 export class NestPostsManager {
   constructor(config, apiPath) {
@@ -542,7 +543,7 @@ export class NestPostsManager {
       const tempDiv = document.createElement('div');
       const tempEditor = new Editor({
         element: tempDiv,
-        extensions: [StarterKit, Link, Image],
+        extensions: [StarterKit, Link, ImageFigure],
         content: parsed,
       });
       const html = tempEditor.getHTML();
@@ -1002,16 +1003,9 @@ export class NestPostsManager {
             class: 'tiptap-link',
           },
         }),
-        Image.configure({
+        ImageFigure.configure({
           HTMLAttributes: {
             class: 'tiptap-image',
-          },
-          resize: {
-            enabled: true,
-            directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
-            minWidth: 100,
-            minHeight: 100,
-            alwaysPreserveAspectRatio: false, // Shift+drag preserves aspect ratio
           },
         }),
         Placeholder.configure({
