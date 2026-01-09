@@ -22,6 +22,11 @@
   transform: translateY(-50%);
   z-index: 100;
   border-radius: 0 8px 8px 0;
+  /* Prevent toolbar from being selected or copied */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Toolbar groups */
@@ -178,6 +183,63 @@
   height: auto;
   border-radius: 8px;
   margin: 16px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Image hover effect in edit mode */
+.nest-post-editing .tiptap img:hover {
+  box-shadow: 0 0 0 3px rgba(90, 87, 217, 0.2);
+}
+
+/* Selected image (when clicked) */
+.tiptap img.ProseMirror-selectednode {
+  outline: 3px solid var(--color-iris);
+  outline-offset: 2px;
+  box-shadow: 0 4px 12px rgba(90, 87, 217, 0.3);
+}
+
+/* Image wrapper for delete button */
+.tiptap .image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* Delete button on image - shown on hover and when selected */
+.tiptap img:hover::after,
+.tiptap img.ProseMirror-selectednode::after {
+  content: '🗑';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+/* Instructions for image deletion */
+.nest-post-editing .tiptap img.ProseMirror-selectednode::before {
+  content: 'Нажмите Delete или Backspace чтобы удалить';
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Ubuntu Sans', sans-serif;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .tiptap strong {
@@ -210,130 +272,4 @@
   border: 2px dashed var(--color-iris);
   border-radius: 8px;
   transition: all 0.2s ease;
-}
-
-/* Resizable image styles (TipTap official resize) */
-.tiptap-resizable-container {
-  display: inline-block;
-  position: relative;
-  max-width: 100%;
-  margin: 16px 0;
-}
-
-.tiptap-resizable-wrapper {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-}
-
-.tiptap-resizable-wrapper img {
-  display: block;
-  margin: 0;
-}
-
-/* Resize handles */
-.tiptap-resizable-handle {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: var(--color-iris);
-  border: 2px solid white;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 10;
-  pointer-events: auto;
-  cursor: nwse-resize;
-}
-
-/* Show handles on hover (only in editable mode) */
-.tiptap[contenteditable="true"] .tiptap-resizable-wrapper:hover .tiptap-resizable-handle,
-.tiptap[contenteditable="true"] .tiptap-resizable-wrapper.resizing .tiptap-resizable-handle {
-  opacity: 1;
-}
-
-/* Position handles at corners */
-.tiptap-resizable-handle[data-direction="top-left"] {
-  top: -6px;
-  left: -6px;
-  cursor: nwse-resize;
-}
-
-.tiptap-resizable-handle[data-direction="top-right"] {
-  top: -6px;
-  right: -6px;
-  cursor: nesw-resize;
-}
-
-.tiptap-resizable-handle[data-direction="bottom-left"] {
-  bottom: -6px;
-  left: -6px;
-  cursor: nesw-resize;
-}
-
-.tiptap-resizable-handle[data-direction="bottom-right"] {
-  bottom: -6px;
-  right: -6px;
-  cursor: nwse-resize;
-}
-
-/* Active resizing state */
-.tiptap-resizable-wrapper.resizing {
-  outline: 2px solid var(--color-iris);
-  outline-offset: 2px;
-}
-
-/* Hide handles in read-only mode */
-.tiptap[contenteditable="false"] .tiptap-resizable-handle {
-  display: none;
-}
-
-/* Figure and figcaption styles (for image captions) */
-.tiptap figure {
-  margin: 16px 0;
-  max-width: 100%;
-}
-
-.tiptap figure img {
-  display: block;
-  margin: 0;
-}
-
-.tiptap figcaption {
-  margin-top: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--color-nimbus-dark);
-  font-style: italic;
-  background: var(--color-nimbus-light);
-  border-radius: 4px;
-  text-align: center;
-}
-
-/* Editable figcaption */
-.tiptap[contenteditable="true"] figcaption {
-  outline: none;
-  cursor: text;
-}
-
-.tiptap[contenteditable="true"] figcaption:hover {
-  background: rgba(124, 119, 238, 0.05);
-}
-
-.tiptap[contenteditable="true"] figcaption:focus {
-  background: rgba(124, 119, 238, 0.1);
-  border: 1px solid var(--color-iris);
-}
-
-/* Empty figcaption placeholder */
-.tiptap figcaption:empty::before {
-  content: 'Добавить подпись к изображению...';
-  color: var(--color-nimbus-medium);
-  font-style: italic;
-  pointer-events: none;
-}
-
-.tiptap[contenteditable="false"] figcaption:empty {
-  display: none;
 }

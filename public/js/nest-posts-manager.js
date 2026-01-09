@@ -1,6 +1,6 @@
 // nest-posts-manager.js
 // TipTap modules will be loaded dynamically to avoid blocking page load
-let Editor, StarterKit, Link, Image, Placeholder, ImageFigure;
+let Editor, StarterKit, Link, Image, Placeholder;
 let tiptapModulesLoaded = false;
 
 // Load TipTap modules dynamically (only when needed for editing)
@@ -8,13 +8,12 @@ async function loadTipTapModules() {
   if (tiptapModulesLoaded) return;
 
   console.log('[PostsManager] Loading TipTap modules...');
-  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, imageFigureModule] = await Promise.all([
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
     import('https://esm.sh/@tiptap/core@2.1.13'),
     import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
-    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12')
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
   ]);
 
   Editor = editorModule.Editor;
@@ -22,7 +21,6 @@ async function loadTipTapModules() {
   Link = linkModule.default;
   Image = imageModule.default;
   Placeholder = placeholderModule.default;
-  ImageFigure = imageFigureModule.default;
   tiptapModulesLoaded = true;
   console.log('[PostsManager] TipTap modules loaded');
 }
@@ -50,6 +48,13 @@ export class NestPostsManager {
     if (window.dayjs) {
       dayjs.extend(dayjs_plugin_relativeTime);
       dayjs.locale('ru');
+    }
+
+    // Preload TipTap modules in background if this is own nest
+    if (this.config.isOwnNest) {
+      loadTipTapModules().catch(err => {
+        console.error('[PostsManager] Failed to preload TipTap modules:', err);
+      });
     }
   }
 
@@ -613,24 +618,6 @@ export class NestPostsManager {
           const alt = node.attrs?.alt || '';
           return `<img src="${src}" alt="${alt}" class="tiptap-image" loading="lazy" decoding="async">`;
 
-        case 'figure':
-          let figureHtml = '<figure>';
-          if (node.content) {
-            figureHtml += node.content.map(c => {
-              if (c.type === 'image') {
-                const src = c.attrs?.src || '';
-                const alt = c.attrs?.alt || '';
-                return `<img src="${src}" alt="${alt}" class="tiptap-image" loading="lazy" decoding="async">`;
-              } else if (c.type === 'figcaption') {
-                const captionContent = c.content?.map(cc => this.nodeToHtml(cc)).join('') || '';
-                return `<figcaption>${captionContent}</figcaption>`;
-              }
-              return '';
-            }).join('');
-          }
-          figureHtml += '</figure>';
-          return figureHtml;
-
         case 'horizontalRule':
           return '<hr>';
 
@@ -826,55 +813,58 @@ export class NestPostsManager {
   createToolbar(postId) {
     const toolbar = document.createElement('div');
     toolbar.className = 'tiptap-toolbar';
+    // Make toolbar non-editable and non-selectable to prevent content leakage
+    toolbar.contentEditable = 'false';
+    toolbar.setAttribute('data-tiptap-toolbar', 'true');
     toolbar.innerHTML = `
       <div class="tiptap-toolbar-group">
         <button type="button" class="tiptap-toolbar-button" data-action="bold" title="Bold (Ctrl+B)">
-          <img src="assets/tiptap/bold.svg" alt="Bold" width="24" height="24">
+          <img src="assets/tiptap/bold.svg" alt="Bold" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="italic" title="Italic (Ctrl+I)">
-          <img src="assets/tiptap/Italic.svg" alt="Italic" width="24" height="24">
+          <img src="assets/tiptap/Italic.svg" alt="Italic" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="code" title="Code (Ctrl+E)">
-          <img src="assets/tiptap/code.svg" alt="Code" width="24" height="24">
+          <img src="assets/tiptap/code.svg" alt="Code" width="24" height="24" draggable="false">
         </button>
       </div>
       <div class="tiptap-toolbar-separator"></div>
       <div class="tiptap-toolbar-group">
         <button type="button" class="tiptap-toolbar-button" data-action="h1" title="Heading 1">
-          <img src="assets/tiptap/h1.svg" alt="H1" width="24" height="24">
+          <img src="assets/tiptap/h1.svg" alt="H1" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="h2" title="Heading 2">
-          <img src="assets/tiptap/h2.svg" alt="H2" width="24" height="24">
+          <img src="assets/tiptap/h2.svg" alt="H2" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="h3" title="Heading 3">
-          <img src="assets/tiptap/h3.svg" alt="H3" width="24" height="24">
+          <img src="assets/tiptap/h3.svg" alt="H3" width="24" height="24" draggable="false">
         </button>
       </div>
       <div class="tiptap-toolbar-separator"></div>
       <div class="tiptap-toolbar-group">
         <button type="button" class="tiptap-toolbar-button" data-action="bulletList" title="Bullet List">
-          <img src="assets/tiptap/list-dashes.svg" alt="Bullet List" width="24" height="24">
+          <img src="assets/tiptap/list-dashes.svg" alt="Bullet List" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="orderedList" title="Ordered List">
-          <img src="assets/tiptap/list-numbers.svg" alt="Ordered List" width="24" height="24">
+          <img src="assets/tiptap/list-numbers.svg" alt="Ordered List" width="24" height="24" draggable="false">
         </button>
       </div>
       <div class="tiptap-toolbar-separator"></div>
       <div class="tiptap-toolbar-group">
         <button type="button" class="tiptap-toolbar-button" data-action="codeBlock" title="Code Block">
-          <img src="assets/tiptap/code-block.svg" alt="Code Block" width="24" height="24">
+          <img src="assets/tiptap/code-block.svg" alt="Code Block" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="link" title="Link">
-          <img src="assets/tiptap/link.svg" alt="Link" width="24" height="24">
+          <img src="assets/tiptap/link.svg" alt="Link" width="24" height="24" draggable="false">
         </button>
         <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">
-          <img src="assets/tiptap/image.svg" alt="Image" width="24" height="24">
+          <img src="assets/tiptap/image.svg" alt="Image" width="24" height="24" draggable="false">
         </button>
       </div>
       <div class="tiptap-toolbar-separator"></div>
       <div class="tiptap-toolbar-group">
         <button type="button" class="tiptap-toolbar-button tiptap-toolbar-delete" data-action="delete" data-post-id="${postId}" title="Удалить статью">
-          <img src="assets/tiptap/del.svg" alt="Delete" width="24" height="24">
+          <img src="assets/tiptap/del.svg" alt="Delete" width="24" height="24" draggable="false">
         </button>
       </div>
     `;
@@ -1135,20 +1125,10 @@ export class NestPostsManager {
           },
         }),
         Image.configure({
+          inline: false,
+          allowBase64: true,
           HTMLAttributes: {
             class: 'tiptap-image',
-          },
-          resize: {
-            enabled: true,
-            directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
-            minWidth: 100,
-            minHeight: 100,
-            alwaysPreserveAspectRatio: false,
-          },
-        }),
-        ImageFigure.configure({
-          HTMLAttributes: {
-            class: 'tiptap-figure',
           },
         }),
         Placeholder.configure({
@@ -1266,6 +1246,10 @@ export class NestPostsManager {
     const editor = this.editors.get(postId);
     if (!editor) return;
 
+    // Save current scroll position
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+
     editor.destroy();
     this.editors.delete(postId);
 
@@ -1288,6 +1272,11 @@ export class NestPostsManager {
       // Post was deleted, remove element
       postEl.remove();
     }
+
+    // Restore scroll position after DOM updates
+    requestAnimationFrame(() => {
+      window.scrollTo(scrollX, scrollY);
+    });
 
     // Re-enable insert zones if no editors are active
     this.updateEditorActiveState();

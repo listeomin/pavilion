@@ -12,7 +12,7 @@ import { NestPostsManager } from './nest-posts-manager.js?v=22';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
-let Editor, StarterKit, Link, Image, Placeholder, ImageFigure;
+let Editor, StarterKit, Link, Image, Placeholder;
 let tiptapLoaded = false;
 
 // Suppress YouTube postMessage errors globally
@@ -77,13 +77,12 @@ async function loadTipTap() {
   if (tiptapLoaded) return;
 
   console.log('[Nest] Loading TipTap modules...');
-  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, imageFigureModule] = await Promise.all([
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
     import('https://esm.sh/@tiptap/core@2.1.13'),
     import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
-    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12')
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
   ]);
 
   Editor = editorModule.Editor;
@@ -91,7 +90,6 @@ async function loadTipTap() {
   Link = linkModule.default;
   Image = imageModule.default;
   Placeholder = placeholderModule.default;
-  ImageFigure = imageFigureModule.default;
   tiptapLoaded = true;
   console.log('[Nest] TipTap modules loaded');
 }
@@ -521,18 +519,6 @@ function alignUserHeader() {
           Image.configure({
             HTMLAttributes: {
               class: 'tiptap-image',
-            },
-            resize: {
-              enabled: true,
-              directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
-              minWidth: 100,
-              minHeight: 100,
-              alwaysPreserveAspectRatio: false,
-            },
-          }),
-          ImageFigure.configure({
-            HTMLAttributes: {
-              class: 'tiptap-figure',
             },
           }),
           Placeholder.configure({
