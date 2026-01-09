@@ -87,11 +87,74 @@
   -ms-overflow-style: none; /* IE and Edge */
 }
 
-/* Navigation content panel */
+/* Navigation content panel - grid of category tiles */
 .nest-navigation-content {
-  padding: 0;
+  padding: 0 0 0 32px;
   background: transparent;
   border: none;
+  display: grid;
+  grid-template-columns: repeat(2, 160px);
+  gap: 24px;
+  row-gap: 24px;
+}
+
+/* Category tile */
+.category-tile {
+  width: 160px;
+  height: 160px;
+  background: #FFFFFF;
+  box-shadow: 0px 4px 16px #E8E6DC;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  text-decoration: none;
+}
+
+.category-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 20px #E8E6DC;
+}
+
+.category-tile.active {
+  border-color: var(--color-cactus);
+}
+
+.category-tile-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.category-tile-name {
+  font-family: 'Ubuntu Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 138%;
+  text-align: center;
+  color: #5E5D59;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-tile-count {
+  font-family: 'Ubuntu Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 138%;
+  text-align: center;
+  color: #5E5D59;
+  opacity: 0.6;
 }
 
 /* Add section link */

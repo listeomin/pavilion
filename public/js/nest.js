@@ -1270,23 +1270,33 @@ function alignUserHeader() {
       const navItem = document.querySelector('.nest-nav-item[href="#navigation"]');
       if (!navItem) return;
 
-      // Get manually created sections (only for own nest)
-      let sectionNames = getSections();
+      // Fixed categories in specified order
+      const categories = [
+        { name: 'Лента', image: 'лента.png' },
+        { name: 'Разработка', image: 'разработка.png' },
+        { name: 'Наблюдения', image: 'наблюдения.png' },
+        { name: 'Психонавтика', image: 'психонавтика.png' },
+        { name: 'Краски да холсты', image: 'краски_да_холсты.png' },
+        { name: 'Стихи', image: 'стихи.png' },
+        { name: 'Рассказы', image: 'рассказы.png' },
+        { name: 'Воспоминания', image: 'воспоминания.png' },
+        { name: 'Письма', image: 'письма.png' },
+        { name: 'Фотокарточки', image: 'фотокарточки.png' },
+        { name: 'Пейджер', image: 'пейджер.png' },
+        { name: 'Музыка', image: 'музыка.png' },
+        { name: 'Кинофильмы', image: 'кинофильмы.png' },
+        { name: 'Черновики', image: 'черновики.png' }
+      ];
 
-      // For visitors or if no manual sections, use tags from content
-      if (!nestConfig.isOwnNest || sectionNames.length === 0) {
-        const autoTags = extractTagsFromContent();
-        // Merge with manual sections (manual takes priority)
-        const manualSet = new Set(sectionNames.map(s => s.toLowerCase()));
-        autoTags.forEach(tag => {
-          if (!manualSet.has(tag.toLowerCase())) {
-            sectionNames.push(tag);
+      // Count posts per category
+      const categoryCounts = {};
+      if (postsManager && postsManager.posts) {
+        postsManager.posts.forEach(post => {
+          if (post.tag) {
+            categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
           }
         });
       }
-
-      // Parse content to find posts for each section
-      const { sections: contentSections } = parseContentStructure(sectionNames);
 
       // Create tabs content container if it doesn't exist
       let tabsContainer = document.querySelector('.nest-tabs-content');
@@ -1310,95 +1320,41 @@ function alignUserHeader() {
       // Clear and rebuild navigation content
       navContainer.innerHTML = '';
 
-      // Show sections
-      if (sectionNames.length === 0 && !nestConfig.isOwnNest) {
-        navContainer.innerHTML += '<div class="nav-empty">Нет разделов</div>';
-        return;
-      }
+      // Build category tiles
+      categories.forEach(category => {
+        const count = categoryCounts[category.name] || 0;
 
-      // Build navigation HTML for each section
-      sectionNames.forEach(sectionName => {
-        const section = document.createElement('div');
-        section.className = 'nav-section';
+        const tile = document.createElement('div');
+        tile.className = 'category-tile';
+        tile.dataset.section = category.name;
 
-        const sectionHeader = document.createElement('div');
-        sectionHeader.className = 'nav-section-header';
-        sectionHeader.textContent = capitalize(sectionName);
-        sectionHeader.dataset.section = sectionName;
-
-        // Check if this section is active
-        if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
-          sectionHeader.classList.add('active');
+        // Check if active
+        if (currentFilter?.type === 'section' && currentFilter.name === category.name) {
+          tile.classList.add('active');
         }
 
-        // Add context menu for manual sections (only for own nest)
-        if (nestConfig.isOwnNest) {
-          const manualSections = getSections();
-          if (manualSections.includes(sectionName)) {
-            sectionHeader.style.cursor = 'context-menu';
-            sectionHeader.addEventListener('contextmenu', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              showSectionContextMenu(sectionName, e.clientX, e.clientY);
-            });
-          }
-        }
+        // Image
+        const img = document.createElement('img');
+        img.className = 'category-tile-image';
+        img.src = `assets/categories/${category.image}`;
+        img.alt = category.name;
 
-        section.appendChild(sectionHeader);
+        // Name
+        const nameEl = document.createElement('div');
+        nameEl.className = 'category-tile-name';
+        nameEl.textContent = category.name;
 
-        // Add posts for this section
-        const posts = contentSections[sectionName] || [];
-        const postsList = document.createElement('div');
-        postsList.className = 'nav-posts';
+        // Count
+        const countEl = document.createElement('div');
+        countEl.className = 'category-tile-count';
+        countEl.textContent = count > 0 ? `${count} ${count === 1 ? 'статья' : count < 5 ? 'статьи' : 'статей'}` : 'Пусто';
 
-        if (posts.length === 0) {
-          const emptyMsg = document.createElement('div');
-          emptyMsg.className = 'nav-post-empty';
-          emptyMsg.textContent = 'Нет статей';
-          postsList.appendChild(emptyMsg);
-        } else {
-          posts.forEach(post => {
-            const postItem = document.createElement('div');
-            postItem.className = 'nav-post';
-            postItem.textContent = post.title;
-            postItem.dataset.postStartIndex = post.startIndex;
-            postItem.dataset.postEndIndex = post.endIndex;
+        tile.appendChild(img);
+        tile.appendChild(nameEl);
+        tile.appendChild(countEl);
 
-            // Check if this post is active
-            if (currentFilter?.type === 'post' && currentFilter.startIndex === post.startIndex) {
-              postItem.classList.add('active');
-            }
-
-            postsList.appendChild(postItem);
-          });
-        }
-
-        section.appendChild(postsList);
-        navContainer.appendChild(section);
+        navContainer.appendChild(tile);
       });
-
-      // Add "[Добавить раздел]" link at the bottom (only in edit mode)
-      if (nestConfig.isOwnNest) {
-        const addSectionContainer = document.createElement('div');
-        addSectionContainer.className = 'nav-add-section';
-
-        const addSectionLink = document.createElement('a');
-        addSectionLink.className = 'nav-add-section-link';
-        addSectionLink.textContent = '[добавить раздел]';
-        addSectionLink.href = '#';
-
-        addSectionLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          showInputModal('Новый раздел', 'Название раздела', (value) => {
-            if (value && value.trim()) {
-              addSection(value.trim());
-            }
-          });
-        });
-
-        addSectionContainer.appendChild(addSectionLink);
-        navContainer.appendChild(addSectionContainer);
-      }
 
       // Place navigation content in tabs container (only if not already there)
       if (!navContainer.parentElement || navContainer.parentElement !== tabsContainer) {
@@ -1411,10 +1367,10 @@ function alignUserHeader() {
 
     // Attach click handlers to navigation
     const attachNavigationHandlers = () => {
-      // Section headers
-      document.querySelectorAll('.nav-section-header').forEach(header => {
-        header.addEventListener('click', (e) => {
-          const sectionName = e.target.dataset.section;
+      // Category tiles
+      document.querySelectorAll('.category-tile').forEach(tile => {
+        tile.addEventListener('click', (e) => {
+          const sectionName = tile.dataset.section;
 
           // If postsManager is available (nest_posts mode), use it for filtering
           if (postsManager) {
@@ -1457,40 +1413,6 @@ function alignUserHeader() {
             applyFilter();
             renderNavigation(); // Re-render to update active states
           }
-        });
-      });
-
-      // Posts
-      document.querySelectorAll('.nav-post').forEach(postEl => {
-        postEl.addEventListener('click', (e) => {
-          const postTitle = e.target.textContent.trim();
-          
-          // Check if this is a post from nest_posts (has individual page)
-          // For now, only "Ветер" - later we'll check via API
-          if (postTitle === 'Ветер') {
-            // Navigate to post page
-            const baseUrl = nestConfig.urlUsername 
-              ? CONFIG.BASE_PATH + '/nest/' + nestConfig.urlUsername
-              : CONFIG.BASE_PATH + '/nest';
-            window.location.href = baseUrl + '/veter';
-            return;
-          }
-
-          // Legacy posts - use filtering
-          const startIndex = parseInt(e.target.dataset.postStartIndex);
-          const endIndex = parseInt(e.target.dataset.postEndIndex);
-
-          // Toggle filter
-          if (currentFilter?.type === 'post' && currentFilter.startIndex === startIndex) {
-            // Deactivate filter
-            currentFilter = null;
-          } else {
-            // Activate post filter
-            currentFilter = { type: 'post', startIndex, endIndex };
-          }
-
-          applyFilter();
-          renderNavigation(); // Re-render to update active states
         });
       });
     };
