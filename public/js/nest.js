@@ -1745,13 +1745,15 @@ function alignUserHeader() {
         watchForImages();
       }
     } else {
-      // Load single post from nest_posts by slug
+      // Load single post from nest_posts by slug using API
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
-      await postsManager.loadPosts();
-      const post = postsManager.posts.find(p => p.slug === nestConfig.postSlug);
 
-      if (post) {
-        postsManager.renderSinglePost(document.getElementById('nest-editor-container'), post);
+      // Fetch single post directly by slug (not limited by pagination)
+      const response = await fetch(`${CONFIG.BASE_PATH}/api/nest_posts.php?action=get&username=${encodeURIComponent(nestConfig.urlUsername)}&slug=${encodeURIComponent(nestConfig.postSlug)}`);
+      const result = await response.json();
+
+      if (result.success && result.post) {
+        postsManager.renderSinglePost(document.getElementById('nest-editor-container'), result.post);
       } else {
         // Post not found, show 404 or redirect
         document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';

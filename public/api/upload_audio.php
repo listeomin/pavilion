@@ -73,8 +73,8 @@ try {
     // Create filename
     $filename = $cleanName . '.' . $extension;
 
-    // Upload to /collection/music/ directory (outside public for safety)
-    $uploadDir = __DIR__ . '/../../collection/music/';
+    // Upload to /collection/music/ directory (in root, outside pavilion)
+    $uploadDir = __DIR__ . '/../../../collection/music/';
     $uploadPath = $uploadDir . $filename;
 
     // Ensure directory exists
@@ -109,18 +109,14 @@ try {
         $metadata['track'] = trim($parts[1]);
     }
 
-    // Auto-detect BASE_PATH from request URI
-    $uri = $_SERVER['REQUEST_URI'] ?? '';
-    $basePath = '';
-    if (strpos($uri, '/pavilion/') === 0) {
-        $basePath = '/pavilion';
-    }
+    // Collection is in root, not in pavilion
+    // So URL is always /collection/music/ without basePath
 
     // Return success response
     echo json_encode([
         'success' => 1,
         'file' => [
-            'url' => $basePath . '/collection/music/' . $filename,
+            'url' => '/collection/music/' . $filename,
             'name' => $file['name'],
             'size' => $file['size'],
             'artist' => $metadata['artist'],
