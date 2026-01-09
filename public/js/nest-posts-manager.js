@@ -16,7 +16,7 @@ async function loadTipTapModules() {
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
     import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
-    import('./tiptap-audio-extension.js?v=1')
+    import('./tiptap-audio-extension.js?v=2')
   ]);
 
   Editor = editorModule.Editor;

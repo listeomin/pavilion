@@ -30,6 +30,18 @@ export const AudioPlayer = Node.create({
     return [
       {
         tag: 'div[data-audio-player]',
+        getAttrs: (dom) => {
+          // Extract attributes from HTML when loading existing content
+          const audioUrl = dom.getAttribute('data-audio-url');
+          const artistEl = dom.querySelector('.audio-artist');
+          const trackEl = dom.querySelector('.audio-track');
+
+          return {
+            src: audioUrl,
+            artist: artistEl ? artistEl.textContent : '',
+            track: trackEl ? trackEl.textContent : '',
+          };
+        },
       },
     ];
   },
