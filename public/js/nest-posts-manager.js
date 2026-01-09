@@ -1,6 +1,8 @@
 // nest-posts-manager.js
+import { initAudioPlayer } from './audio-player.js?v=2';
+
 // TipTap modules will be loaded dynamically to avoid blocking page load
-let Editor, StarterKit, Link, Image, Placeholder;
+let Editor, StarterKit, Link, Image, Placeholder, AudioPlayer;
 let tiptapModulesLoaded = false;
 
 // Load TipTap modules dynamically (only when needed for editing)
@@ -8,12 +10,13 @@ async function loadTipTapModules() {
   if (tiptapModulesLoaded) return;
 
   console.log('[PostsManager] Loading TipTap modules...');
-  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, audioModule] = await Promise.all([
     import('https://esm.sh/@tiptap/core@2.1.13'),
     import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
     import('https://esm.sh/@tiptap/extension-link@2.1.13'),
     import('https://esm.sh/@tiptap/extension-image@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
+    import('./tiptap-audio-extension.js?v=1')
   ]);
 
   Editor = editorModule.Editor;
@@ -21,6 +24,7 @@ async function loadTipTapModules() {
   Link = linkModule.default;
   Image = imageModule.default;
   Placeholder = placeholderModule.default;
+  AudioPlayer = audioModule.AudioPlayer;
   tiptapModulesLoaded = true;
   console.log('[PostsManager] TipTap modules loaded');
 }
@@ -618,6 +622,31 @@ export class NestPostsManager {
           const alt = node.attrs?.alt || '';
           return `<img src="${src}" alt="${alt}" class="tiptap-image" loading="lazy" decoding="async">`;
 
+        case 'audioPlayer':
+          const audioSrc = node.attrs?.src || '';
+          const artist = node.attrs?.artist || '';
+          const track = node.attrs?.track || 'Аудио файл';
+          return `
+            <div class="audio-player" data-audio-player data-audio-url="${audioSrc}">
+              <button class="audio-play-btn" title="Воспроизвести">
+                <svg viewBox="0 0 10 12" fill="none" class="play-icon">
+                  <path d="M0.5 0.492737V11.5077C0.501568 11.5956 0.526397 11.6815 0.571779 11.7567C0.617162 11.832 0.681744 11.894 0.758733 11.9364C0.835721 11.9788 0.922609 12.0001 1.01049 11.9983C1.09838 11.9964 1.18423 11.9714 1.25938 11.9258L10.2644 6.41826C10.3363 6.37479 10.3958 6.31343 10.4371 6.24017C10.4784 6.16692 10.5 6.08415 10.5 6.00015C10.5 5.91616 10.4784 5.83339 10.4371 5.76014C10.3958 5.68688 10.3363 5.62552 10.2644 5.58205L1.25938 0.0745248C1.18423 0.0289309 1.09838 0.00393112 1.01049 0.00208127C0.922609 0.000231421 0.835721 0.0215731 0.758733 0.0639786C0.681744 0.106384 0.617162 0.168341 0.571779 0.243595C0.526397 0.318849 0.501568 0.404787 0.5 0.492737Z" fill="#FAF9F5"/>
+                </svg>
+                <svg viewBox="0 0 8 12" fill="none" class="pause-icon" style="display: none;">
+                  <path d="M0.5 1C0.5 0.723858 0.723858 0.5 1 0.5H2.5C2.77614 0.5 3 0.723858 3 1V11C3 11.2761 2.77614 11.5 2.5 11.5H1C0.723858 11.5 0.5 11.2761 0.5 11V1Z M5 1C5 0.723858 5.22386 0.5 5.5 0.5H7C7.27614 0.5 7.5 0.723858 7.5 1V11C7.5 11.2761 7.27614 11.5 7 11.5H5.5C5.22386 11.5 5 11.2761 5 11V1Z" fill="#FAF9F5"/>
+                </svg>
+              </button>
+              <div class="audio-info">
+                <div class="audio-artist">${artist}</div>
+                <div class="audio-track">${track}</div>
+              </div>
+              <div class="audio-time">00:00</div>
+              <div class="audio-progress-container">
+                <div class="audio-progress-bar"></div>
+              </div>
+            </div>
+          `;
+
         case 'horizontalRule':
           return '<hr>';
 
@@ -782,6 +811,16 @@ export class NestPostsManager {
       img.decoding = 'async';
     });
 
+    // Initialize audio players
+    contentEl.querySelectorAll('.audio-player[data-audio-player]').forEach(playerEl => {
+      const audioUrl = playerEl.dataset.audioUrl;
+      const artist = playerEl.querySelector('.audio-artist')?.textContent || '';
+      const track = playerEl.querySelector('.audio-track')?.textContent || '';
+      if (audioUrl) {
+        initAudioPlayer(playerEl, audioUrl, { type: 'music', artist, track });
+      }
+    });
+
     postEl.appendChild(contentEl);
 
     if (this.config.isOwnNest) {
@@ -865,6 +904,9 @@ export class NestPostsManager {
         <button type="button" class="tiptap-toolbar-button" data-action="image" title="Image">
           <img src="assets/tiptap/image.svg" alt="Image" width="24" height="24" draggable="false">
         </button>
+        <button type="button" class="tiptap-toolbar-button" data-action="audio" title="Audio">
+          <img src="assets/tiptap/music.svg" alt="Audio" width="24" height="24" draggable="false">
+        </button>
       </div>
       <div class="tiptap-toolbar-separator"></div>
       <div class="tiptap-toolbar-group">
@@ -946,6 +988,41 @@ export class NestPostsManager {
               }
             };
             input.click();
+            break;
+          case 'audio':
+            const audioInput = document.createElement('input');
+            audioInput.type = 'file';
+            audioInput.accept = 'audio/*';
+            audioInput.onchange = async (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+
+              try {
+                const formData = new FormData();
+                formData.append('audio', file);
+
+                const response = await fetch(this.apiPath + '/api/upload_audio.php', {
+                  method: 'POST',
+                  body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.file) {
+                  editor.chain().focus().setAudioPlayer({
+                    src: result.file.url,
+                    artist: result.file.artist || '',
+                    track: result.file.track || file.name
+                  }).run();
+                } else {
+                  alert('Ошибка загрузки аудио: ' + (result.error || 'Неизвестная ошибка'));
+                }
+              } catch (err) {
+                console.error('[NestPostsManager] Error uploading audio:', err);
+                alert('Ошибка: ' + err.message);
+              }
+            };
+            audioInput.click();
             break;
           case 'delete':
             const postId = btn.dataset.postId;
@@ -1136,6 +1213,7 @@ export class NestPostsManager {
             class: 'tiptap-image',
           },
         }),
+        AudioPlayer,
         Placeholder.configure({
           placeholder: 'Начните писать...',
         }),
