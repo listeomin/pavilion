@@ -75,24 +75,41 @@ try {
 
     // Upload to /collection/music/ directory (in root, outside pavilion)
     $uploadDir = __DIR__ . '/../../../collection/music/';
-    $uploadPath = $uploadDir . $filename;
-
-    // Ensure directory exists
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    // Normalize path
+    $uploadDir = realpath($uploadDir);
+    if ($uploadDir === false) {
+        // If realpath fails, try to create the directory first
+        $uploadDir = __DIR__ . '/../../../collection/music/';
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0777, true)) {
+                echo json_encode(['success' => 0, 'error' => 'Failed to create directory: ' . $uploadDir]);
+                exit;
+            }
+        }
+        $uploadDir = realpath($uploadDir);
     }
+
+    $uploadPath = $uploadDir . '/' . $filename;
 
     // Check if file already exists and add number suffix if needed
     $counter = 1;
     while (file_exists($uploadPath)) {
         $filename = $cleanName . '_' . $counter . '.' . $extension;
-        $uploadPath = $uploadDir . $filename;
+        $uploadPath = $uploadDir . '/' . $filename;
         $counter++;
     }
 
-    // Move uploaded file
+    // Move uploaded file with detailed error reporting
     if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
-        echo json_encode(['success' => 0, 'error' => 'Failed to save file']);
+        $phpError = error_get_last();
+        $errorMsg = 'Failed to save file to: ' . $uploadPath;
+        if ($phpError) {
+            $errorMsg .= ' - PHP Error: ' . $phpError['message'];
+        }
+        if (!is_writable($uploadDir)) {
+            $errorMsg .= ' - Directory not writable';
+        }
+        echo json_encode(['success' => 0, 'error' => $errorMsg]);
         exit;
     }
 
