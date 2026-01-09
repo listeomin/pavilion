@@ -1,8 +1,8 @@
 /* Developer Nest button */
 #dev-nest-btn {
   position: fixed;
-  bottom: 24px;
-  right: calc(320px + 40px + 32px); /* sidebar width + gap + offset = 392px */
+  bottom: 32px;
+  right: calc(500px - 32px); /* main-column margin-right (500px) minus offset (32px) = 468px */
   width: 40px;
   height: 40px;
   border: none;
@@ -29,6 +29,13 @@
   height: 65%;
   display: block;
   filter: brightness(0) invert(1);
+}
+
+/* Responsive: on small screens move button to right edge */
+@media (max-width: 639px) {
+  #dev-nest-btn {
+    right: 32px;
+  }
 }
 
 /* Developer page background sticker */

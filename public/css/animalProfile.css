@@ -371,8 +371,8 @@
 /* Animal Profile Button */
 .animal-profile-trigger {
   position: fixed;
-  top: 24px;
-  right: calc(320px + 40px + 32px); /* sidebar width + gap + offset = 392px */
+  top: 32px;
+  right: calc(500px - 32px); /* main-column margin-right (500px) minus offset (32px) = 468px */
   width: 40px;
   height: 40px;
   border: none;
@@ -399,5 +399,12 @@
 
 /* NightShift button adjustment */
 #nightshift-toggle {
-  top: 76px !important;
+  top: 84px !important;
+}
+
+/* Responsive: on small screens move buttons to right edge */
+@media (max-width: 639px) {
+  .animal-profile-trigger {
+    right: 32px;
+  }
 }
