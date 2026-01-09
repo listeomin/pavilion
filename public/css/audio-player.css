@@ -10,7 +10,7 @@
   transition: background 0.2s;
   position: relative;
   padding-left: 32px;
-  overflow: hidden;
+  overflow: visible;
   width: 320px;
   height: 60px;
   box-sizing: border-box;
@@ -37,7 +37,11 @@
   justify-content: center;
   flex-shrink: 0;
   transition: background 0.2s;
-  position: relative;
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .audio-play-btn:hover {
