@@ -248,7 +248,7 @@ export class NestPostsManager {
 
     // Add click handlers to menu items
     menu.querySelectorAll('.context-menu-item').forEach(item => {
-      item.addEventListener('click', async () => {
+      item.addEventListener('click', () => {
         const sortMode = item.dataset.sort;
         this.currentSort = sortMode;
         localStorage.setItem('nest-sort-mode', sortMode);
@@ -257,7 +257,7 @@ export class NestPostsManager {
         // Re-render posts with new sort
         const container = document.getElementById('nest-editor-container');
         if (container) {
-          await this.renderPostsList(container);
+          this.renderPostsList(container);
         }
       });
     });
@@ -354,7 +354,7 @@ export class NestPostsManager {
     return posts;
   }
 
-  async renderPostsList(container, append = false) {
+  renderPostsList(container, append = false) {
     if (!append) {
       container.innerHTML = '';
     }
@@ -382,15 +382,15 @@ export class NestPostsManager {
     const startIndex = append ? container.querySelectorAll('.nest-post').length : 0;
     const postsToRender = append ? sortedPosts.slice(startIndex) : sortedPosts;
 
-    for (const post of postsToRender) {
-      const postEl = await this.createPostElement(post);
+    postsToRender.forEach((post) => {
+      const postEl = this.createPostElement(post);
       container.appendChild(postEl);
 
       if (this.config.isOwnNest) {
         const insertZone = this.createInsertZone(post.position + 1);
         container.appendChild(insertZone);
       }
-    }
+    });
 
     // Add loading indicator if more posts available
     if (!this.config.isOwnNest && this.hasMorePosts) {
@@ -409,7 +409,7 @@ export class NestPostsManager {
       const loadingEl = entries[0];
       if (loadingEl.isIntersecting && !this.isLoading && this.hasMorePosts) {
         await this.loadPosts();
-        await this.renderPostsList(container, true);
+        this.renderPostsList(container, true);
       }
     }, {
       rootMargin: '200px' // Start loading 200px before reaching bottom
@@ -435,9 +435,9 @@ export class NestPostsManager {
   }
 
   // Render single post view (read-only, no edit mode)
-  async renderSinglePost(container, post) {
+  renderSinglePost(container, post) {
     container.innerHTML = '';
-    const postEl = await this.createPostElement(post);
+    const postEl = this.createPostElement(post);
     // Remove hover/click handlers for single post view
     postEl.classList.remove('nest-post-hover');
     postEl.style.cursor = 'default';
@@ -551,7 +551,7 @@ export class NestPostsManager {
     });
   }
 
-  async convertJsonToHtml(jsonContent) {
+  convertJsonToHtml(jsonContent) {
     if (!jsonContent || jsonContent === '{}' || jsonContent.trim() === '') {
       return '<p><br></p>';
     }
@@ -560,26 +560,130 @@ export class NestPostsManager {
       // Try to parse as JSON
       const parsed = JSON.parse(jsonContent);
 
-      // Load TipTap modules if not already loaded
-      await loadTipTapModules();
+      // Simple JSON to HTML converter (without loading TipTap)
+      if (parsed.type === 'doc' && parsed.content) {
+        return this.tiptapJsonToHtml(parsed.content);
+      }
 
-      // Create temporary editor to convert JSON to HTML
-      const tempDiv = document.createElement('div');
-      const tempEditor = new Editor({
-        element: tempDiv,
-        extensions: [StarterKit, Link, Image, ImageFigure],
-        content: parsed,
-      });
-      const html = tempEditor.getHTML();
-      tempEditor.destroy();
-      return html;
+      return '<p><br></p>';
     } catch (e) {
       // If not JSON, treat as HTML
       return jsonContent;
     }
   }
 
-  async createPostElement(post) {
+  // Simple TipTap JSON to HTML converter (without loading full TipTap)
+  tiptapJsonToHtml(nodes) {
+    return nodes.map(node => {
+      switch (node.type) {
+        case 'paragraph':
+          if (!node.content || node.content.length === 0) {
+            return '<p><br></p>';
+          }
+          const pContent = node.content.map(c => this.nodeToHtml(c)).join('');
+          return `<p>${pContent}</p>`;
+
+        case 'heading':
+          const level = node.attrs?.level || 2;
+          const hContent = node.content?.map(c => this.nodeToHtml(c)).join('') || '';
+          return `<h${level}>${hContent}</h${level}>`;
+
+        case 'bulletList':
+          const ulItems = node.content?.map(li => this.tiptapJsonToHtml([li])).join('') || '';
+          return `<ul>${ulItems}</ul>`;
+
+        case 'orderedList':
+          const olItems = node.content?.map(li => this.tiptapJsonToHtml([li])).join('') || '';
+          return `<ol>${olItems}</ol>`;
+
+        case 'listItem':
+          const liContent = node.content?.map(c => this.tiptapJsonToHtml([c])).join('') || '';
+          return `<li>${liContent}</li>`;
+
+        case 'codeBlock':
+          const codeContent = node.content?.map(c => this.nodeToHtml(c)).join('') || '';
+          return `<pre><code>${codeContent}</code></pre>`;
+
+        case 'blockquote':
+          const bqContent = node.content?.map(c => this.tiptapJsonToHtml([c])).join('') || '';
+          return `<blockquote>${bqContent}</blockquote>`;
+
+        case 'image':
+          const src = node.attrs?.src || '';
+          const alt = node.attrs?.alt || '';
+          return `<img src="${src}" alt="${alt}" class="tiptap-image" loading="lazy" decoding="async">`;
+
+        case 'figure':
+          let figureHtml = '<figure>';
+          if (node.content) {
+            figureHtml += node.content.map(c => {
+              if (c.type === 'image') {
+                const src = c.attrs?.src || '';
+                const alt = c.attrs?.alt || '';
+                return `<img src="${src}" alt="${alt}" class="tiptap-image" loading="lazy" decoding="async">`;
+              } else if (c.type === 'figcaption') {
+                const captionContent = c.content?.map(cc => this.nodeToHtml(cc)).join('') || '';
+                return `<figcaption>${captionContent}</figcaption>`;
+              }
+              return '';
+            }).join('');
+          }
+          figureHtml += '</figure>';
+          return figureHtml;
+
+        case 'horizontalRule':
+          return '<hr>';
+
+        default:
+          return '';
+      }
+    }).join('');
+  }
+
+  // Convert text node with marks to HTML
+  nodeToHtml(node) {
+    if (node.type === 'text') {
+      let html = node.text || '';
+
+      // Escape HTML
+      html = html.replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;')
+                 .replace(/"/g, '&quot;');
+
+      // Apply marks
+      if (node.marks) {
+        node.marks.forEach(mark => {
+          switch (mark.type) {
+            case 'bold':
+              html = `<strong>${html}</strong>`;
+              break;
+            case 'italic':
+              html = `<em>${html}</em>`;
+              break;
+            case 'code':
+              html = `<code>${html}</code>`;
+              break;
+            case 'link':
+              const href = mark.attrs?.href || '';
+              html = `<a href="${href}" class="tiptap-link">${html}</a>`;
+              break;
+            case 'strike':
+              html = `<s>${html}</s>`;
+              break;
+          }
+        });
+      }
+
+      return html;
+    } else if (node.type === 'hardBreak') {
+      return '<br>';
+    }
+
+    return '';
+  }
+
+  createPostElement(post) {
     const postEl = document.createElement('article');
     postEl.className = 'nest-post';
     postEl.dataset.postId = post.id;
@@ -682,7 +786,7 @@ export class NestPostsManager {
     const contentEl = document.createElement('div');
     contentEl.className = 'nest-post-content';
     // Convert JSON to HTML for display
-    const html = await this.convertJsonToHtml(post.content);
+    const html = this.convertJsonToHtml(post.content);
     contentEl.innerHTML = html;
 
     // Add lazy loading to all images in content
@@ -1178,7 +1282,7 @@ export class NestPostsManager {
 
     if (post) {
       // Replace only this post element, don't re-render entire list
-      const newPostEl = await this.createPostElement(post);
+      const newPostEl = this.createPostElement(post);
       postEl.replaceWith(newPostEl);
     } else {
       // Post was deleted, remove element
@@ -1267,7 +1371,7 @@ export class NestPostsManager {
         post.title = '';
 
         // Create new post element
-        const postEl = await this.createPostElement(post);
+        const postEl = this.createPostElement(post);
 
         // Create insert zone after new post
         const insertZoneAfter = this.createInsertZone(position + 1);
@@ -1315,7 +1419,7 @@ export class NestPostsManager {
       // Reload and re-render posts list
       await this.loadPosts();
       const container = document.getElementById('nest-editor-container');
-      await this.renderPostsList(container);
+      this.renderPostsList(container);
 
       // Re-enable insert zones if no editors are active
       this.updateEditorActiveState();
