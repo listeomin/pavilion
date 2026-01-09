@@ -1006,6 +1006,13 @@ export class NestPostsManager {
           HTMLAttributes: {
             class: 'tiptap-image',
           },
+          resize: {
+            enabled: true,
+            directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+            minWidth: 100,
+            minHeight: 100,
+            alwaysPreserveAspectRatio: false, // Shift+drag preserves aspect ratio
+          },
         }),
         Placeholder.configure({
           placeholder: 'Начните писать...',

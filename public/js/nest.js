@@ -8,7 +8,7 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=6';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
-import { NestPostsManager } from './nest-posts-manager.js?v=15';
+import { NestPostsManager } from './nest-posts-manager.js?v=16';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -519,6 +519,13 @@ function alignUserHeader() {
           Image.configure({
             HTMLAttributes: {
               class: 'tiptap-image',
+            },
+            resize: {
+              enabled: true,
+              directions: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+              minWidth: 100,
+              minHeight: 100,
+              alwaysPreserveAspectRatio: false, // Shift+drag preserves aspect ratio
             },
           }),
           Placeholder.configure({

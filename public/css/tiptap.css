@@ -211,3 +211,79 @@
   border-radius: 8px;
   transition: all 0.2s ease;
 }
+
+/* Resizable image styles (TipTap official resize) */
+.tiptap-resizable-container {
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  margin: 16px 0;
+}
+
+.tiptap-resizable-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.tiptap-resizable-wrapper img {
+  display: block;
+  margin: 0;
+}
+
+/* Resize handles */
+.tiptap-resizable-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-iris);
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  pointer-events: auto;
+  cursor: nwse-resize;
+}
+
+/* Show handles on hover (only in editable mode) */
+.tiptap[contenteditable="true"] .tiptap-resizable-wrapper:hover .tiptap-resizable-handle,
+.tiptap[contenteditable="true"] .tiptap-resizable-wrapper.resizing .tiptap-resizable-handle {
+  opacity: 1;
+}
+
+/* Position handles at corners */
+.tiptap-resizable-handle[data-direction="top-left"] {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.tiptap-resizable-handle[data-direction="top-right"] {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.tiptap-resizable-handle[data-direction="bottom-left"] {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.tiptap-resizable-handle[data-direction="bottom-right"] {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+/* Active resizing state */
+.tiptap-resizable-wrapper.resizing {
+  outline: 2px solid var(--color-iris);
+  outline-offset: 2px;
+}
+
+/* Hide handles in read-only mode */
+.tiptap[contenteditable="false"] .tiptap-resizable-handle {
+  display: none;
+}
