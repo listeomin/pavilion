@@ -1347,7 +1347,7 @@ function alignUserHeader() {
         // Count
         const countEl = document.createElement('div');
         countEl.className = 'category-tile-count';
-        countEl.textContent = count > 0 ? `${count} ${count === 1 ? 'статья' : count < 5 ? 'статьи' : 'статей'}` : 'Пусто';
+        countEl.textContent = count.toString();
 
         tile.appendChild(img);
         tile.appendChild(nameEl);
