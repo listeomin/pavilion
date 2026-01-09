@@ -1,10 +1,31 @@
 // nest-posts-manager.js
-import { Editor } from 'https://esm.sh/@tiptap/core@2.1.13';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.1.13';
-import Link from 'https://esm.sh/@tiptap/extension-link@2.1.13';
-import Image from 'https://esm.sh/@tiptap/extension-image@2.1.13';
-import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.1.13';
-import ImageFigure from 'https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12';
+// TipTap modules will be loaded dynamically to avoid blocking page load
+let Editor, StarterKit, Link, Image, Placeholder, ImageFigure;
+let tiptapModulesLoaded = false;
+
+// Load TipTap modules dynamically (only when needed for editing)
+async function loadTipTapModules() {
+  if (tiptapModulesLoaded) return;
+
+  console.log('[PostsManager] Loading TipTap modules...');
+  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, imageFigureModule] = await Promise.all([
+    import('https://esm.sh/@tiptap/core@2.1.13'),
+    import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-link@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-image@2.1.13'),
+    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13'),
+    import('https://esm.sh/@pentestpad/tiptap-extension-figure@1.0.12')
+  ]);
+
+  Editor = editorModule.Editor;
+  StarterKit = starterKitModule.default;
+  Link = linkModule.default;
+  Image = imageModule.default;
+  Placeholder = placeholderModule.default;
+  ImageFigure = imageFigureModule.default;
+  tiptapModulesLoaded = true;
+  console.log('[PostsManager] TipTap modules loaded');
+}
 
 export class NestPostsManager {
   constructor(config, apiPath) {
@@ -361,15 +382,15 @@ export class NestPostsManager {
     const startIndex = append ? container.querySelectorAll('.nest-post').length : 0;
     const postsToRender = append ? sortedPosts.slice(startIndex) : sortedPosts;
 
-    postsToRender.forEach((post) => {
-      const postEl = this.createPostElement(post);
+    for (const post of postsToRender) {
+      const postEl = await this.createPostElement(post);
       container.appendChild(postEl);
 
       if (this.config.isOwnNest) {
         const insertZone = this.createInsertZone(post.position + 1);
         container.appendChild(insertZone);
       }
-    });
+    }
 
     // Add loading indicator if more posts available
     if (!this.config.isOwnNest && this.hasMorePosts) {
@@ -414,9 +435,9 @@ export class NestPostsManager {
   }
 
   // Render single post view (read-only, no edit mode)
-  renderSinglePost(container, post) {
+  async renderSinglePost(container, post) {
     container.innerHTML = '';
-    const postEl = this.createPostElement(post);
+    const postEl = await this.createPostElement(post);
     // Remove hover/click handlers for single post view
     postEl.classList.remove('nest-post-hover');
     postEl.style.cursor = 'default';
@@ -530,7 +551,7 @@ export class NestPostsManager {
     });
   }
 
-  convertJsonToHtml(jsonContent) {
+  async convertJsonToHtml(jsonContent) {
     if (!jsonContent || jsonContent === '{}' || jsonContent.trim() === '') {
       return '<p><br></p>';
     }
@@ -538,6 +559,9 @@ export class NestPostsManager {
     try {
       // Try to parse as JSON
       const parsed = JSON.parse(jsonContent);
+
+      // Load TipTap modules if not already loaded
+      await loadTipTapModules();
 
       // Create temporary editor to convert JSON to HTML
       const tempDiv = document.createElement('div');
@@ -555,7 +579,7 @@ export class NestPostsManager {
     }
   }
 
-  createPostElement(post) {
+  async createPostElement(post) {
     const postEl = document.createElement('article');
     postEl.className = 'nest-post';
     postEl.dataset.postId = post.id;
@@ -658,7 +682,7 @@ export class NestPostsManager {
     const contentEl = document.createElement('div');
     contentEl.className = 'nest-post-content';
     // Convert JSON to HTML for display
-    const html = this.convertJsonToHtml(post.content);
+    const html = await this.convertJsonToHtml(post.content);
     contentEl.innerHTML = html;
 
     // Add lazy loading to all images in content
@@ -882,7 +906,10 @@ export class NestPostsManager {
     });
   }
 
-  activateEditor(post, postEl) {
+  async activateEditor(post, postEl) {
+    // Load TipTap modules if not already loaded
+    await loadTipTapModules();
+
     const contentEl = postEl.querySelector('.nest-post-content');
     let currentHtml = contentEl.innerHTML;
 
@@ -1151,7 +1178,7 @@ export class NestPostsManager {
 
     if (post) {
       // Replace only this post element, don't re-render entire list
-      const newPostEl = this.createPostElement(post);
+      const newPostEl = await this.createPostElement(post);
       postEl.replaceWith(newPostEl);
     } else {
       // Post was deleted, remove element
@@ -1240,7 +1267,7 @@ export class NestPostsManager {
         post.title = '';
 
         // Create new post element
-        const postEl = this.createPostElement(post);
+        const postEl = await this.createPostElement(post);
 
         // Create insert zone after new post
         const insertZoneAfter = this.createInsertZone(position + 1);
