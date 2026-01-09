@@ -792,9 +792,14 @@ export class NestPostsManager {
         postEl.classList.remove('nest-post-hover');
       });
       postEl.addEventListener('click', (e) => {
-        // Don't activate editor when clicking on links or images
-        if (e.target.tagName === 'A' || e.target.tagName === 'IMG') return;
-        if (!this.editors.has(post.id)) this.activateEditor(post, postEl);
+        // Don't activate editor when clicking on links (but allow images)
+        if (e.target.tagName === 'A') return;
+        if (!this.editors.has(post.id)) {
+          // Save click coordinates for cursor positioning
+          const clickX = e.clientX;
+          const clickY = e.clientY;
+          this.activateEditor(post, postEl, { clickX, clickY });
+        }
       });
     }
 
@@ -1000,7 +1005,7 @@ export class NestPostsManager {
     });
   }
 
-  async activateEditor(post, postEl) {
+  async activateEditor(post, postEl, clickCoords = null) {
     // Load TipTap modules if not already loaded
     await loadTipTapModules();
 
@@ -1137,9 +1142,32 @@ export class NestPostsManager {
       ],
       content: currentHtml,
       editable: true,
-      autofocus: true,
+      autofocus: !clickCoords, // Only autofocus if no click coords (new post)
       onUpdate: ({ editor }) => this.scheduleAutosave(post.id, editor),
     });
+
+    // If we have click coordinates, position cursor at that location
+    if (clickCoords) {
+      // Wait for editor to be ready and DOM to settle
+      setTimeout(() => {
+        try {
+          const { clickX, clickY } = clickCoords;
+          // Use TipTap's posAtCoords to find position at click coordinates
+          const pos = editor.view.posAtCoords({ left: clickX, top: clickY });
+          if (pos) {
+            // Set cursor at clicked position
+            editor.chain().focus().setTextSelection(pos.pos).run();
+          } else {
+            // Fallback: focus at the end
+            editor.commands.focus('end');
+          }
+        } catch (err) {
+          console.error('[PostsManager] Error positioning cursor:', err);
+          // Fallback: focus at the end
+          editor.commands.focus('end');
+        }
+      }, 50);
+    }
 
     // Setup toolbar functionality
     this.setupToolbar(editor, toolbar);
