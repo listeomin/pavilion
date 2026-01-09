@@ -248,7 +248,7 @@ export class NestPostsManager {
 
     // Add click handlers to menu items
     menu.querySelectorAll('.context-menu-item').forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', async () => {
         const sortMode = item.dataset.sort;
         this.currentSort = sortMode;
         localStorage.setItem('nest-sort-mode', sortMode);
@@ -257,7 +257,7 @@ export class NestPostsManager {
         // Re-render posts with new sort
         const container = document.getElementById('nest-editor-container');
         if (container) {
-          this.renderPostsList(container);
+          await this.renderPostsList(container);
         }
       });
     });
@@ -354,7 +354,7 @@ export class NestPostsManager {
     return posts;
   }
 
-  renderPostsList(container, append = false) {
+  async renderPostsList(container, append = false) {
     if (!append) {
       container.innerHTML = '';
     }
@@ -409,7 +409,7 @@ export class NestPostsManager {
       const loadingEl = entries[0];
       if (loadingEl.isIntersecting && !this.isLoading && this.hasMorePosts) {
         await this.loadPosts();
-        this.renderPostsList(container, true);
+        await this.renderPostsList(container, true);
       }
     }, {
       rootMargin: '200px' // Start loading 200px before reaching bottom
@@ -1315,7 +1315,7 @@ export class NestPostsManager {
       // Reload and re-render posts list
       await this.loadPosts();
       const container = document.getElementById('nest-editor-container');
-      this.renderPostsList(container);
+      await this.renderPostsList(container);
 
       // Re-enable insert zones if no editors are active
       this.updateEditorActiveState();
