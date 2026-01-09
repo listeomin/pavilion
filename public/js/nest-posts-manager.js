@@ -635,6 +635,11 @@ export class NestPostsManager {
                 <svg viewBox="0 0 8 12" fill="none" class="pause-icon" style="display: none;">
                   <path d="M0.5 1C0.5 0.723858 0.723858 0.5 1 0.5H2.5C2.77614 0.5 3 0.723858 3 1V11C3 11.2761 2.77614 11.5 2.5 11.5H1C0.723858 11.5 0.5 11.2761 0.5 11V1Z M5 1C5 0.723858 5.22386 0.5 5.5 0.5H7C7.27614 0.5 7.5 0.723858 7.5 1V11C7.5 11.2761 7.27614 11.5 7 11.5H5.5C5.22386 11.5 5 11.2761 5 11V1Z" fill="#FAF9F5"/>
                 </svg>
+                <div class="audio-equalizer">
+                  <div class="audio-equalizer-bar"></div>
+                  <div class="audio-equalizer-bar"></div>
+                  <div class="audio-equalizer-bar"></div>
+                </div>
               </button>
               <div class="audio-info">
                 <div class="audio-artist">${artist}</div>

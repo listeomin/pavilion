@@ -82,6 +82,15 @@ export const AudioPlayer = Node.create({
             },
           ],
         ],
+        [
+          'div',
+          {
+            class: 'audio-equalizer',
+          },
+          ['div', { class: 'audio-equalizer-bar' }],
+          ['div', { class: 'audio-equalizer-bar' }],
+          ['div', { class: 'audio-equalizer-bar' }],
+        ],
       ],
       [
         'div',

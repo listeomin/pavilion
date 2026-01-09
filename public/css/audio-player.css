@@ -54,12 +54,55 @@
   display: none;
 }
 
+/* Equalizer bars */
+.audio-equalizer {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 12px;
+}
+
+.audio-equalizer-bar {
+  width: 2px;
+  height: 100%;
+  background: #FAF9F5;
+  border-radius: 1px;
+  transform-origin: bottom;
+  animation: equalize 0.6s ease-in-out infinite;
+}
+
+.audio-equalizer-bar:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.audio-equalizer-bar:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.audio-equalizer-bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes equalize {
+  0%, 100% {
+    transform: scaleY(0.4);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 .audio-play-btn.playing .play-icon {
   display: none;
 }
 
 .audio-play-btn.playing .pause-icon {
-  display: block;
+  display: none;
+}
+
+.audio-play-btn.playing .audio-equalizer {
+  display: flex;
 }
 
 .audio-info {
