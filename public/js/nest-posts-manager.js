@@ -551,7 +551,8 @@ export class NestPostsManager {
             const baseUrl = this.config.urlUsername
               ? `${this.apiPath}/nest/${this.config.urlUsername}`
               : `${this.apiPath}/nest`;
-            window.location.href = `${baseUrl}/${post.slug}`;
+            // Include section parameter to preserve sidebar state
+            window.location.href = `${baseUrl}/${post.slug}?section=${encodeURIComponent(sectionName)}`;
           });
 
           postsContainer.appendChild(postItem);

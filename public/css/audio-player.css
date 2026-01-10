@@ -11,8 +11,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 8px 0;
-  margin-left: 20px;
+  margin:  32px 0px 24px 0px;
   transition: background 0.2s;
   position: relative;
   padding-left: 32px;
@@ -184,7 +183,8 @@
 .audio-progress-container {
   position: absolute;
   bottom: 0;
-  left: 0;
+  width: 100%;
+  left: 0px;
   right: 0;
   height: 3px;
   background: rgba(0, 0, 0, 0.1);
@@ -212,7 +212,6 @@
   background: #BDBCE4;
   border-radius: 0 0 0 16px;
   transition: width 0.1s linear;
-  max-width: 100%;
 }
 
 .audio-tooltip {

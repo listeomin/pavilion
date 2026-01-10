@@ -1280,7 +1280,6 @@ function alignUserHeader() {
     };
 
     const renderNavigation = () => {
-      logToServer(`renderNavigation called, postsManager exists: ${!!postsManager}, allPostsMetadata: ${postsManager?.allPostsMetadata?.length || 0}, posts: ${postsManager?.posts?.length || 0}`);
       const navItem = document.querySelector('.nest-nav-item[href="#navigation"]');
       if (!navItem) return;
 
@@ -1307,15 +1306,11 @@ function alignUserHeader() {
       if (postsManager) {
         // Use allPostsMetadata if available (has all posts), otherwise fallback to posts
         const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
-        console.log('[DEBUG] Counting from', postsData.length, 'posts');
         postsData.forEach(post => {
           if (post.tag) {
             categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
           }
         });
-        console.log('[DEBUG] Category counts:', categoryCounts);
-      } else {
-        console.log('[DEBUG] No postsManager available');
       }
 
       // Create tabs content container if it doesn't exist
@@ -1340,9 +1335,9 @@ function alignUserHeader() {
       // Clear and rebuild navigation content
       navContainer.innerHTML = '';
 
-      // Reset inline styles to allow CSS to work
+      // Reset inline styles to allow CSS to work (grid display with 32px padding)
       navContainer.style.display = '';
-      navContainer.style.paddingLeft = '';
+      navContainer.style.paddingLeft = ''; // Reset to CSS default (32px from nest-layout.css)
 
       // Build category tiles
       categories.forEach(category => {
@@ -1351,7 +1346,6 @@ function alignUserHeader() {
           key => key.toLowerCase() === category.name.toLowerCase()
         );
         const count = countKey ? categoryCounts[countKey] : 0;
-        console.log('[DEBUG] Category', category.name, 'countKey:', countKey, 'count:', count);
 
         const tile = document.createElement('div');
         tile.className = 'category-tile';
@@ -1377,7 +1371,6 @@ function alignUserHeader() {
         const countEl = document.createElement('div');
         countEl.className = 'category-tile-count';
         countEl.textContent = count.toString();
-        console.log('[DEBUG] Setting count for', category.name, '=', count);
 
         tile.appendChild(img);
         tile.appendChild(nameEl);
@@ -1440,41 +1433,85 @@ function alignUserHeader() {
       // Clear and rebuild with single category
       navContainer.innerHTML = '';
       navContainer.style.display = 'block'; // Override grid for single item
-      navContainer.style.paddingLeft = '32px'; // Match grid padding
+      // Keep padding-left: 32px from CSS (376px max-width - 32px padding = 344px, use 320px for shadow space)
 
-      // Create single tile
+      // Create single category header tile
       const tile = document.createElement('div');
-      tile.className = 'category-tile';
+      tile.className = 'single-category-header';
       tile.dataset.section = category.name;
-      tile.style.width = '356px'; // Full width for single view
-      tile.style.height = '160px';
 
-      // Check if active
-      if (currentFilter?.type === 'section' && currentFilter.name === category.name) {
-        tile.classList.add('active');
-      }
+      // Header (category name)
+      const header = document.createElement('div');
+      header.className = 'single-category-header-title';
+      header.textContent = category.name;
 
-      // Image
+      // Meta container
+      const meta = document.createElement('div');
+      meta.className = 'single-category-meta';
+
+      // Posts count
+      const postsRow = document.createElement('div');
+      postsRow.className = 'single-category-stat-row';
+      const postsNumber = document.createElement('span');
+      postsNumber.className = 'single-category-stat-number';
+      postsNumber.textContent = count;
+      const postsLabel = document.createElement('span');
+      postsLabel.className = 'single-category-stat-label';
+      postsLabel.textContent = 'постов';
+      postsRow.appendChild(postsNumber);
+      postsRow.appendChild(postsLabel);
+
+      // Comments count (placeholder)
+      const commentsRow = document.createElement('div');
+      commentsRow.className = 'single-category-stat-row';
+      const commentsNumber = document.createElement('span');
+      commentsNumber.className = 'single-category-stat-number';
+      commentsNumber.textContent = '0';
+      const commentsLabel = document.createElement('span');
+      commentsLabel.className = 'single-category-stat-label';
+      commentsLabel.textContent = 'комментариев';
+      commentsRow.appendChild(commentsNumber);
+      commentsRow.appendChild(commentsLabel);
+
+      // Likes count (орехи)
+      const likesRow = document.createElement('div');
+      likesRow.className = 'single-category-stat-row';
+      const likesNumber = document.createElement('span');
+      likesNumber.className = 'single-category-stat-number';
+      likesNumber.textContent = '0';
+      const likesLabel = document.createElement('span');
+      likesLabel.className = 'single-category-stat-label';
+      likesLabel.textContent = 'орехов';
+      likesRow.appendChild(likesNumber);
+      likesRow.appendChild(likesLabel);
+
+      meta.appendChild(postsRow);
+      meta.appendChild(commentsRow);
+      meta.appendChild(likesRow);
+
+      // Image cover (absolute positioned on the right)
+      const imgCover = document.createElement('div');
+      imgCover.className = 'single-category-image-cover';
       const img = document.createElement('img');
-      img.className = 'category-tile-image';
+      img.className = 'single-category-image';
       img.src = `assets/categories/${encodeURIComponent(category.image)}`;
       img.alt = category.name;
+      imgCover.appendChild(img);
 
-      // Name
-      const nameEl = document.createElement('div');
-      nameEl.className = 'category-tile-name';
-      nameEl.textContent = category.name;
-
-      // Count
-      const countEl = document.createElement('div');
-      countEl.className = 'category-tile-count';
-      countEl.textContent = count.toString();
-
-      tile.appendChild(img);
-      tile.appendChild(nameEl);
-      tile.appendChild(countEl);
+      tile.appendChild(header);
+      tile.appendChild(meta);
+      tile.appendChild(imgCover);
 
       navContainer.appendChild(tile);
+
+      // Add click handler to header - navigate to category list view
+      tile.addEventListener('click', (e) => {
+        // Navigate to category list view
+        const baseUrl = nestConfig.urlUsername
+          ? `${CONFIG.BASE_PATH}/nest/${nestConfig.urlUsername}`
+          : `${CONFIG.BASE_PATH}/nest`;
+        window.location.href = `${baseUrl}?section=${encodeURIComponent(category.name)}`;
+      });
 
       // Add posts list under the tile
       if (postsManager) {
@@ -1488,22 +1525,42 @@ function alignUserHeader() {
           // Create posts list container
           const postsListContainer = document.createElement('div');
           postsListContainer.className = 'single-category-posts';
-          postsListContainer.style.cssText = `
-            margin-top: 24px;
-            width: 356px;
-          `;
 
           // Add each post as a link
           categoryPosts.forEach(post => {
             const postLink = document.createElement('a');
             postLink.className = 'nav-post';
-            postLink.href = `${CONFIG.BASE_PATH}/nest/${nestConfig.urlUsername}/${post.slug}`;
-            postLink.textContent = post.title || 'Без названия';
-            postLink.style.cssText = `
-              display: block;
-              text-decoration: none;
-              padding: 8px 0;
-            `;
+            // Include section parameter to preserve sidebar state
+            postLink.href = `${CONFIG.BASE_PATH}/nest/${nestConfig.urlUsername}/${post.slug}?section=${encodeURIComponent(category.name)}`;
+
+            // Check if this is the current post
+            const isActive = nestConfig.postSlug === post.slug;
+            if (isActive) {
+              postLink.classList.add('active');
+            }
+
+            // Create wrapper for flexbox (icon/placeholder + title)
+            const linkContent = document.createElement('div');
+            linkContent.className = 'nav-post-content';
+
+            // Add icon for active post OR placeholder for inactive (to align text)
+            if (isActive) {
+              const icon = document.createElement('img');
+              icon.className = 'nav-post-icon';
+              icon.src = 'assets/article-leaf.svg';
+              linkContent.appendChild(icon);
+            } else {
+              // Placeholder to maintain text alignment
+              const placeholder = document.createElement('div');
+              placeholder.className = 'nav-post-icon-placeholder';
+              linkContent.appendChild(placeholder);
+            }
+
+            const title = document.createElement('span');
+            title.textContent = post.title || 'Без названия';
+            linkContent.appendChild(title);
+
+            postLink.appendChild(linkContent);
 
             // Navigate on click
             postLink.addEventListener('click', (e) => {
@@ -1598,15 +1655,10 @@ function alignUserHeader() {
             }
 
             // Re-render posts list, navigation, and sidebar
-            logToServer(`Filtering by section: ${sectionName}, currentFilter: ${JSON.stringify(currentFilter)}`);
             const container = document.getElementById('nest-editor-container');
-            logToServer(`Container exists: ${!!container}`);
             postsManager.renderPostsList(container);
-            logToServer('Posts list rendered');
             renderNavigation(); // Re-render navigation to update active states (creates sidebar structure)
-            logToServer('Navigation rendered');
             postsManager.renderSidebarNavigation(); // Populate sidebar with all posts
-            logToServer('Sidebar navigation rendered');
           } else {
             // Legacy mode (old content with TipTap)
             // Toggle filter
@@ -1829,6 +1881,20 @@ function alignUserHeader() {
           }
         }
 
+        // For single post view: remove section parameter and restore grid view
+        if (nestConfig.postSlug) {
+          const url = new URL(window.location);
+          if (url.searchParams.has('section')) {
+            url.searchParams.delete('section');
+            window.history.pushState({ section: null }, '', url);
+            // Re-render navigation to show all categories in grid
+            renderNavigation();
+            if (postsManager) {
+              postsManager.renderSidebarNavigation();
+            }
+          }
+        }
+
         switchTab('navigation');
       });
     }
@@ -1873,14 +1939,12 @@ function alignUserHeader() {
     // If viewing a nest without a specific post slug, use posts manager for list view
     // This applies to both own nest and viewing others' nests
     if (!nestConfig.postSlug) {
-      logToServer('Initializing list view...');
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
 
       // Check for section filter in URL BEFORE loading posts
       const urlParams = new URLSearchParams(window.location.search);
       const sectionParam = urlParams.get('section');
       if (sectionParam) {
-        logToServer(`Setting section filter BEFORE loading: ${sectionParam}`);
         currentFilter = { type: 'section', name: sectionParam };
         postsManager.setFilter('section', sectionParam);
       }
@@ -1888,39 +1952,29 @@ function alignUserHeader() {
       // For viewing mode: load metadata first for navigation, then paginated posts
       // For own nest: load all posts
       if (!nestConfig.isOwnNest) {
-        logToServer('Loading metadata...');
         // Load metadata for sidebar navigation (lightweight)
         await postsManager.loadMetadata();
-        logToServer(`Metadata loaded: ${postsManager.totalPosts} total posts`);
       }
 
-      logToServer('Loading posts...');
       // Load posts (paginated for viewing, all for own nest)
       await postsManager.loadPosts();
-      logToServer(`Posts loaded: ${postsManager.posts.length} of ${postsManager.totalPosts}`);
 
-      logToServer('Loading sections...');
       // Load sections and render navigation
       await loadSections();
       renderNavigation();
-      logToServer('Sections loaded');
 
       // Populate sidebar sections with posts from nest_posts (uses metadata)
       postsManager.renderSidebarNavigation();
 
       // Render posts list
-      logToServer('Rendering posts list...');
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
-      logToServer('Posts list rendered');
 
       // Setup infinite scroll for viewing mode
       if (!nestConfig.isOwnNest) {
         postsManager.setupInfiniteScroll(document.getElementById('nest-editor-container'));
       }
 
-      logToServer('Hiding skeleton...');
       hideSkeleton();
-      logToServer('Skeleton hidden');
 
       // Enable image zoom for viewing (watch for dynamically added images)
       if (!nestConfig.isOwnNest) {
@@ -1929,6 +1983,12 @@ function alignUserHeader() {
     } else {
       // Load single post from nest_posts by slug using API
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
+
+      // CRITICAL: Load metadata FIRST for sidebar navigation (for all users)
+      await postsManager.loadMetadata();
+
+      // Load sections early for sidebar
+      await loadSections();
 
       // Fetch single post directly by slug (not limited by pagination)
       const response = await fetch(`${CONFIG.BASE_PATH}/api/nest_posts.php?action=get&username=${encodeURIComponent(nestConfig.urlUsername)}&slug=${encodeURIComponent(nestConfig.postSlug)}`);
@@ -1941,10 +2001,20 @@ function alignUserHeader() {
         document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';
       }
 
-      // Load sections and render sidebar navigation (same as list view)
-      await loadSections();
+      // Render basic navigation structure first
       renderNavigation();
-      postsManager.renderSidebarNavigation();
+
+      // Check if we need to restore sidebar state from URL parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const sectionParam = urlParams.get('section');
+
+      if (sectionParam) {
+        // Restore sidebar state - show single category with posts list
+        showSingleCategoryInSidebar(sectionParam);
+      } else {
+        // Default sidebar navigation - populate all sections
+        postsManager.renderSidebarNavigation();
+      }
 
       hideSkeleton();
 
@@ -1971,8 +2041,24 @@ function alignUserHeader() {
         postsManager.renderPostsList(document.getElementById('nest-editor-container'));
         renderNavigation();
         postsManager.renderSidebarNavigation();
+      } else if (nestConfig.postSlug) {
+        // Single post view - handle section parameter changes
+        const urlParams = new URLSearchParams(window.location.search);
+        const sectionParam = urlParams.get('section');
+
+        if (sectionParam) {
+          // Show single category sidebar
+          renderNavigation();
+          showSingleCategoryInSidebar(sectionParam);
+        } else {
+          // Show all categories grid
+          renderNavigation();
+          if (postsManager) {
+            postsManager.renderSidebarNavigation();
+          }
+        }
       } else {
-        // Single post view - use slug navigation
+        // Legacy TipTap mode - use slug navigation
         const slug = event.state?.slug || null;
         loadContent(slug);
       }

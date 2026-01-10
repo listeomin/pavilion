@@ -82,7 +82,8 @@
   padding: 0;
   background: transparent;
   border: none;
-  max-width: 376px; /* 32px + 160px + 24px + 160px */
+  max-width: none; /* Allow shadows to extend beyond content */
+  width: 100%; /* Use full sidebar width (420px) */
   /* Scrollable content */
   overflow-y: auto;
   overflow-x: visible;
@@ -102,6 +103,110 @@
   grid-template-columns: repeat(2, 160px);
   gap: 24px;
   row-gap: 24px;
+}
+
+/* Meta and Discussions content panels */
+.nest-meta-content,
+.nest-discussions-content {
+  padding-left: 32px; /* Consistent left padding for all sidebar tabs */
+  background: transparent;
+  border: none;
+}
+
+/* Single category view - posts list */
+.single-category-posts {
+  margin-top: 24px;
+  width: 344px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Single category header */
+.single-category-header {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 6px;
+  padding: 24px;
+  gap: 16px;
+  isolation: isolate;
+  width: 356px;
+  height: 160px;
+  background: #FFFFFF;
+  border: 2px solid #BCD1CA;
+  box-shadow: 0px 4px 16px #BCD1CA;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.single-category-header:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 20px #BCD1CA;
+}
+
+.single-category-header-title {
+  font-family: 'Ubuntu Sans Mono', monospace;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 18px;
+  color: #5E5D59;
+  z-index: 1;
+}
+
+.single-category-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  z-index: 1;
+}
+
+.single-category-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.single-category-stat-number {
+  font-family: 'Ubuntu Sans Mono', monospace;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 24px;
+  color: #5E5D59;
+}
+
+.single-category-stat-label {
+  font-family: 'Ubuntu Sans Mono', monospace;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #87867F;
+}
+
+.single-category-image-cover {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  right: 0px;
+  top: 0px;
+  z-index: 0;
+  border-radius: 0 24px 24px 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.single-category-image {
+  max-width: 160px;
+  max-height: 110px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Category tile */
@@ -212,6 +317,7 @@
 /* Navigation section */
 .nav-section {
   margin-bottom: 24px;
+  padding-left: 32px; /* Consistent left padding for all sidebar content */
 }
 
 .nav-section:last-child {
@@ -248,20 +354,43 @@
 /* Individual post */
 .nav-post {
   font-family: 'Ubuntu Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
   font-size: 14px;
-  color: var(--color-nimbus-dark);
-  margin-bottom: 8px;
+  line-height: 32px;
+  color: #87867F; /* Nimbus Dark */
+  text-decoration: none;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease;
+  display: block;
 }
 
 .nav-post:hover {
-  color: var(--color-cumulonimbus-medium);
+  color: var(--color-cumulonimbus-light); /* #5E5D59 */
 }
 
 .nav-post.active {
   color: var(--color-olive);
+}
+
+/* Post link content wrapper */
+.nav-post-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Post active icon */
+.nav-post-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Post icon placeholder (for alignment) */
+.nav-post-icon-placeholder {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 /* Empty state */
