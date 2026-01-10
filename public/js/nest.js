@@ -9,6 +9,7 @@ import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=8';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
 import { NestPostsManager } from './nest-posts-manager.js?v=22';
+import { DiscussionsManager } from './discussions.js?v=1';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -1996,6 +1997,15 @@ function alignUserHeader() {
 
       if (result.success && result.post) {
         postsManager.renderSinglePost(document.getElementById('nest-editor-container'), result.post);
+
+        // Initialize discussions for text quotation (only for viewing mode)
+        if (!nestConfig.isOwnNest) {
+          const discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
+          const contentElement = document.querySelector('.nest-post-content');
+          if (contentElement) {
+            discussionsManager.initializeTextSelection(result.post.id, contentElement);
+          }
+        }
       } else {
         // Post not found, show 404 or redirect
         document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';
