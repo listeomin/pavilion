@@ -168,15 +168,11 @@ if ($branchId) {
   <div class="branch-context-menu-item" data-action="delete">Удалить</div>
 </div>
 
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
-  <img src="assets/paw.svg" alt="Animal Profile">
-</button>
-<button id="nightshift-toggle">
-  <img src="assets/moon.svg" alt="Night Shift">
-</button>
-<a id="dev-nest-btn" href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
+<button id="nightshift-toggle"></button>
+<button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
-</a>
+</button>
 
 <script type="module" src="js/branches.js?v=6"></script>
 </body>

@@ -25,10 +25,9 @@ class NightShift {
   applyState() {
     if (this.enabled) {
       document.documentElement.classList.add('nightshift-on');
-      this.icon.src = 'assets/sun.svg';
-    } else {
+    }
+    else {
       document.documentElement.classList.remove('nightshift-on');
-      this.icon.src = 'assets/moon.svg';
     }
   }
 }

@@ -72,15 +72,9 @@ $basePath = get_base_path();
   </div>
 </div>
 <div id="telegram-auth-container"></div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
-  <img src="assets/paw.svg" alt="Animal Profile">
-</button>
-<button id="nightshift-toggle">
-  <img src="assets/moon.svg" alt="Night Shift">
-</button>
-<a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
-  <img src="assets/leaf.svg" alt="Developer Nest">
-</a>
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
+<button id="nightshift-toggle"></button>
+<button id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика"></button>
 <script type="module" src="js/messages.js?v=5"></script>
 </body>
 </html>

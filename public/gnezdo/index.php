@@ -48,12 +48,8 @@ $basePath = get_base_path();
     <h1>Гнездо</h1>
   </div>
 </div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
-  <img src="assets/paw.svg" alt="Animal Profile">
-</button>
-<button id="nightshift-toggle">
-  <img src="assets/moon.svg" alt="Night Shift">
-</button>
+<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
+<button id="nightshift-toggle"></button>
 <script type="module" src="js/gnezdo.js"></script>
 </body>
 </html>
