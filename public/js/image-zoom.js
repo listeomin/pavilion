@@ -255,6 +255,7 @@ export class ImageZoom {
     const hasExcludeClass = img.classList.contains('icon') ||
                             img.classList.contains('avatar') ||
                             img.classList.contains('logo') ||
+                            img.classList.contains('category-tile-image') ||
                             img.classList.contains('emoji');
     const isSVG = img.src && img.src.endsWith('.svg');
 

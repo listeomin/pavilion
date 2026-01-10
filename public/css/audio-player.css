@@ -1,3 +1,9 @@
+/* Wrapper for player and play button */
+.audio-player-wrapper {
+  position: relative;
+  overflow: visible;
+}
+
 .audio-player {
   background: #F0EEE6;
   border-radius: 16px;
@@ -156,12 +162,14 @@
   font-size: 13px;
   color: var(--color-cumulonimbus-light);
   text-decoration: none;
-  opacity: 0;
-  transition: opacity 0.2s;
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
   flex-shrink: 0;
   position: absolute;
   right: 16px;
-  bottom: 12px;
+  bottom: 14px;
+  z-index: 10;
+  pointer-events: auto;
 }
 
 .audio-player:hover .audio-download-btn {
@@ -170,6 +178,7 @@
 
 .audio-download-btn:hover {
   color: var(--color-cumulonimbus-dark);
+  opacity: 1;
 }
 
 .audio-progress-container {
@@ -183,19 +192,27 @@
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s, height 0.2s;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: auto;
 }
 
-.audio-player:hover .audio-progress-container,
-.audio-player.playing .audio-progress-container {
+.audio-player:hover .audio-progress-container {
   opacity: 1;
   height: 4px;
+}
+
+.audio-player.playing .audio-progress-container {
+  opacity: 1 !important;
+  height: 4px !important;
 }
 
 .audio-progress-bar {
   height: 100%;
   background: #BDBCE4;
-  border-radius: 0 0 0 12px;
+  border-radius: 0 0 0 16px;
   transition: width 0.1s linear;
+  max-width: 100%;
 }
 
 .audio-tooltip {

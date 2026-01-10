@@ -225,7 +225,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/inline-input.css?v=3">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
-<link rel="stylesheet" href="css/audio-player.css?v=1">
+<link rel="stylesheet" href="css/audio-player.css?v=8">
 <link rel="stylesheet" href="css/nightshift.css?v=4">
 <link rel="stylesheet" href="css/animalProfile.css?v=20">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
@@ -233,9 +233,9 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=27">
-<link rel="stylesheet" href="css/nest-layout.css?v=38">
+<link rel="stylesheet" href="css/nest-layout.css?v=39">
 <link rel="stylesheet" href="css/nest-posts.css?v=21">
-<link rel="stylesheet" href="css/image-zoom.css?v=2">
+<link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
@@ -383,6 +383,6 @@ if ($telegramUserId && $urlUsername) {
 <script src="libs/dayjs-ru.js"></script>
 <script src="libs/flatpickr.min.js"></script>
 <script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=131"></script>
+<script type="module" src="js/nest.js?v=140"></script>
 </body>
 </html>

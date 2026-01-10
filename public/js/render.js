@@ -6,8 +6,8 @@ import { renderNestPreview } from './nest-preview.js?v=1';
 import { renderBranchPreview } from './branch-preview.js?v=4';
 import { renderWeatherPreview } from './weather-preview.js?v=4';
 import { renderLinkPreview } from './link.js?v=1';
-import { renderMusicPlayer } from './music.js?v=6';
-import { makeImageZoomable } from './image-zoom.js?v=2';
+import { renderMusicPlayer } from './music.js?v=8';
+import { makeImageZoomable } from './image-zoom.js?v=12';
 import { parseYouTubeUrl, isYouTubeUrl } from './youtube.js?v=2';
 import { CONFIG } from './config.js?v=7';
 

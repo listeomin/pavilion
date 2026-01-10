@@ -6,14 +6,27 @@ import { AnimalProfile } from './animalProfile.js?v=18';
 import { TelegramAuth } from './telegramAuth.js?v=2';
 import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
-import { renderMusicPlayer } from './music.js?v=6';
-import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=11';
+import { renderMusicPlayer } from './music.js?v=8';
+import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
 import { NestPostsManager } from './nest-posts-manager.js?v=22';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
 let Editor, StarterKit, Link, Image, Placeholder;
 let tiptapLoaded = false;
+
+// Log to server file instead of console
+const logToServer = async (message, level = 'INFO') => {
+  try {
+    await fetch('server/api/log.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `[Nest] ${message}`, level })
+    });
+  } catch (e) {
+    // Silent fail - logging shouldn't break functionality
+  }
+};
 
 // Suppress YouTube postMessage errors globally
 const originalError = console.error.bind(console);
@@ -1267,6 +1280,7 @@ function alignUserHeader() {
     };
 
     const renderNavigation = () => {
+      logToServer(`renderNavigation called, postsManager exists: ${!!postsManager}, allPostsMetadata: ${postsManager?.allPostsMetadata?.length || 0}, posts: ${postsManager?.posts?.length || 0}`);
       const navItem = document.querySelector('.nest-nav-item[href="#navigation"]');
       if (!navItem) return;
 
@@ -1293,11 +1307,15 @@ function alignUserHeader() {
       if (postsManager) {
         // Use allPostsMetadata if available (has all posts), otherwise fallback to posts
         const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
+        console.log('[DEBUG] Counting from', postsData.length, 'posts');
         postsData.forEach(post => {
           if (post.tag) {
             categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
           }
         });
+        console.log('[DEBUG] Category counts:', categoryCounts);
+      } else {
+        console.log('[DEBUG] No postsManager available');
       }
 
       // Create tabs content container if it doesn't exist
@@ -1322,9 +1340,18 @@ function alignUserHeader() {
       // Clear and rebuild navigation content
       navContainer.innerHTML = '';
 
+      // Reset inline styles to allow CSS to work
+      navContainer.style.display = '';
+      navContainer.style.paddingLeft = '';
+
       // Build category tiles
       categories.forEach(category => {
-        const count = categoryCounts[category.name] || 0;
+        // Find count (case-insensitive match)
+        const countKey = Object.keys(categoryCounts).find(
+          key => key.toLowerCase() === category.name.toLowerCase()
+        );
+        const count = countKey ? categoryCounts[countKey] : 0;
+        console.log('[DEBUG] Category', category.name, 'countKey:', countKey, 'count:', count);
 
         const tile = document.createElement('div');
         tile.className = 'category-tile';
@@ -1338,7 +1365,7 @@ function alignUserHeader() {
         // Image
         const img = document.createElement('img');
         img.className = 'category-tile-image';
-        img.src = `assets/categories/${category.image}`;
+        img.src = `assets/categories/${encodeURIComponent(category.image)}`;
         img.alt = category.name;
 
         // Name
@@ -1350,6 +1377,7 @@ function alignUserHeader() {
         const countEl = document.createElement('div');
         countEl.className = 'category-tile-count';
         countEl.textContent = count.toString();
+        console.log('[DEBUG] Setting count for', category.name, '=', count);
 
         tile.appendChild(img);
         tile.appendChild(nameEl);
@@ -1367,11 +1395,183 @@ function alignUserHeader() {
       attachNavigationHandlers();
     };
 
+    // Show single category in sidebar
+    const showSingleCategoryInSidebar = (categoryName) => {
+      const navContainer = document.querySelector('.nest-navigation-content');
+      if (!navContainer) return;
+
+      // Find the category
+      const categories = [
+        { name: 'Лента', image: 'лента.png' },
+        { name: 'Разработка', image: 'разработка.png' },
+        { name: 'Наблюдения', image: 'наблюдения.png' },
+        { name: 'Психонавтика', image: 'психонавтика.png' },
+        { name: 'Краски да холсты', image: 'краски_да_холсты.png' },
+        { name: 'Стихи', image: 'стихи.png' },
+        { name: 'Рассказы', image: 'рассказы.png' },
+        { name: 'Воспоминания', image: 'воспоминания.png' },
+        { name: 'Письма', image: 'письма.png' },
+        { name: 'Фотокарточки', image: 'фотокарточки.png' },
+        { name: 'Пейджер', image: 'пейджер.png' },
+        { name: 'Музыка', image: 'музыка.png' },
+        { name: 'Кинофильмы', image: 'кинофильмы.png' },
+        { name: 'Черновики', image: 'черновики.png' }
+      ];
+
+      const category = categories.find(c => c.name === categoryName);
+      if (!category) return;
+
+      // Get count for this category
+      const categoryCounts = {};
+      if (postsManager) {
+        const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
+        postsData.forEach(post => {
+          if (post.tag) {
+            categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
+          }
+        });
+      }
+      // Find count (case-insensitive match)
+      const countKey = Object.keys(categoryCounts).find(
+        key => key.toLowerCase() === category.name.toLowerCase()
+      );
+      const count = countKey ? categoryCounts[countKey] : 0;
+
+      // Clear and rebuild with single category
+      navContainer.innerHTML = '';
+      navContainer.style.display = 'block'; // Override grid for single item
+      navContainer.style.paddingLeft = '32px'; // Match grid padding
+
+      // Create single tile
+      const tile = document.createElement('div');
+      tile.className = 'category-tile';
+      tile.dataset.section = category.name;
+      tile.style.width = '356px'; // Full width for single view
+      tile.style.height = '160px';
+
+      // Check if active
+      if (currentFilter?.type === 'section' && currentFilter.name === category.name) {
+        tile.classList.add('active');
+      }
+
+      // Image
+      const img = document.createElement('img');
+      img.className = 'category-tile-image';
+      img.src = `assets/categories/${encodeURIComponent(category.image)}`;
+      img.alt = category.name;
+
+      // Name
+      const nameEl = document.createElement('div');
+      nameEl.className = 'category-tile-name';
+      nameEl.textContent = category.name;
+
+      // Count
+      const countEl = document.createElement('div');
+      countEl.className = 'category-tile-count';
+      countEl.textContent = count.toString();
+
+      tile.appendChild(img);
+      tile.appendChild(nameEl);
+      tile.appendChild(countEl);
+
+      navContainer.appendChild(tile);
+
+      // Add posts list under the tile
+      if (postsManager) {
+        const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
+        // Filter posts by category (case-insensitive)
+        const categoryPosts = postsData.filter(post =>
+          post.tag && post.tag.toLowerCase() === category.name.toLowerCase()
+        );
+
+        if (categoryPosts.length > 0) {
+          // Create posts list container
+          const postsListContainer = document.createElement('div');
+          postsListContainer.className = 'single-category-posts';
+          postsListContainer.style.cssText = `
+            margin-top: 24px;
+            width: 356px;
+          `;
+
+          // Add each post as a link
+          categoryPosts.forEach(post => {
+            const postLink = document.createElement('a');
+            postLink.className = 'nav-post';
+            postLink.href = `${CONFIG.BASE_PATH}/nest/${nestConfig.urlUsername}/${post.slug}`;
+            postLink.textContent = post.title || 'Без названия';
+            postLink.style.cssText = `
+              display: block;
+              text-decoration: none;
+              padding: 8px 0;
+            `;
+
+            // Navigate on click
+            postLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              window.location.href = postLink.href;
+            });
+
+            postsListContainer.appendChild(postLink);
+          });
+
+          navContainer.appendChild(postsListContainer);
+        }
+      }
+
+      // Attach handlers to the new tile (not the title this time)
+      tile.addEventListener('click', (e) => {
+        // Don't handle title clicks in single view
+        if (e.target.classList.contains('category-tile-name')) {
+          return;
+        }
+
+        const sectionName = tile.dataset.section;
+
+        // If postsManager is available (nest_posts mode), use it for filtering
+        if (postsManager) {
+          // Toggle filter
+          if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+            // Deactivate filter
+            currentFilter = null;
+            postsManager.setFilter(null, null);
+
+            // Remove section from URL
+            const url = new URL(window.location);
+            url.searchParams.delete('section');
+            window.history.pushState({ section: null }, '', url);
+          } else {
+            // Activate section filter
+            currentFilter = { type: 'section', name: sectionName };
+            postsManager.setFilter('section', sectionName);
+
+            // Add section to URL
+            const url = new URL(window.location);
+            url.searchParams.set('section', sectionName);
+            window.history.pushState({ section: sectionName }, '', url);
+          }
+
+          // Re-render posts list and update tile active state
+          postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+          if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
+            tile.classList.add('active');
+          } else {
+            tile.classList.remove('active');
+          }
+          postsManager.renderSidebarNavigation();
+        }
+      });
+    };
+
     // Attach click handlers to navigation
     const attachNavigationHandlers = () => {
-      // Category tiles
+      // Category tiles - click on tile area (not on title)
       document.querySelectorAll('.category-tile').forEach(tile => {
         tile.addEventListener('click', (e) => {
+          // If clicked on title, don't handle here (separate handler below)
+          if (e.target.classList.contains('category-tile-name')) {
+            return;
+          }
+
           const sectionName = tile.dataset.section;
 
           // If postsManager is available (nest_posts mode), use it for filtering
@@ -1398,9 +1598,15 @@ function alignUserHeader() {
             }
 
             // Re-render posts list, navigation, and sidebar
-            postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+            logToServer(`Filtering by section: ${sectionName}, currentFilter: ${JSON.stringify(currentFilter)}`);
+            const container = document.getElementById('nest-editor-container');
+            logToServer(`Container exists: ${!!container}`);
+            postsManager.renderPostsList(container);
+            logToServer('Posts list rendered');
             renderNavigation(); // Re-render navigation to update active states (creates sidebar structure)
+            logToServer('Navigation rendered');
             postsManager.renderSidebarNavigation(); // Populate sidebar with all posts
+            logToServer('Sidebar navigation rendered');
           } else {
             // Legacy mode (old content with TipTap)
             // Toggle filter
@@ -1416,6 +1622,34 @@ function alignUserHeader() {
             renderNavigation(); // Re-render to update active states
           }
         });
+
+        // Category title click - filter content + show single category in sidebar
+        const titleEl = tile.querySelector('.category-tile-name');
+        if (titleEl) {
+          titleEl.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent tile click handler
+            const sectionName = tile.dataset.section;
+
+            // Filter content (same as tile click)
+            if (postsManager) {
+              // Activate section filter
+              currentFilter = { type: 'section', name: sectionName };
+              postsManager.setFilter('section', sectionName);
+
+              // Add section to URL
+              const url = new URL(window.location);
+              url.searchParams.set('section', sectionName);
+              window.history.pushState({ section: sectionName }, '', url);
+
+              // Re-render posts list
+              postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+              postsManager.renderSidebarNavigation();
+            }
+
+            // Show single category in sidebar
+            showSingleCategoryInSidebar(sectionName);
+          });
+        }
       });
     };
 
@@ -1547,7 +1781,7 @@ function alignUserHeader() {
 
       // Show selected tab content
       if (tabName === 'navigation' && navContent) {
-        navContent.style.display = 'block';
+        navContent.style.display = 'grid';
       } else if (tabName === 'meta') {
         if (!metaContent) {
           const container = document.querySelector('.nest-tabs-content');
@@ -1576,6 +1810,25 @@ function alignUserHeader() {
     if (navToggle) {
       navToggle.addEventListener('click', (e) => {
         e.preventDefault();
+
+        // Reset filter when clicking Рубрики
+        if (currentFilter) {
+          currentFilter = null;
+          if (postsManager) {
+            postsManager.setFilter(null, null);
+
+            // Remove section from URL
+            const url = new URL(window.location);
+            url.searchParams.delete('section');
+            window.history.pushState({ section: null }, '', url);
+
+            // Re-render posts and navigation
+            postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+            renderNavigation(); // Re-render navigation to remove active states
+            postsManager.renderSidebarNavigation();
+          }
+        }
+
         switchTab('navigation');
       });
     }
@@ -1620,49 +1873,54 @@ function alignUserHeader() {
     // If viewing a nest without a specific post slug, use posts manager for list view
     // This applies to both own nest and viewing others' nests
     if (!nestConfig.postSlug) {
-      console.log('[Nest] Initializing list view...');
+      logToServer('Initializing list view...');
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
 
-      // For viewing mode: load metadata first for navigation, then paginated posts
-      // For own nest: load all posts
-      if (!nestConfig.isOwnNest) {
-        console.log('[Nest] Loading metadata...');
-        // Load metadata for sidebar navigation (lightweight)
-        await postsManager.loadMetadata();
-        console.log('[Nest] Metadata loaded:', postsManager.totalPosts, 'total posts');
-      }
-
-      console.log('[Nest] Loading posts...');
-      // Load posts (paginated for viewing, all for own nest)
-      await postsManager.loadPosts();
-      console.log('[Nest] Posts loaded:', postsManager.posts.length, 'of', postsManager.totalPosts);
-
-      // Check for section filter in URL
+      // Check for section filter in URL BEFORE loading posts
       const urlParams = new URLSearchParams(window.location.search);
       const sectionParam = urlParams.get('section');
       if (sectionParam) {
+        logToServer(`Setting section filter BEFORE loading: ${sectionParam}`);
         currentFilter = { type: 'section', name: sectionParam };
         postsManager.setFilter('section', sectionParam);
       }
 
-      console.log('[Nest] Loading sections...');
+      // For viewing mode: load metadata first for navigation, then paginated posts
+      // For own nest: load all posts
+      if (!nestConfig.isOwnNest) {
+        logToServer('Loading metadata...');
+        // Load metadata for sidebar navigation (lightweight)
+        await postsManager.loadMetadata();
+        logToServer(`Metadata loaded: ${postsManager.totalPosts} total posts`);
+      }
+
+      logToServer('Loading posts...');
+      // Load posts (paginated for viewing, all for own nest)
+      await postsManager.loadPosts();
+      logToServer(`Posts loaded: ${postsManager.posts.length} of ${postsManager.totalPosts}`);
+
+      logToServer('Loading sections...');
       // Load sections and render navigation
       await loadSections();
       renderNavigation();
-      console.log('[Nest] Sections loaded');
+      logToServer('Sections loaded');
 
       // Populate sidebar sections with posts from nest_posts (uses metadata)
       postsManager.renderSidebarNavigation();
 
       // Render posts list
+      logToServer('Rendering posts list...');
       postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+      logToServer('Posts list rendered');
 
       // Setup infinite scroll for viewing mode
       if (!nestConfig.isOwnNest) {
         postsManager.setupInfiniteScroll(document.getElementById('nest-editor-container'));
       }
 
+      logToServer('Hiding skeleton...');
       hideSkeleton();
+      logToServer('Skeleton hidden');
 
       // Enable image zoom for viewing (watch for dynamically added images)
       if (!nestConfig.isOwnNest) {
