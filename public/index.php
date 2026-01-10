@@ -1,5 +1,6 @@
 <?php
 // index.php
+// Чат – Главная страница сайта.
 
 // Auto-detect BASE_PATH from request URI
 function get_base_path() {
@@ -92,11 +93,7 @@ $basePath = get_base_path();
 </div>
 
 <div id="telegram-auth-container" style="display: none;"></div>
-<div id="utility-buttons-group">
-  <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-  <button id="nightshift-toggle"></button>
-  <button id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика"></button>
-</div>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/main.js?v=42"></script>
 </body>
 </html>

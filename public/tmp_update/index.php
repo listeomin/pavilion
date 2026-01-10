@@ -196,7 +196,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   </div>
 </div>
 
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
+<button id="animal-profile-btn" title="Звериный профиль"></button>
 <button id="nightshift-toggle"></button>
 <button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
   <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
