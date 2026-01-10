@@ -104,9 +104,7 @@ if (!$telegramUserId && !$recipientUsername) {
   </div>
 </div>
 <div id="telegram-auth-container"></div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<button id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика"></button>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/messages.js?v=5"></script>
 </body>
 </html>
@@ -302,13 +300,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <div class="dm-context-menu-item" data-action="goto-nest">Гнездо</div>
   <div class="dm-context-menu-item" data-action="hide">Спрятать</div>
 </div>
-
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
-  <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
-</button>
-
+<?php include '/var/www/hhrrr.ru/pavilion/public/partials/utility-buttons.html'; ?>
 <script type="module" src="js/dm.js?v=15"></script>
 </body>
 </html>

@@ -115,7 +115,6 @@ if ($branchId) {
     </div>
     <h1>Ветки</h1>
   </div>
-
   <?php if ($branchId): ?>
     <!-- Chat area when branch is selected -->
     <div class="branch-chat-container">
@@ -167,13 +166,7 @@ if ($branchId) {
   <div class="branch-context-menu-item" data-action="hide">Спрятать</div>
   <div class="branch-context-menu-item" data-action="delete">Удалить</div>
 </div>
-
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
-  <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
-</button>
-
+<?php include '/var/www/hhrrr.ru/pavilion/public/partials/utility-buttons.html'; ?>
 <script type="module" src="js/branches.js?v=6"></script>
 </body>
 </html>

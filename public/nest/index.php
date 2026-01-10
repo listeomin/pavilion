@@ -314,7 +314,6 @@ if ($telegramUserId && $urlUsername) {
   <?php if (!$isOwnNest): ?>
   <div id="telegram-auth-container"></div>
   <?php endif; ?>
-
   <?php if ($urlUsername): ?>
   <!-- Loading indicator (only on personal pages) -->
   <div id="skeleton-content" class="skeleton-container">
@@ -338,7 +337,6 @@ if ($telegramUserId && $urlUsername) {
 
 <?php if ($urlUsername): ?>
   </div><!-- .main-column -->
-
   <aside class="nest-sidebar">
     <nav class="nest-nav">
       <a href="#navigation" class="nest-nav-item active">Рубрики</a>

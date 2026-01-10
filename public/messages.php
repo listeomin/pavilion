@@ -72,9 +72,7 @@ $basePath = get_base_path();
   </div>
 </div>
 <div id="telegram-auth-container"></div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<button id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика"></button>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/messages.js?v=5"></script>
 </body>
 </html>

@@ -195,13 +195,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
     <div id="dm-users-list" class="dm-users-list"></div>
   </div>
 </div>
-
-<button id="animal-profile-btn" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
-  <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
-</button>
-
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/dm.js?v=1"></script>
 </body>
 </html>

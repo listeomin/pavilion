@@ -347,12 +347,7 @@ if ($telegramUserId && $urlUsername) {
   </aside>
 </div><!-- .page-layout -->
 <?php endif; ?>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
-<?php if ($urlUsername !== 'developer'): ?>
-<button href="<?php echo htmlspecialchars($basePath); ?>/nest/developer" title="Гнездо разработчика">
-  <img src="<?php echo htmlspecialchars($basePath); ?>/assets/leaf.svg" alt="Developer Nest">
-</button>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <?php endif; ?>
 <?php if (!$urlUsername): ?>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">

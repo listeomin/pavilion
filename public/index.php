@@ -43,7 +43,6 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/weather.css?v=5">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
-<link rel="stylesheet" href="css/utility-buttons.css?v=1">
 </head>
 <body class="page-chat skeleton-active">
 <nav class="main-nav">
@@ -93,7 +92,7 @@ $basePath = get_base_path();
 </div>
 
 <div id="telegram-auth-container" style="display: none;"></div>
-<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
+<?php include $_SERVER['DOCUMENT_ROOT'] . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/main.js?v=42"></script>
 </body>
 </html>

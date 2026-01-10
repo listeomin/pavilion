@@ -48,8 +48,7 @@ $basePath = get_base_path();
     <h1>Гнездо</h1>
   </div>
 </div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <script type="module" src="js/gnezdo.js"></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
-// nightshift.js
-
 const NIGHTSHIFT_KEY = 'nightshift_enabled';
 
 class NightShift {
   constructor() {
     this.button = document.getElementById('nightshift-toggle');
+    if (!this.button) return; // ← защита, чтобы не падало
+
     this.icon = this.button.querySelector('img');
     this.enabled = localStorage.getItem(NIGHTSHIFT_KEY) === 'true';
     
@@ -25,8 +25,7 @@ class NightShift {
   applyState() {
     if (this.enabled) {
       document.documentElement.classList.add('nightshift-on');
-    }
-    else {
+    } else {
       document.documentElement.classList.remove('nightshift-on');
     }
   }

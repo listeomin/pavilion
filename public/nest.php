@@ -118,8 +118,7 @@ if ($telegramUserId && !$urlUserId) {
   </div>
   <div id="telegram-auth-container"></div>
 </div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль"></button>
-<button id="nightshift-toggle"></button>
+<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
 <img src="assets/jp.png" id="jp-window" alt="Juni Perus Window">
 <img src="assets/owl.png" id="owl-image" alt="Owl">
 <script type="module" src="js/nest.js?v=9"></script>
