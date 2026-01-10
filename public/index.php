@@ -42,6 +42,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/weather.css?v=5">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
+<link rel="stylesheet" href="css/utility-buttons.css?v=1">
 </head>
 <body class="page-chat skeleton-active">
 <nav class="main-nav">
@@ -91,15 +92,17 @@ $basePath = get_base_path();
 </div>
 
 <div id="telegram-auth-container" style="display: none;"></div>
-<button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
-  <img src="assets/paw.svg" alt="Animal Profile">
-</button>
-<button id="nightshift-toggle">
-  <img src="assets/moon.svg" alt="Night Shift">
-</button>
-<a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
-  <img src="assets/leaf.svg" alt="Developer Nest">
-</a>
+<div id="utility-buttons-group">
+  <button id="animal-profile-btn" class="animal-profile-trigger" title="Звериный профиль">
+    <img src="assets/paw.svg" alt="Animal Profile">
+  </button>
+  <button id="nightshift-toggle">
+    <img src="assets/moon.svg" alt="Night Shift">
+  </button>
+  <a id="dev-nest-btn" href="nest/developer" title="Гнездо разработчика">
+    <img src="assets/leaf.svg" alt="Developer Nest">
+  </a>
+</div>
 <script type="module" src="js/main.js?v=42"></script>
 </body>
 </html>

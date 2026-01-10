@@ -1,42 +1,4 @@
-/* Developer Nest button */
-#dev-nest-btn {
-  position: fixed;
-  bottom: 32px;
-  right: calc(500px - 32px); /* main-column margin-right (500px) minus offset (32px) = 468px */
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 20px;
-  background: var(--color-olive);
-  padding: 0;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-  z-index: 1000;
-  pointer-events: all !important;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#dev-nest-btn:hover {
-  opacity: 1;
-}
-
-#dev-nest-btn img {
-  width: 65%;
-  height: 65%;
-  display: block;
-  filter: brightness(0) invert(1);
-}
-
-/* Responsive: on small screens move button to right edge */
-@media (max-width: 639px) {
-  #dev-nest-btn {
-    right: 32px;
-  }
-}
+/* Developer Nest button styles moved to utility-buttons.css */
 
 /* Developer page background sticker */
 body.developer-page {
