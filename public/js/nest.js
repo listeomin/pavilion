@@ -9,7 +9,7 @@ import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=8';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
 import { NestPostsManager } from './nest-posts-manager.js?v=22';
-import { DiscussionsManager } from './discussions.js?v=1';
+import { DiscussionsManager } from './discussions.js?v=2';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -2000,11 +2000,18 @@ function alignUserHeader() {
 
         // Initialize discussions for text quotation (only for viewing mode)
         if (!nestConfig.isOwnNest) {
-          const discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
-          const contentElement = document.querySelector('.nest-post-content');
-          if (contentElement) {
-            discussionsManager.initializeTextSelection(result.post.id, contentElement);
-          }
+          // Wait for DOM to be ready
+          setTimeout(() => {
+            const contentElement = document.querySelector('.nest-post-content');
+            if (contentElement) {
+              console.log('[Nest] Initializing discussions for post:', result.post.id);
+              const discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
+              discussionsManager.initializeTextSelection(result.post.id, contentElement);
+              console.log('[Nest] Discussions initialized');
+            } else {
+              console.error('[Nest] Content element not found for discussions');
+            }
+          }, 100);
         }
       } else {
         // Post not found, show 404 or redirect

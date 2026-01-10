@@ -1,18 +1,22 @@
 // discussions.js - Module for text quotation and discussions
 export class DiscussionsManager {
   constructor(config, apiPath) {
+    console.log('[Discussions] Creating DiscussionsManager');
     this.config = config;
     this.apiPath = apiPath;
     this.currentPostId = null;
     this.discussions = [];
     this.contextMenu = null;
     this.quoteModal = null;
+    this.quoteButton = null;
 
     this.initializeContextMenu();
+    console.log('[Discussions] Constructor complete');
   }
 
   // Initialize text selection and context menu
   initializeTextSelection(postId, contentElement) {
+    console.log('[Discussions] Initializing for post:', postId);
     this.currentPostId = postId;
 
     // Remove existing listeners if any
@@ -27,15 +31,22 @@ export class DiscussionsManager {
     };
 
     const contextmenuHandler = (e) => {
+      console.log('[Discussions] Context menu triggered');
       const selection = window.getSelection();
+      console.log('[Discussions] Selection:', selection ? selection.toString() : 'null');
       if (selection && selection.toString().trim().length > 0) {
+        console.log('[Discussions] Preventing default and showing menu');
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         this.showContextMenu(e.clientX, e.clientY);
       }
     };
 
-    contentElement.addEventListener('mouseup', mouseupHandler);
-    contentElement.addEventListener('contextmenu', contextmenuHandler);
+    // Use capture phase to catch event before any other handlers
+    contentElement.addEventListener('mouseup', mouseupHandler, false);
+    contentElement.addEventListener('contextmenu', contextmenuHandler, true);
+    console.log('[Discussions] Event listeners attached to:', contentElement);
 
     // Store listeners for cleanup
     contentElement._discussionListeners = {
@@ -50,6 +61,7 @@ export class DiscussionsManager {
 
     if (!selection || selection.toString().trim().length === 0) {
       this.hideContextMenu();
+      this.hideQuoteButton();
       return;
     }
 
@@ -58,6 +70,7 @@ export class DiscussionsManager {
     // Check text length (max 300 characters)
     if (selectedText.length > 300) {
       console.log('[Discussions] Selection too long (max 300 characters)');
+      this.hideQuoteButton();
       return;
     }
 
@@ -67,10 +80,73 @@ export class DiscussionsManager {
       range: selection.getRangeAt(0),
       contentElement: contentElement
     };
+
+    // Show floating quote button near selection
+    this.showQuoteButton(event);
+  }
+
+  // Show floating quote button near selection
+  showQuoteButton(event) {
+    // Remove existing button if any
+    this.hideQuoteButton();
+
+    const button = document.createElement('button');
+    button.className = 'discussions-quote-button';
+    button.innerHTML = '💬 Цитировать';
+    button.style.cssText = `
+      position: fixed;
+      left: ${event.clientX + 10}px;
+      top: ${event.clientY + 10}px;
+      background: #BCD1CA;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: 'Ubuntu Sans', sans-serif;
+      font-size: 14px;
+      color: #5E5D59;
+      cursor: pointer;
+      z-index: 10001;
+      box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.2);
+      transition: background 0.2s;
+      font-weight: 600;
+    `;
+
+    button.addEventListener('mouseenter', () => {
+      button.style.background = '#A8C0B8';
+    });
+    button.addEventListener('mouseleave', () => {
+      button.style.background = '#BCD1CA';
+    });
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hideQuoteButton();
+      this.showQuoteModal();
+    });
+
+    document.body.appendChild(button);
+    this.quoteButton = button;
+
+    // Hide button on any click outside
+    setTimeout(() => {
+      document.addEventListener('click', (e) => {
+        if (e.target !== button) {
+          this.hideQuoteButton();
+        }
+      }, { once: true });
+    }, 10);
+  }
+
+  // Hide quote button
+  hideQuoteButton() {
+    if (this.quoteButton) {
+      this.quoteButton.remove();
+      this.quoteButton = null;
+    }
   }
 
   // Create context menu HTML
   initializeContextMenu() {
+    console.log('[Discussions] Creating context menu');
     // Remove existing menu if any
     if (this.contextMenu) {
       this.contextMenu.remove();
