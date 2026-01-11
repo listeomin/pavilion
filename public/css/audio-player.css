@@ -1,7 +1,6 @@
 /* Wrapper for player and play button */
 .audio-player-wrapper {
   position: relative;
-  overflow: visible;
 }
 
 .audio-player {
@@ -15,7 +14,6 @@
   transition: background 0.2s;
   position: relative;
   padding-left: 32px;
-  overflow: visible;
   width: 320px;
   height: 60px;
   box-sizing: border-box;

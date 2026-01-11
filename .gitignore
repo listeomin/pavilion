@@ -50,3 +50,6 @@ vendor/
 
 # Кеш тестов
 .phpunit.cache/
+
+*storybook.log
+storybook-static
