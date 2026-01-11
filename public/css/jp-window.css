@@ -4,22 +4,7 @@
   bottom: 0;
   right: 0;
   width: auto;
-  height: auto;
   max-width: none;
-  max-height: none;
-  z-index: 1000;
-  pointer-events: none; /* Allow clicks to go through */
-}
-
-/* Owl image styling */
-#owl-image {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: auto;
-  height: auto;
-  max-width: none;
-  max-height: none;
   z-index: 1000;
   pointer-events: none; /* Allow clicks to go through */
 }
