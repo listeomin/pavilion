@@ -1,6 +1,5 @@
 // public/js/music.js
 import { initAudioPlayer } from './audio-player.js?v=3';
-import { initYouTubePlayer } from './youtube-player.js?v=5';
 
 export function renderMusicPlayer(metadata) {
   if (!metadata || metadata.type !== 'music') return '';
@@ -10,7 +9,12 @@ export function renderMusicPlayer(metadata) {
   const audioUrl = metadata.audioUrl || '';
   const isYouTube = metadata.youtube_id !== undefined;
 
-  console.log('[Music] Rendering player:', { artist, track, audioUrl, isYouTube });
+  // Skip YouTube videos (YouTube player disabled)
+  if (isYouTube) {
+    return '';
+  }
+
+  console.log('[Music] Rendering player:', { artist, track, audioUrl });
 
   const playerHtml = `
     <div class="audio-player-wrapper">
@@ -28,7 +32,7 @@ export function renderMusicPlayer(metadata) {
           ${track ? `<div class="audio-track">${escapeHtml(track)}</div>` : ''}
         </div>
         <div class="audio-time">00:00</div>
-        ${!isYouTube && audioUrl ? `<a href="${escapeHtml(audioUrl)}" download class="audio-download-btn" style="display: block;">скачать</a>` : ''}
+        ${audioUrl ? `<a href="${escapeHtml(audioUrl)}" download class="audio-download-btn" style="display: block;">скачать</a>` : ''}
         <div class="audio-progress-container">
           <div class="audio-progress-bar"></div>
         </div>
@@ -36,7 +40,7 @@ export function renderMusicPlayer(metadata) {
       </div>
     </div>
   `;
-  
+
   // Init player after element is added to DOM
   setTimeout(() => {
     const wrappers = document.querySelectorAll('.audio-player-wrapper .audio-player[data-audio-url]');
@@ -47,21 +51,13 @@ export function renderMusicPlayer(metadata) {
         const url = playerEl.dataset.audioUrl;
 
         if (url && playBtn) {
-          // Check if this is a YouTube video
-          const isYouTube = metadata.youtube_id !== undefined;
-
-          if (isYouTube) {
-            initYouTubePlayer(playerEl, metadata.youtube_id, metadata, playBtn);
-          } else {
-            const playerInstance = initAudioPlayer(playerEl, url, metadata, playBtn);
-          }
-
+          const playerInstance = initAudioPlayer(playerEl, url, metadata, playBtn);
           playerEl.dataset.initialized = 'true';
         }
       }
     });
   }, 0);
-  
+
   return playerHtml;
 }
 

@@ -238,14 +238,12 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=6">
 <!-- Flatpickr date picker -->
 <link rel="stylesheet" href="libs/flatpickr.min.css">
 </head>
 <body<?php
   $classes = ['no-js']; // Remove via JavaScript when loaded
-  if ($urlUsername) $classes[] = 'skeleton-active';
   if ($urlUsername === 'developer') $classes[] = 'developer-page';
   echo ' class="' . implode(' ', $classes) . '"';
 ?>>
@@ -315,21 +313,27 @@ if ($telegramUserId && $urlUsername) {
   <div id="telegram-auth-container"></div>
   <?php endif; ?>
   <?php if ($urlUsername): ?>
-  <!-- Loading indicator (only on personal pages) -->
-  <div id="skeleton-content" class="skeleton-container">
-    <div class="skeleton-loader">
-      <div class="skeleton-spinner"></div>
-      <div class="skeleton-text">Загрузка...</div>
-    </div>
-  </div>
   <!-- Static HTML content for SEO and Instant View (hidden by JavaScript) -->
   <?php if ($nestContentHtml): ?>
   <article id="nest-static-content" class="nest-static-content">
-    <?php echo $nestContentHtml; ?>
+    <?php
+    // Add loading="lazy" to all images for performance
+    $contentWithLazy = preg_replace('/<img\s/', '<img loading="lazy" decoding="async" ', $nestContentHtml);
+    echo $contentWithLazy;
+    ?>
   </article>
   <?php endif; ?>
   <!-- Content editor (only on personal pages) -->
   <div id="nest-editor-container">
+    <?php if (!$isOwnNest): ?>
+    <!-- Simple loading indicator for viewing mode -->
+    <div id="initial-loader" style="display: flex; justify-content: center; align-items: center; padding: 60px 20px; opacity: 0.7;">
+      <div style="width: 40px; height: 40px; border: 3px solid #E0E0E0; border-top-color: #6366F1; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+    </div>
+    <style>
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+    <?php endif; ?>
     <div id="nest-editor"></div>
   </div>
   <?php endif; ?>
@@ -366,12 +370,28 @@ if ($telegramUserId && $urlUsername) {
   <div class="context-menu-item" data-sort="modified">По дате изменения</div>
 </div>
 
-<!-- Date/time libraries -->
-<script src="libs/dayjs.min.js"></script>
-<script src="libs/dayjs-relativeTime.min.js"></script>
-<script src="libs/dayjs-ru.js"></script>
-<script src="libs/flatpickr.min.js"></script>
-<script src="libs/flatpickr-ru.js"></script>
-<script type="module" src="js/nest.js?v=141"></script>
+<!-- Date/time libraries - defer to not block initial render -->
+<script defer src="libs/dayjs.min.js"></script>
+<script defer src="libs/dayjs-relativeTime.min.js"></script>
+<script defer src="libs/dayjs-ru.js"></script>
+<script defer src="libs/flatpickr.min.js"></script>
+<script defer src="libs/flatpickr-ru.js"></script>
+
+<!-- Preload all JS modules to enable parallel loading -->
+<link rel="modulepreload" href="js/config.js?v=7">
+<link rel="modulepreload" href="js/api.js?v=7">
+<link rel="modulepreload" href="js/nightshift.js?v=1">
+<link rel="modulepreload" href="js/animalProfile.js?v=18">
+<link rel="modulepreload" href="js/telegramAuth.js?v=2">
+<link rel="modulepreload" href="js/github.js?v=5">
+<link rel="modulepreload" href="js/youtube.js?v=2">
+<link rel="modulepreload" href="js/music.js?v=9">
+<link rel="modulepreload" href="js/image-zoom.js?v=12">
+<link rel="modulepreload" href="js/nest-posts-manager.js?v=23">
+<link rel="modulepreload" href="js/discussions.js?v=2">
+<link rel="modulepreload" href="js/nest-utils.js?v=1">
+<link rel="modulepreload" href="js/nest-sections.js?v=1">
+
+<script type="module" src="js/nest.js?v=151"></script>
 </body>
 </html>

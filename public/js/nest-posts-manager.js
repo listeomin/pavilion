@@ -9,7 +9,6 @@ let tiptapModulesLoaded = false;
 async function loadTipTapModules() {
   if (tiptapModulesLoaded) return;
 
-  console.log('[PostsManager] Loading TipTap modules...');
   const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule, audioModule] = await Promise.all([
     import('https://esm.sh/@tiptap/core@2.1.13'),
     import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
@@ -26,7 +25,6 @@ async function loadTipTapModules() {
   Placeholder = placeholderModule.default;
   AudioPlayer = audioModule.AudioPlayer;
   tiptapModulesLoaded = true;
-  console.log('[PostsManager] TipTap modules loaded');
 }
 
 export class NestPostsManager {
@@ -42,7 +40,7 @@ export class NestPostsManager {
     this.currentFilter = null; // { type: 'section', name: 'стихи' } or null
 
     // Pagination for viewing mode
-    this.postsPerPage = 20;
+    this.postsPerPage = 10; // Reduced from 20 for faster initial load
     this.currentOffset = 0;
     this.totalPosts = 0;
     this.isLoading = false;
@@ -122,29 +120,37 @@ export class NestPostsManager {
   async loadMetadata() {
     // Load only metadata (no content) for sidebar navigation
     const url = `${this.apiPath}/api/nest_posts.php?action=list_metadata&username=${encodeURIComponent(this.config.urlUsername)}`;
-    console.log('[PostsManager] Loading metadata:', url);
     const response = await fetch(url);
     const result = await response.json();
     if (result.success && result.posts) {
       this.allPostsMetadata = result.posts;
       this.totalPosts = result.total || result.posts.length;
-      console.log('[PostsManager] Metadata loaded:', this.allPostsMetadata.length, 'posts');
     }
     return this.allPostsMetadata;
   }
 
+  async loadCounts() {
+    // Load post counts per tag/category (fast, no posts loading)
+    const url = `${this.apiPath}/api/nest_posts.php?action=get_counts&username=${encodeURIComponent(this.config.urlUsername)}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    if (result.success && result.counts) {
+      this.postCounts = result.counts;
+    }
+    return this.postCounts;
+  }
+
   async loadPosts(reset = false) {
+
     // If own nest, load all posts without pagination
     if (this.config.isOwnNest) {
       const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
-      console.log('[PostsManager] Loading all posts for editing:', url);
       const response = await fetch(url);
       const result = await response.json();
       if (result.success && result.posts) {
         this.posts = result.posts;
         this.totalPosts = result.total || result.posts.length;
       }
-      console.log('[PostsManager] Loaded', this.posts.length, 'posts for editing');
       return this.posts;
     }
 
@@ -156,25 +162,31 @@ export class NestPostsManager {
     }
 
     if (this.isLoading || !this.hasMorePosts) {
-      console.log('[PostsManager] Skipping load - isLoading:', this.isLoading, 'hasMorePosts:', this.hasMorePosts);
       return this.posts;
     }
 
     this.isLoading = true;
-    const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}&limit=${this.postsPerPage}&offset=${this.currentOffset}`;
-    console.log('[PostsManager] Fetching paginated posts:', url);
+
+    // Build URL with optional tag filter
+    let url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}&limit=${this.postsPerPage}&offset=${this.currentOffset}`;
+    if (this.currentFilter && this.currentFilter.type === 'section' && this.currentFilter.name) {
+      url += `&tag=${encodeURIComponent(this.currentFilter.name)}`;
+    }
+
 
     try {
       const response = await fetch(url);
       const result = await response.json();
+
 
       if (result.success && result.posts) {
         this.posts = [...this.posts, ...result.posts];
         this.totalPosts = result.total || 0;
         this.currentOffset += result.posts.length;
         this.hasMorePosts = this.posts.length < this.totalPosts;
-        console.log('[PostsManager] Loaded', result.posts.length, 'posts. Total so far:', this.posts.length, 'of', this.totalPosts);
+      } else {
       }
+    } catch (err) {
     } finally {
       this.isLoading = false;
     }
@@ -339,12 +351,20 @@ export class NestPostsManager {
     return sorted;
   }
 
-  // Set filter for posts
-  setFilter(filterType, filterValue) {
+  // Set filter for posts and reload if needed
+  async setFilter(filterType, filterValue, reload = true) {
+    const previousFilter = this.currentFilter;
+
     if (!filterType) {
       this.currentFilter = null;
     } else {
       this.currentFilter = { type: filterType, name: filterValue };
+    }
+
+    // If filter changed and we're in viewing mode, reload posts from backend
+    const filterChanged = JSON.stringify(previousFilter) !== JSON.stringify(this.currentFilter);
+    if (reload && !this.config.isOwnNest && filterChanged) {
+      await this.loadPosts(true); // Reset and reload with new filter
     }
   }
 
@@ -352,8 +372,9 @@ export class NestPostsManager {
   getFilteredPosts() {
     let posts = this.sortPosts();
 
-    // Apply filter if active
-    if (this.currentFilter && this.currentFilter.type === 'section') {
+    // Apply client-side filter only if in own nest mode (all posts loaded)
+    // In viewing mode, backend already filters posts, so no need to filter again
+    if (this.config.isOwnNest && this.currentFilter && this.currentFilter.type === 'section') {
       const sectionName = this.currentFilter.name.toLowerCase();
       posts = posts.filter(post => {
         return post.tag && post.tag.toLowerCase() === sectionName;
@@ -364,8 +385,15 @@ export class NestPostsManager {
   }
 
   renderPostsList(container, append = false) {
+
     if (!append) {
       container.innerHTML = '';
+    }
+
+    // Remove initial loader if it exists (on first render)
+    const initialLoader = document.getElementById('initial-loader');
+    if (initialLoader) {
+      initialLoader.remove();
     }
 
     // Initialize sort menu once (only after DOM is ready)
@@ -388,8 +416,19 @@ export class NestPostsManager {
       container.appendChild(beforeFirstZone);
     }
 
-    const startIndex = append ? container.querySelectorAll('.nest-post').length : 0;
-    const postsToRender = append ? sortedPosts.slice(startIndex) : sortedPosts;
+    let postsToRender;
+
+    if (append) {
+      // When appending, only render posts that aren't already in the DOM
+      // to avoid duplicates when sorting changes post order
+      const renderedIds = new Set(
+        Array.from(container.querySelectorAll('.nest-post[data-post-id]'))
+          .map(el => el.dataset.postId)
+      );
+      postsToRender = sortedPosts.filter(post => !renderedIds.has(String(post.id)));
+    } else {
+      postsToRender = sortedPosts;
+    }
 
     postsToRender.forEach((post) => {
       const postEl = this.createPostElement(post);
@@ -405,7 +444,12 @@ export class NestPostsManager {
     if (!this.config.isOwnNest && this.hasMorePosts) {
       const loadingEl = document.createElement('div');
       loadingEl.className = 'posts-loading';
-      loadingEl.innerHTML = '<div class="posts-loading-text">Загрузка...</div>';
+      loadingEl.innerHTML = `
+        <div class="skeleton-loader">
+          <div class="skeleton-spinner"></div>
+          <div class="skeleton-text">Загрузка...</div>
+        </div>
+      `;
       container.appendChild(loadingEl);
     }
   }
@@ -1586,7 +1630,6 @@ export class NestPostsManager {
         const file = files[i];
         if (!file.type.startsWith('image/')) continue;
 
-        console.log('[PostsManager] Uploading dropped image:', file.name);
         const url = await this.uploadImageFile(file);
 
         if (url) {
@@ -1618,7 +1661,6 @@ export class NestPostsManager {
           const file = item.getAsFile();
           if (!file) continue;
 
-          console.log('[PostsManager] Uploading pasted image from clipboard');
           const url = await this.uploadImageFile(file);
 
           if (url) {

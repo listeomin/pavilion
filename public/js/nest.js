@@ -6,42 +6,19 @@ import { AnimalProfile } from './animalProfile.js?v=18';
 import { TelegramAuth } from './telegramAuth.js?v=2';
 import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
-import { renderMusicPlayer } from './music.js?v=8';
+import { renderMusicPlayer } from './music.js?v=9';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
-import { NestPostsManager } from './nest-posts-manager.js?v=22';
+import { NestPostsManager } from './nest-posts-manager.js?v=23';
 import { DiscussionsManager } from './discussions.js?v=2';
+import { logToServer, alignUserHeader, setupHeaderAlignment, loadTipTap, suppressYouTubeErrors, capitalize } from './nest-utils.js?v=1';
+import { createSectionsManager, showInputModal, showSectionContextMenu } from './nest-sections.js?v=1';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
 let Editor, StarterKit, Link, Image, Placeholder;
-let tiptapLoaded = false;
 
-// Log to server file instead of console
-const logToServer = async (message, level = 'INFO') => {
-  try {
-    await fetch('server/api/log.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `[Nest] ${message}`, level })
-    });
-  } catch (e) {
-    // Silent fail - logging shouldn't break functionality
-  }
-};
-
-// Suppress YouTube postMessage errors globally
-const originalError = console.error.bind(console);
-console.error = (...args) => {
-  const firstArg = args[0];
-  if (firstArg && typeof firstArg === 'string') {
-    if (firstArg.includes('postMessage') ||
-        firstArg.includes('youtube.com') ||
-        firstArg.includes('www-widgetapi')) {
-      return;
-    }
-  }
-  originalError(...args);
-};
+// Setup error suppression
+suppressYouTubeErrors();
 
 // Remove no-js class immediately (JavaScript is available)
 console.log('[Nest] JavaScript starting at:', performance.now().toFixed(2), 'ms');
@@ -53,79 +30,14 @@ if (staticContent) {
   staticContent.style.display = 'none';
 }
 
-// Function to hide skeleton loading screen
-let skeletonHidden = false;
-function hideSkeleton() {
-  if (skeletonHidden) return;
-  skeletonHidden = true;
-
-  const skeletonContainer = document.getElementById('skeleton-content');
-  if (!skeletonContainer) return;
-
-  // Fade out skeleton
-  skeletonContainer.classList.add('fade-out');
-
-  // Remove skeleton-active class and delete skeleton after animation
-  setTimeout(() => {
-    document.body.classList.remove('skeleton-active');
-    if (skeletonContainer.parentNode) {
-      skeletonContainer.parentNode.removeChild(skeletonContainer);
-    }
-    // Realign user header after skeleton is removed and layout has settled
-    requestAnimationFrame(() => {
-      setTimeout(alignUserHeader, 100);
-    });
-  }, 300);
-}
-
-// Fallback: force hide skeleton after 2 seconds if not hidden yet
-setTimeout(() => {
-  if (!skeletonHidden) {
-    console.warn('[Nest] Skeleton timeout - forcing hide');
-    hideSkeleton();
-  }
-}, 2000);
-
-// Load TipTap modules dynamically (only when needed for single post TipTap editor)
-async function loadTipTap() {
-  if (tiptapLoaded) return;
-
-  console.log('[Nest] Loading TipTap modules...');
-  const [editorModule, starterKitModule, linkModule, imageModule, placeholderModule] = await Promise.all([
-    import('https://esm.sh/@tiptap/core@2.1.13'),
-    import('https://esm.sh/@tiptap/starter-kit@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-link@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-image@2.1.13'),
-    import('https://esm.sh/@tiptap/extension-placeholder@2.1.13')
-  ]);
-
-  Editor = editorModule.Editor;
-  StarterKit = starterKitModule.default;
-  Link = linkModule.default;
-  Image = imageModule.default;
-  Placeholder = placeholderModule.default;
-  tiptapLoaded = true;
-  console.log('[Nest] TipTap modules loaded');
-}
-
-// Function to align user header to the right edge of the title
-function alignUserHeader() {
-  const h1 = document.querySelector('h1');
-  const userHeader = document.getElementById('user-header');
-
-  if (!h1 || !userHeader) {
-    return;
-  }
-
-  // Force a reflow to ensure layout is calculated
-  h1.offsetHeight;
-
-  const h1Rect = h1.getBoundingClientRect();
-  const containerRect = h1.parentElement.getBoundingClientRect();
-  const rightOffset = h1Rect.right - containerRect.left;
-  const marginLeft = rightOffset - userHeader.offsetWidth;
-
-  userHeader.style.marginLeft = marginLeft + 'px';
+// TipTap loading wrapper that updates local variables
+async function loadTipTapModules() {
+  const modules = await loadTipTap();
+  Editor = modules.Editor;
+  StarterKit = modules.StarterKit;
+  Link = modules.Link;
+  Image = modules.Image;
+  Placeholder = modules.Placeholder;
 }
 
 (async function () {
@@ -148,49 +60,8 @@ function alignUserHeader() {
     userEmojiEl.textContent = emoji;
   }
 
-  // Align user header after content loads
-  // Use multiple strategies to ensure alignment happens after layout is stable
-  const doAlign = () => {
-    requestAnimationFrame(() => {
-      alignUserHeader();
-    });
-  };
-
-  // Check if skeleton is active - if yes, wait for it to be removed
-  const hasSkeleton = document.body.classList.contains('skeleton-active');
-
-  if (!hasSkeleton) {
-    // No skeleton - use multiple strategies to ensure alignment
-
-    // Strategy 1: After fonts load
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        setTimeout(doAlign, 150);
-      });
-    }
-
-    // Strategy 2: After DOMContentLoaded
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(doAlign, 200);
-      });
-    } else {
-      setTimeout(doAlign, 200);
-    }
-
-    // Strategy 3: After window load (images, etc.)
-    window.addEventListener('load', () => {
-      setTimeout(doAlign, 100);
-    });
-
-    // Strategy 4: Fallback with longer delay
-    setTimeout(() => {
-      doAlign();
-    }, 500);
-  }
-  // If skeleton is active, alignment will happen in hideSkeleton()
-
-  window.addEventListener('resize', alignUserHeader);
+  // Setup user header alignment with multiple strategies
+  setupHeaderAlignment();
 
   // Handle emoji click for changing animal
   if (userEmojiEl) {
@@ -500,7 +371,7 @@ function alignUserHeader() {
     // Configure Tiptap
     const initEditor = async (initialContent = '') => {
       // Load TipTap modules if not already loaded
-      await loadTipTap();
+      await loadTipTapModules();
 
       // Create wrapper for editor
       const wrapper = document.createElement('div');
@@ -911,11 +782,9 @@ function alignUserHeader() {
             }
           }
         }
-        hideSkeleton();
       } catch (err) {
         console.error('[Nest] Error loading content:', err);
         await initEditor('');
-        hideSkeleton();
       }
     };
 
@@ -1289,30 +1158,23 @@ function alignUserHeader() {
         { name: 'Лента', image: 'лента.png' },
         { name: 'Разработка', image: 'разработка.png' },
         { name: 'Наблюдения', image: 'наблюдения.png' },
+        { name: 'Твои сны', image: 'сны.png' },
         { name: 'Психонавтика', image: 'психонавтика.png' },
         { name: 'Краски да холсты', image: 'краски_да_холсты.png' },
         { name: 'Стихи', image: 'стихи.png' },
         { name: 'Рассказы', image: 'рассказы.png' },
+        { name: 'Рефлексия', image: 'рефлексия.png' },
+        { name: 'Фотокарточки', image: 'фотокарточки.png' },
         { name: 'Воспоминания', image: 'воспоминания.png' },
         { name: 'Письма', image: 'письма.png' },
-        { name: 'Фотокарточки', image: 'фотокарточки.png' },
-        { name: 'Пейджер', image: 'пейджер.png' },
         { name: 'Музыка', image: 'музыка.png' },
-        { name: 'Кинофильмы', image: 'кинофильмы.png' },
+        { name: 'Фильмы', image: 'кинофильмы.png' },
+        { name: 'Пейджер', image: 'пейджер.png' },
         { name: 'Черновики', image: 'черновики.png' }
       ];
 
-      // Count posts per category (use metadata for counts, it has all posts)
-      const categoryCounts = {};
-      if (postsManager) {
-        // Use allPostsMetadata if available (has all posts), otherwise fallback to posts
-        const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
-        postsData.forEach(post => {
-          if (post.tag) {
-            categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
-          }
-        });
-      }
+      // Get counts from cached data (fast, no counting needed)
+      const categoryCounts = postsManager?.postCounts || {};
 
       // Create tabs content container if it doesn't exist
       let tabsContainer = document.querySelector('.nest-tabs-content');
@@ -1399,32 +1261,27 @@ function alignUserHeader() {
         { name: 'Лента', image: 'лента.png' },
         { name: 'Разработка', image: 'разработка.png' },
         { name: 'Наблюдения', image: 'наблюдения.png' },
+        { name: 'Твои сны', image: 'сны.png' },
         { name: 'Психонавтика', image: 'психонавтика.png' },
         { name: 'Краски да холсты', image: 'краски_да_холсты.png' },
         { name: 'Стихи', image: 'стихи.png' },
         { name: 'Рассказы', image: 'рассказы.png' },
+        { name: 'Рефлексия', image: 'рефлексия.png' },
+        { name: 'Фотокарточки', image: 'фотокарточки.png' },
         { name: 'Воспоминания', image: 'воспоминания.png' },
         { name: 'Письма', image: 'письма.png' },
-        { name: 'Фотокарточки', image: 'фотокарточки.png' },
-        { name: 'Пейджер', image: 'пейджер.png' },
         { name: 'Музыка', image: 'музыка.png' },
-        { name: 'Кинофильмы', image: 'кинофильмы.png' },
+        { name: 'Фильмы', image: 'кинофильмы.png' },
+        { name: 'Пейджер', image: 'пейджер.png' },
         { name: 'Черновики', image: 'черновики.png' }
       ];
 
       const category = categories.find(c => c.name === categoryName);
       if (!category) return;
 
-      // Get count for this category
-      const categoryCounts = {};
-      if (postsManager) {
-        const postsData = postsManager.allPostsMetadata || postsManager.posts || [];
-        postsData.forEach(post => {
-          if (post.tag) {
-            categoryCounts[post.tag] = (categoryCounts[post.tag] || 0) + 1;
-          }
-        });
-      }
+      // Get counts from cached data (fast, no counting needed)
+      const categoryCounts = postsManager?.postCounts || {};
+
       // Find count (case-insensitive match)
       const countKey = Object.keys(categoryCounts).find(
         key => key.toLowerCase() === category.name.toLowerCase()
@@ -1577,7 +1434,7 @@ function alignUserHeader() {
       }
 
       // Attach handlers to the new tile (not the title this time)
-      tile.addEventListener('click', (e) => {
+      tile.addEventListener('click', async (e) => {
         // Don't handle title clicks in single view
         if (e.target.classList.contains('category-tile-name')) {
           return;
@@ -1591,7 +1448,7 @@ function alignUserHeader() {
           if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
             // Deactivate filter
             currentFilter = null;
-            postsManager.setFilter(null, null);
+            await postsManager.setFilter(null, null);
 
             // Remove section from URL
             const url = new URL(window.location);
@@ -1600,7 +1457,7 @@ function alignUserHeader() {
           } else {
             // Activate section filter
             currentFilter = { type: 'section', name: sectionName };
-            postsManager.setFilter('section', sectionName);
+            await postsManager.setFilter('section', sectionName);
 
             // Add section to URL
             const url = new URL(window.location);
@@ -1615,7 +1472,6 @@ function alignUserHeader() {
           } else {
             tile.classList.remove('active');
           }
-          postsManager.renderSidebarNavigation();
         }
       });
     };
@@ -1624,7 +1480,7 @@ function alignUserHeader() {
     const attachNavigationHandlers = () => {
       // Category tiles - click on tile area (not on title)
       document.querySelectorAll('.category-tile').forEach(tile => {
-        tile.addEventListener('click', (e) => {
+        tile.addEventListener('click', async (e) => {
           // If clicked on title, don't handle here (separate handler below)
           if (e.target.classList.contains('category-tile-name')) {
             return;
@@ -1638,7 +1494,7 @@ function alignUserHeader() {
             if (currentFilter?.type === 'section' && currentFilter.name === sectionName) {
               // Deactivate filter
               currentFilter = null;
-              postsManager.setFilter(null, null);
+              await postsManager.setFilter(null, null);
 
               // Remove section from URL
               const url = new URL(window.location);
@@ -1647,7 +1503,7 @@ function alignUserHeader() {
             } else {
               // Activate section filter
               currentFilter = { type: 'section', name: sectionName };
-              postsManager.setFilter('section', sectionName);
+              await postsManager.setFilter('section', sectionName);
 
               // Add section to URL
               const url = new URL(window.location);
@@ -1655,11 +1511,18 @@ function alignUserHeader() {
               window.history.pushState({ section: sectionName }, '', url);
             }
 
-            // Re-render posts list, navigation, and sidebar
+            // Re-render posts list only
             const container = document.getElementById('nest-editor-container');
             postsManager.renderPostsList(container);
-            renderNavigation(); // Re-render navigation to update active states (creates sidebar structure)
-            postsManager.renderSidebarNavigation(); // Populate sidebar with all posts
+
+            // Update tile active states without full re-render
+            document.querySelectorAll('.category-tile').forEach(t => {
+              if (t.dataset.section === sectionName && currentFilter?.type === 'section') {
+                t.classList.add('active');
+              } else {
+                t.classList.remove('active');
+              }
+            });
           } else {
             // Legacy mode (old content with TipTap)
             // Toggle filter
@@ -1679,7 +1542,7 @@ function alignUserHeader() {
         // Category title click - filter content + show single category in sidebar
         const titleEl = tile.querySelector('.category-tile-name');
         if (titleEl) {
-          titleEl.addEventListener('click', (e) => {
+          titleEl.addEventListener('click', async (e) => {
             e.stopPropagation(); // Prevent tile click handler
             const sectionName = tile.dataset.section;
 
@@ -1687,7 +1550,7 @@ function alignUserHeader() {
             if (postsManager) {
               // Activate section filter
               currentFilter = { type: 'section', name: sectionName };
-              postsManager.setFilter('section', sectionName);
+              await postsManager.setFilter('section', sectionName);
 
               // Add section to URL
               const url = new URL(window.location);
@@ -1696,7 +1559,6 @@ function alignUserHeader() {
 
               // Re-render posts list
               postsManager.renderPostsList(document.getElementById('nest-editor-container'));
-              postsManager.renderSidebarNavigation();
             }
 
             // Show single category in sidebar
@@ -1947,35 +1809,46 @@ function alignUserHeader() {
       const sectionParam = urlParams.get('section');
       if (sectionParam) {
         currentFilter = { type: 'section', name: sectionParam };
-        postsManager.setFilter('section', sectionParam);
+        // Set filter without reload, we'll load posts manually below
+        await postsManager.setFilter('section', sectionParam, false);
       }
 
-      // For viewing mode: load metadata first for navigation, then paginated posts
+      // For viewing mode: prioritize showing posts quickly, load metadata in background
       // For own nest: load all posts
       if (!nestConfig.isOwnNest) {
-        // Load metadata for sidebar navigation (lightweight)
-        await postsManager.loadMetadata();
+        // Start loading metadata in background for sidebar (don't wait for it)
+        const metadataPromise = postsManager.loadMetadata();
+
+        // Load posts, sections, and counts in parallel (fast)
+        await Promise.all([
+          postsManager.loadPosts(),
+          loadSections(),
+          postsManager.loadCounts()
+        ]);
+
+        // Render navigation with counts and posts immediately
+        renderNavigation();
+        postsManager.renderPostsList(document.getElementById('nest-editor-container'));
+
+        // Load metadata in background and populate sidebar when ready
+        metadataPromise.then(() => {
+          postsManager.renderSidebarNavigation();
+        });
+      } else {
+        // For own nest: load all posts
+        await Promise.all([
+          postsManager.loadPosts(),
+          loadSections(),
+          postsManager.loadCounts()
+        ]);
+        renderNavigation();
+        postsManager.renderPostsList(document.getElementById('nest-editor-container'));
       }
-
-      // Load posts (paginated for viewing, all for own nest)
-      await postsManager.loadPosts();
-
-      // Load sections and render navigation
-      await loadSections();
-      renderNavigation();
-
-      // Populate sidebar sections with posts from nest_posts (uses metadata)
-      postsManager.renderSidebarNavigation();
-
-      // Render posts list
-      postsManager.renderPostsList(document.getElementById('nest-editor-container'));
 
       // Setup infinite scroll for viewing mode
       if (!nestConfig.isOwnNest) {
         postsManager.setupInfiniteScroll(document.getElementById('nest-editor-container'));
       }
-
-      hideSkeleton();
 
       // Enable image zoom for viewing (watch for dynamically added images)
       if (!nestConfig.isOwnNest) {
@@ -1985,15 +1858,16 @@ function alignUserHeader() {
       // Load single post from nest_posts by slug using API
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
 
-      // CRITICAL: Load metadata FIRST for sidebar navigation (for all users)
-      await postsManager.loadMetadata();
+      // Load metadata in background, but load sections, counts and post first (fast)
+      const metadataPromise = postsManager.loadMetadata();
 
-      // Load sections early for sidebar
-      await loadSections();
+      const [, , singlePostResponse] = await Promise.all([
+        loadSections(),
+        postsManager.loadCounts(),
+        fetch(`${CONFIG.BASE_PATH}/api/nest_posts.php?action=get&username=${encodeURIComponent(nestConfig.urlUsername)}&slug=${encodeURIComponent(nestConfig.postSlug)}`)
+      ]);
 
-      // Fetch single post directly by slug (not limited by pagination)
-      const response = await fetch(`${CONFIG.BASE_PATH}/api/nest_posts.php?action=get&username=${encodeURIComponent(nestConfig.urlUsername)}&slug=${encodeURIComponent(nestConfig.postSlug)}`);
-      const result = await response.json();
+      const result = await singlePostResponse.json();
 
       if (result.success && result.post) {
         postsManager.renderSinglePost(document.getElementById('nest-editor-container'), result.post);
@@ -2025,15 +1899,16 @@ function alignUserHeader() {
       const urlParams = new URLSearchParams(window.location.search);
       const sectionParam = urlParams.get('section');
 
-      if (sectionParam) {
-        // Restore sidebar state - show single category with posts list
-        showSingleCategoryInSidebar(sectionParam);
-      } else {
-        // Default sidebar navigation - populate all sections
-        postsManager.renderSidebarNavigation();
-      }
-
-      hideSkeleton();
+      // Load metadata in background and populate sidebar when ready
+      metadataPromise.then(() => {
+        if (sectionParam) {
+          // Restore sidebar state - show single category with posts list
+          showSingleCategoryInSidebar(sectionParam);
+        } else {
+          // Default sidebar navigation - populate all sections
+          postsManager.renderSidebarNavigation();
+        }
+      });
 
       // Enable image zoom for viewing (watch for dynamically added images)
       if (!nestConfig.isOwnNest) {
@@ -2042,22 +1917,20 @@ function alignUserHeader() {
     }
 
     // Handle browser back/forward buttons
-    window.addEventListener('popstate', (event) => {
+    window.addEventListener('popstate', async (event) => {
       // If we have postsManager (list view), handle section filtering
       if (postsManager && !nestConfig.postSlug) {
         const sectionParam = event.state?.section || null;
 
         if (sectionParam) {
           currentFilter = { type: 'section', name: sectionParam };
-          postsManager.setFilter('section', sectionParam);
+          await postsManager.setFilter('section', sectionParam);
         } else {
           currentFilter = null;
-          postsManager.setFilter(null, null);
+          await postsManager.setFilter(null, null);
         }
 
         postsManager.renderPostsList(document.getElementById('nest-editor-container'));
-        renderNavigation();
-        postsManager.renderSidebarNavigation();
       } else if (nestConfig.postSlug) {
         // Single post view - handle section parameter changes
         const urlParams = new URLSearchParams(window.location.search);
