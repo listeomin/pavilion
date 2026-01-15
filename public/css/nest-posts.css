@@ -396,3 +396,16 @@ body.editor-active .nest-insert-zone {
 .night-shift .nest-post-editor .ProseMirror p.is-editor-empty:first-child::before {
   color: rgba(255, 255, 255, 0.3);
 }
+
+/* Placeholder for posts with lazy-loaded content */
+.nest-post-placeholder {
+  color: var(--color-nimbus-light);
+  font-style: italic;
+  opacity: 0.6;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.night-shift .nest-post-placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}

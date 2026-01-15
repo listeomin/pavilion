@@ -225,7 +225,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/inline-input.css?v=3">
 <link rel="stylesheet" href="css/music.css?v=1">
 <link rel="stylesheet" href="css/track-preview.css?v=1">
-<link rel="stylesheet" href="css/audio-player.css?v=8">
+<link rel="stylesheet" href="css/audio-player.css?v=9">
 <link rel="stylesheet" href="css/nightshift.css?v=4">
 <link rel="stylesheet" href="css/animalProfile.css?v=20">
 <link rel="stylesheet" href="css/contextMenu.css?v=1">
@@ -234,7 +234,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=27">
 <link rel="stylesheet" href="css/nest-layout.css?v=39">
-<link rel="stylesheet" href="css/nest-posts.css?v=21">
+<link rel="stylesheet" href="css/nest-posts.css?v=22">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
@@ -387,11 +387,11 @@ if ($telegramUserId && $urlUsername) {
 <link rel="modulepreload" href="js/youtube.js?v=2">
 <link rel="modulepreload" href="js/music.js?v=9">
 <link rel="modulepreload" href="js/image-zoom.js?v=12">
-<link rel="modulepreload" href="js/nest-posts-manager.js?v=23">
+<link rel="modulepreload" href="js/nest-posts-manager.js?v=25">
 <link rel="modulepreload" href="js/discussions.js?v=2">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 
-<script type="module" src="js/nest.js?v=151"></script>
+<script type="module" src="js/nest.js?v=153"></script>
 </body>
 </html>

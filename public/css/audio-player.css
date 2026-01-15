@@ -229,3 +229,29 @@
   transition: opacity 0.2s;
   pointer-events: none;
 }
+
+/* Loading state for lazy audio loading */
+.audio-play-btn.loading {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.audio-play-btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: audio-loading-spin 0.8s linear infinite;
+}
+
+@keyframes audio-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -27,51 +27,74 @@ class AudioPlayer {
     this.audioUrl = audioUrl;
     this.metadata = metadata;
     this.manager = manager;
-    
-    this.audio = new Audio(audioUrl);
+
+    // Lazy loading: Audio is NOT created until user clicks play
+    this.audio = null;
     this.isPlaying = false;
-    
+    this.isLoading = false;
+
     this.playBtn = playBtn || element.querySelector('.audio-play-btn');
     this.progressBar = element.querySelector('.audio-progress-bar');
     this.progressContainer = element.querySelector('.audio-progress-container');
     this.timeDisplay = element.querySelector('.audio-time');
-    
+
     this.setupEventListeners();
+  }
+
+  // Create Audio element only when needed (lazy loading)
+  ensureAudio() {
+    if (!this.audio && this.audioUrl) {
+      this.audio = new Audio();
+      this.audio.preload = 'none'; // Don't preload anything
+      this.audio.src = this.audioUrl;
+
+      // Setup audio events
+      this.audio.addEventListener('timeupdate', () => this.updateProgress());
+      this.audio.addEventListener('ended', () => this.onEnded());
+      this.audio.addEventListener('loadedmetadata', () => this.onLoaded());
+      this.audio.addEventListener('canplay', () => {
+        this.isLoading = false;
+        this.playBtn.classList.remove('loading');
+      });
+      this.audio.addEventListener('error', (e) => {
+        console.error('[AudioPlayer] Error loading audio:', e);
+        this.isLoading = false;
+        this.playBtn.classList.remove('loading');
+      });
+    }
+    return this.audio;
   }
 
   setupEventListeners() {
     if (!this.playBtn) return;
-    
+
     // Play/Pause
     this.playBtn.addEventListener('click', () => this.togglePlay());
-    
+
     // Progress bar drag/click
     let isDragging = false;
-    
+
     this.progressContainer.addEventListener('mousedown', (e) => {
       e.preventDefault();
       isDragging = true;
       this.seek(e);
     });
-    
+
     const handleMouseMove = (e) => {
       if (isDragging) {
         e.preventDefault();
         this.seek(e);
       }
     };
-    
+
     const handleMouseUp = () => {
       isDragging = false;
     };
-    
+
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    
-    // Audio events
-    this.audio.addEventListener('timeupdate', () => this.updateProgress());
-    this.audio.addEventListener('ended', () => this.onEnded());
-    this.audio.addEventListener('loadedmetadata', () => this.onLoaded());
+
+    // Audio events are now set up in ensureAudio()
   }
 
   togglePlay() {
@@ -84,21 +107,39 @@ class AudioPlayer {
 
   play() {
     this.manager.pauseOthers(this);
-    this.audio.play();
+
+    // Lazy load audio on first play
+    const audio = this.ensureAudio();
+    if (!audio) return;
+
+    // Show loading state on first play
+    if (audio.readyState < 3) {
+      this.isLoading = true;
+      this.playBtn.classList.add('loading');
+    }
+
+    audio.play().catch(e => {
+      console.error('[AudioPlayer] Play failed:', e);
+      this.isLoading = false;
+      this.playBtn.classList.remove('loading');
+    });
+
     this.isPlaying = true;
     this.playBtn.classList.add('playing');
     this.element.classList.add('playing');
   }
 
   pause() {
-    this.audio.pause();
+    if (this.audio) {
+      this.audio.pause();
+    }
     this.isPlaying = false;
     this.playBtn.classList.remove('playing');
     this.element.classList.remove('playing');
   }
 
   seek(e) {
-    if (!this.audio.duration) return;
+    if (!this.audio || !this.audio.duration) return;
     const rect = this.progressContainer.getBoundingClientRect();
     const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     const newTime = percent * this.audio.duration;
@@ -108,12 +149,14 @@ class AudioPlayer {
   }
 
   updateProgress() {
+    if (!this.audio) return;
     const percent = (this.audio.currentTime / this.audio.duration) * 100;
     this.progressBar.style.width = percent + '%';
     this.updateTime();
   }
 
   updateTime() {
+    if (!this.audio) return;
     const remaining = this.audio.duration - this.audio.currentTime;
     const time = this.formatTime(remaining);
     const prefix = this.isPlaying ? '-' : '';
@@ -134,7 +177,10 @@ class AudioPlayer {
   onEnded() {
     this.isPlaying = false;
     this.playBtn.classList.remove('playing');
-    this.audio.currentTime = 0;
+    this.element.classList.remove('playing');
+    if (this.audio) {
+      this.audio.currentTime = 0;
+    }
     this.updateProgress();
   }
 }

@@ -142,7 +142,7 @@ export class NestPostsManager {
 
   async loadPosts(reset = false) {
 
-    // If own nest, load all posts without pagination
+    // If own nest, load all posts with content (needed for display)
     if (this.config.isOwnNest) {
       const url = `${this.apiPath}/api/nest_posts.php?action=list&username=${encodeURIComponent(this.config.urlUsername)}`;
       const response = await fetch(url);
@@ -192,6 +192,29 @@ export class NestPostsManager {
     }
 
     return this.posts;
+  }
+
+  // Load a single post by ID (for updating after edit)
+  async loadSinglePost(postId) {
+    const post = this.posts.find(p => p.id == postId);
+    if (!post || !post.slug) return null;
+
+    try {
+      const response = await fetch(`${this.apiPath}/api/nest_posts.php?action=get&username=${encodeURIComponent(this.config.urlUsername)}&slug=${encodeURIComponent(post.slug)}`);
+      const result = await response.json();
+
+      if (result.success && result.post) {
+        // Update post in local array
+        const index = this.posts.findIndex(p => p.id == postId);
+        if (index !== -1) {
+          this.posts[index] = result.post;
+        }
+        return result.post;
+      }
+    } catch (err) {
+      console.error('[PostsManager] Failed to load single post:', err);
+    }
+    return null;
   }
 
   // Get sidebar categories dynamically from DOM
@@ -1137,11 +1160,24 @@ export class NestPostsManager {
     await loadTipTapModules();
 
     const contentEl = postEl.querySelector('.nest-post-content');
-    let currentHtml = contentEl.innerHTML;
 
-    // Don't use '{}' or empty JSON as content - leave editor empty to show placeholder
-    if (currentHtml === '{}' || currentHtml.trim() === '' || currentHtml === '<p><br></p>') {
-      currentHtml = '';
+    // Parse JSON content for TipTap (it can accept JSON object directly)
+    let editorContent = '';
+    const rawContent = post.content || '';
+
+    if (rawContent && rawContent !== '{}' && rawContent.trim() !== '') {
+      try {
+        // Try to parse as TipTap JSON
+        const parsed = JSON.parse(rawContent);
+        if (parsed.type === 'doc') {
+          editorContent = parsed; // Pass JSON object directly to TipTap
+        } else {
+          editorContent = rawContent; // Fallback to raw (might be HTML)
+        }
+      } catch (e) {
+        // If not valid JSON, treat as HTML
+        editorContent = rawContent;
+      }
     }
 
     contentEl.innerHTML = '';
@@ -1268,7 +1304,7 @@ export class NestPostsManager {
           placeholder: 'Начните писать...',
         }),
       ],
-      content: currentHtml,
+      content: editorContent,
       editable: true,
       autofocus: !clickCoords, // Only autofocus if no click coords (new post)
       onUpdate: ({ editor }) => this.scheduleAutosave(post.id, editor),
@@ -1406,6 +1442,11 @@ export class NestPostsManager {
     const scrollY = window.scrollY;
     const scrollX = window.scrollX;
 
+    // Get current content before destroying editor
+    const currentContent = editor.getJSON();
+    const titleInput = postEl.querySelector('.nest-post-title-input');
+    const currentTitle = titleInput ? titleInput.value : '';
+
     editor.destroy();
     this.editors.delete(postId);
 
@@ -1416,16 +1457,15 @@ export class NestPostsManager {
       this.datePickers.delete(postId);
     }
 
-    // Reload post data
-    await this.loadPosts();
-    const post = this.posts.find(p => p.id == postId);
+    // Load only this single post instead of all posts (performance optimization)
+    const post = await this.loadSinglePost(postId);
 
     if (post) {
-      // Replace only this post element, don't re-render entire list
+      // Replace only this post element
       const newPostEl = this.createPostElement(post);
       postEl.replaceWith(newPostEl);
     } else {
-      // Post was deleted, remove element
+      // Post was deleted or not found, remove element
       postEl.remove();
     }
 
