@@ -58,3 +58,16 @@
   background-position: center;
   margin-top: auto;
 }
+
+/* Nest variant - positioned inside main-column, left of sidebar */
+#utility-buttons-group.utility-buttons-nest {
+  /* Position at the right edge of main-column (before sidebar) */
+  right: calc(420px + 32px); /* sidebar width + gap */
+}
+
+/* On small screens without sidebar, use default positioning */
+@media (max-width: 639px) {
+  #utility-buttons-group.utility-buttons-nest {
+    right: 32px;
+  }
+}

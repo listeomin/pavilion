@@ -2,6 +2,8 @@
 // index.php
 // Чат – Главная страница сайта.
 
+require_once __DIR__ . '/config.php';
+
 // Auto-detect BASE_PATH from request URI
 function get_base_path() {
     $uri = $_SERVER['REQUEST_URI'] ?? '';
@@ -92,7 +94,7 @@ $basePath = get_base_path();
 </div>
 
 <div id="telegram-auth-container" style="display: none;"></div>
-<?php include $_SERVER['DOCUMENT_ROOT'] . '/partials/utility-buttons.html'; ?>
+<?php include_partial('utility-buttons.php'); ?>
 <script type="module" src="js/main.js?v=42"></script>
 </body>
 </html>

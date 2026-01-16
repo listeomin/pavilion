@@ -1,6 +1,8 @@
 <?php
 // branches/index.php - Branches (topics/threads) page
 
+require_once dirname(__DIR__) . '/config.php';
+
 // Configure session to last longer (30 days)
 ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
 ini_set('session.cookie_lifetime', 2592000); // 30 days
@@ -166,7 +168,7 @@ if ($branchId) {
   <div class="branch-context-menu-item" data-action="hide">Спрятать</div>
   <div class="branch-context-menu-item" data-action="delete">Удалить</div>
 </div>
-<?php include '/var/www/hhrrr.ru/pavilion/public/partials/utility-buttons.html'; ?>
+<?php include_partial('utility-buttons.php'); ?>
 <script type="module" src="js/branches.js?v=6"></script>
 </body>
 </html>

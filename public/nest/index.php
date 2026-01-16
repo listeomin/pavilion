@@ -1,6 +1,8 @@
 <?php
 // nest.php
 
+require_once dirname(__DIR__) . '/config.php';
+
 // Auto-detect BASE_PATH from request URI
 function get_base_path() {
     $uri = $_SERVER['REQUEST_URI'] ?? '';
@@ -393,5 +395,10 @@ if ($telegramUserId && $urlUsername) {
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 
 <script type="module" src="js/nest.js?v=154"></script>
+<?php
+// Use 'nest' variant when sidebar is present (urlUsername is set)
+$buttonVariant = $urlUsername ? 'nest' : 'default';
+include_partial('utility-buttons.php', ['variant' => $buttonVariant]);
+?>
 </body>
 </html>

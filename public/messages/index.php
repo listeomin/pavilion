@@ -1,6 +1,8 @@
 <?php
 // messages/index.php - Direct messages between users
 
+require_once dirname(__DIR__) . '/config.php';
+
 // Configure session to last longer (30 days)
 ini_set('session.gc_maxlifetime', 2592000); // 30 days in seconds
 ini_set('session.cookie_lifetime', 2592000); // 30 days
@@ -104,7 +106,7 @@ if (!$telegramUserId && !$recipientUsername) {
   </div>
 </div>
 <div id="telegram-auth-container"></div>
-<?php include __DIR__ . '/partials/utility-buttons.html'; ?>
+<?php include_partial('utility-buttons.php'); ?>
 <script type="module" src="js/messages.js?v=5"></script>
 </body>
 </html>
@@ -300,7 +302,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
   <div class="dm-context-menu-item" data-action="goto-nest">Гнездо</div>
   <div class="dm-context-menu-item" data-action="hide">Спрятать</div>
 </div>
-<?php include '/var/www/hhrrr.ru/pavilion/public/partials/utility-buttons.html'; ?>
+<?php include_partial('utility-buttons.php'); ?>
 <script type="module" src="js/dm.js?v=15"></script>
 </body>
 </html>
