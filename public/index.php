@@ -50,10 +50,7 @@ $basePath = get_base_path();
 <?php include_partial('main-nav.php', ['active' => 'home']); ?>
 <div class="wrap">
   <div id="header-container">
-    <div id="user-header">
-      <span id="user-emoji" class="user-emoji-clickable"></span>
-      <span id="user-label-header">– это вы!</span>
-    </div>
+    <?php include_partial('user-header.php'); ?>
     <h1>Мурмурация</h1>
   </div>
   <div id="skeleton-ui" class="skeleton-container">

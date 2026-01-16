@@ -79,10 +79,7 @@ if (!$telegramUserId && !$recipientUsername) {
 <?php include_partial('main-nav.php', ['active' => 'messages']); ?>
 <div class="wrap">
   <div id="header-container">
-    <div id="user-header">
-      <span id="user-emoji" class="user-emoji-clickable"></span>
-      <span id="user-label-header">– это вы!</span>
-    </div>
+    <?php include_partial('user-header.php'); ?>
     <h1>Послания</h1>
   </div>
   <div id="skeleton-ui" class="skeleton-container">
@@ -228,10 +225,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 
 <div class="wrap">
   <div id="header-container">
-    <div id="user-header">
-      <span id="user-emoji" class="user-emoji-clickable"></span>
-      <span id="user-label-header">– это вы!</span>
-    </div>
+    <?php include_partial('user-header.php'); ?>
     <h1>Послания</h1>
   </div>
 

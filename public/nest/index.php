@@ -258,10 +258,7 @@ if ($telegramUserId && $urlUsername) {
 <div class="wrap">
   <div id="header-container">
     <?php if (!$urlUsername): ?>
-    <div id="user-header">
-      <span id="user-emoji" class="user-emoji-clickable"></span>
-      <span id="user-label-header">– это вы!</span>
-    </div>
+    <?php include_partial('user-header.php'); ?>
     <?php endif; ?>
     <h1><?php
       if ($urlUsername === 'developer') {

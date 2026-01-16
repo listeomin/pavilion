@@ -103,10 +103,7 @@ if ($branchId) {
 
 <div class="wrap">
   <div id="header-container">
-    <div id="user-header">
-      <span id="user-emoji" class="user-emoji-clickable"></span>
-      <span id="user-label-header">– это вы!</span>
-    </div>
+    <?php include_partial('user-header.php'); ?>
     <h1>Ветки</h1>
   </div>
   <?php if ($branchId): ?>
