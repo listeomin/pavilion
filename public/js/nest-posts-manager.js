@@ -439,7 +439,7 @@ export class NestPostsManager {
   // Create category header block element
   createCategoryHeader(categoryName) {
     const nameLower = categoryName.toLowerCase();
-    const description = this.categoryDescriptions[nameLower];
+    const description = this.categoryDescriptions[nameLower] || 'Описание';
     const image = this.categoryImages[nameLower];
 
     // Only show header if we have an image (category exists)
@@ -454,30 +454,28 @@ export class NestPostsManager {
     title.textContent = categoryName;
     block.appendChild(title);
 
-    // Card with image + description (only if description exists)
-    if (description) {
-      const card = document.createElement('div');
-      card.className = 'category-header-card';
+    // Card with image + description (always show)
+    const card = document.createElement('div');
+    card.className = 'category-header-card';
 
-      // Image section
-      const imageSection = document.createElement('div');
-      imageSection.className = 'category-header-image';
-      const img = document.createElement('img');
-      img.src = `assets/categories/${encodeURIComponent(image)}`;
-      img.alt = categoryName;
-      imageSection.appendChild(img);
-      card.appendChild(imageSection);
+    // Image section
+    const imageSection = document.createElement('div');
+    imageSection.className = 'category-header-image';
+    const img = document.createElement('img');
+    img.src = `assets/categories/${encodeURIComponent(image)}`;
+    img.alt = categoryName;
+    imageSection.appendChild(img);
+    card.appendChild(imageSection);
 
-      // Description section
-      const descSection = document.createElement('div');
-      descSection.className = 'category-header-description';
-      const descP = document.createElement('p');
-      descP.textContent = description;
-      descSection.appendChild(descP);
-      card.appendChild(descSection);
+    // Description section
+    const descSection = document.createElement('div');
+    descSection.className = 'category-header-description';
+    const descP = document.createElement('p');
+    descP.textContent = description;
+    descSection.appendChild(descP);
+    card.appendChild(descSection);
 
-      block.appendChild(card);
-    }
+    block.appendChild(card);
 
     return block;
   }
