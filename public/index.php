@@ -47,15 +47,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
 <body class="page-chat skeleton-active">
-<nav class="main-nav">
-  <a href="./" class="nav-item active">Мурмурация</a>
-  <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item">Ветки</a>
-  <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item">Послания</a>
-  <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item">Гнездо</a>
-</nav>
+<?php include_partial('main-nav.php', ['active' => 'home']); ?>
 <div class="wrap">
   <div id="header-container">
     <div id="user-header">

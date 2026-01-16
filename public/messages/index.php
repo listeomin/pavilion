@@ -76,15 +76,7 @@ if (!$telegramUserId && !$recipientUsername) {
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
 </head>
 <body class="page-chat skeleton-active">
-<nav class="main-nav">
-  <a href="./" class="nav-item">Мурмурация</a>
-  <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item">Ветки</a>
-  <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item active">Послания</a>
-  <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item">Гнездо</a>
-</nav>
+<?php include_partial('main-nav.php', ['active' => 'messages']); ?>
 <div class="wrap">
   <div id="header-container">
     <div id="user-header">
@@ -232,15 +224,7 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
 <img src="assets/bird.png" alt="" class="dm-background-bird" style="display: <?php echo $recipientUsername ? 'block' : 'none'; ?>;">
-<nav class="main-nav">
-  <a href="./" class="nav-item">Мурмурация</a>
-  <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item">Ветки</a>
-  <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item active">Послания</a>
-  <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item">Гнездо</a>
-</nav>
+<?php include_partial('main-nav.php', ['active' => 'messages']); ?>
 
 <div class="wrap">
   <div id="header-container">

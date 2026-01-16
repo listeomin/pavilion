@@ -254,15 +254,7 @@ if ($telegramUserId && $urlUsername) {
   <div class="main-column">
 <?php endif; ?>
 
-<nav class="main-nav">
-  <a href="./" class="nav-item">Мурмурация</a>
-  <span class="nav-separator">|</span>
-  <a href="branches" class="nav-item">Ветки</a>
-  <span class="nav-separator">|</span>
-  <a href="messages" class="nav-item">Послания</a>
-  <span class="nav-separator">|</span>
-  <a href="nest" class="nav-item active">Гнездо</a>
-</nav>
+<?php include_partial('main-nav.php', ['active' => 'nest']); ?>
 <div class="wrap">
   <div id="header-container">
     <?php if (!$urlUsername): ?>
