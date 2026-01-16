@@ -58,6 +58,35 @@ export class NestPostsManager {
         console.error('[PostsManager] Failed to preload TipTap modules:', err);
       });
     }
+
+    // Category descriptions for header blocks
+    this.categoryDescriptions = {
+      'лента': 'Вероятно не самый любимый формат размышлений – мысли без Рубрики, проходные, мимолётные, те что интересны в моменте, привязаны ко времени, но ничего серьезного, простите в этой рубрике нет.',
+      'разработка': 'Айтишные дела живут тут! Не Хабр, не UX-hub, ценность в контексте наблюдения за развитием автора, как разработчика, дизайнера и вообщем человека интересующегося миром технологий, кода и AI.',
+      'наблюдения': 'Без преувеличения наиболее ценный для автора раздел. Тут много философии, глубоких (иногда бредовых и смешных) размышлений об устройстве мира, в частности людей, но далеко не только их, далеко не только…',
+      'психонавтика': 'У автора не плохой опыт космических путешествий без ракеты и скафандра. Тут нет места морали, местами безумно глупо и смешно, где-то есть над чем задуматься. Возможно мой опыт в теме убедит вас не начинать свой.',
+      'воспоминания': 'Пишу то, что чувствую. Хочется больше эмоций, меньше критики и анализа. Личные чувства, немношко рефлексии, часто фотографии и музыка. Добро пожаловать!'
+    };
+
+    // Category images mapping
+    this.categoryImages = {
+      'лента': 'лента.png',
+      'разработка': 'разработка.png',
+      'наблюдения': 'наблюдения.png',
+      'твои сны': 'сны.png',
+      'психонавтика': 'психонавтика.png',
+      'краски да холсты': 'краски_да_холсты.png',
+      'стихи': 'стихи.png',
+      'рассказы': 'рассказы.png',
+      'рефлексия': 'рефлексия.png',
+      'фотокарточки': 'фотокарточки.png',
+      'воспоминания': 'воспоминания.png',
+      'письма': 'письма.png',
+      'музыка': 'музыка.png',
+      'фильмы': 'кинофильмы.png',
+      'пейджер': 'пейджер.png',
+      'черновики': 'черновики.png'
+    };
   }
 
   // Format date using Day.js with live format
@@ -407,6 +436,52 @@ export class NestPostsManager {
     return posts;
   }
 
+  // Create category header block element
+  createCategoryHeader(categoryName) {
+    const nameLower = categoryName.toLowerCase();
+    const description = this.categoryDescriptions[nameLower];
+    const image = this.categoryImages[nameLower];
+
+    // Only show header if we have an image (category exists)
+    if (!image) return null;
+
+    const block = document.createElement('div');
+    block.className = 'category-header-block';
+
+    // Title
+    const title = document.createElement('h2');
+    title.className = 'category-header-title';
+    title.textContent = categoryName;
+    block.appendChild(title);
+
+    // Card with image + description (only if description exists)
+    if (description) {
+      const card = document.createElement('div');
+      card.className = 'category-header-card';
+
+      // Image section
+      const imageSection = document.createElement('div');
+      imageSection.className = 'category-header-image';
+      const img = document.createElement('img');
+      img.src = `assets/categories/${encodeURIComponent(image)}`;
+      img.alt = categoryName;
+      imageSection.appendChild(img);
+      card.appendChild(imageSection);
+
+      // Description section
+      const descSection = document.createElement('div');
+      descSection.className = 'category-header-description';
+      const descP = document.createElement('p');
+      descP.textContent = description;
+      descSection.appendChild(descP);
+      card.appendChild(descSection);
+
+      block.appendChild(card);
+    }
+
+    return block;
+  }
+
   renderPostsList(container, append = false) {
 
     if (!append) {
@@ -432,6 +507,14 @@ export class NestPostsManager {
     const loadingIndicator = container.querySelector('.posts-loading');
     if (loadingIndicator) {
       loadingIndicator.remove();
+    }
+
+    // Add category header when filtered by section (not in append mode)
+    if (!append && this.currentFilter && this.currentFilter.type === 'section') {
+      const categoryHeader = this.createCategoryHeader(this.currentFilter.name);
+      if (categoryHeader) {
+        container.appendChild(categoryHeader);
+      }
     }
 
     if (!append && this.config.isOwnNest) {

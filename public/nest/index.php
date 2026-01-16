@@ -234,7 +234,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=27">
 <link rel="stylesheet" href="css/nest-layout.css?v=39">
-<link rel="stylesheet" href="css/nest-posts.css?v=23">
+<link rel="stylesheet" href="css/nest-posts.css?v=24">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
@@ -387,7 +387,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="modulepreload" href="js/youtube.js?v=2">
 <link rel="modulepreload" href="js/music.js?v=9">
 <link rel="modulepreload" href="js/image-zoom.js?v=12">
-<link rel="modulepreload" href="js/nest-posts-manager.js?v=26">
+<link rel="modulepreload" href="js/nest-posts-manager.js?v=27">
 <link rel="modulepreload" href="js/discussions.js?v=2">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
