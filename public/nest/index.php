@@ -234,13 +234,13 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=27">
 <link rel="stylesheet" href="css/nest-layout.css?v=39">
-<link rel="stylesheet" href="css/nest-posts.css?v=22">
+<link rel="stylesheet" href="css/nest-posts.css?v=23">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=6">
-<!-- Flatpickr date picker -->
-<link rel="stylesheet" href="libs/flatpickr.min.css">
+<!-- HeroUI Components (DatePicker) -->
+<link rel="stylesheet" href="js/lib/hero-ui-components.css?v=1">
 </head>
 <body<?php
   $classes = ['no-js']; // Remove via JavaScript when loaded
@@ -374,8 +374,8 @@ if ($telegramUserId && $urlUsername) {
 <script defer src="libs/dayjs.min.js"></script>
 <script defer src="libs/dayjs-relativeTime.min.js"></script>
 <script defer src="libs/dayjs-ru.js"></script>
-<script defer src="libs/flatpickr.min.js"></script>
-<script defer src="libs/flatpickr-ru.js"></script>
+<!-- HeroUI Components -->
+<script defer src="js/lib/hero-ui-components.iife.js?v=1"></script>
 
 <!-- Preload all JS modules to enable parallel loading -->
 <link rel="modulepreload" href="js/config.js?v=7">
@@ -387,11 +387,11 @@ if ($telegramUserId && $urlUsername) {
 <link rel="modulepreload" href="js/youtube.js?v=2">
 <link rel="modulepreload" href="js/music.js?v=9">
 <link rel="modulepreload" href="js/image-zoom.js?v=12">
-<link rel="modulepreload" href="js/nest-posts-manager.js?v=25">
+<link rel="modulepreload" href="js/nest-posts-manager.js?v=26">
 <link rel="modulepreload" href="js/discussions.js?v=2">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 
-<script type="module" src="js/nest.js?v=153"></script>
+<script type="module" src="js/nest.js?v=154"></script>
 </body>
 </html>

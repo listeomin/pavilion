@@ -409,3 +409,18 @@ body.editor-active .nest-insert-zone {
 .night-shift .nest-post-placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
+
+/* HeroUI DatePicker container */
+.heroui-datepicker-container {
+  min-width: 200px;
+}
+
+.nest-post-date-editable {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nest-post-date-editable .nest-post-date-icon {
+  flex-shrink: 0;
+}

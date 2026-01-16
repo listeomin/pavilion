@@ -1210,22 +1210,35 @@ export class NestPostsManager {
     const datesSection = document.createElement('div');
     datesSection.className = 'nest-post-dates';
 
-    // Created date - EDITABLE with Flatpickr date picker
+    // Created date - EDITABLE with HeroUI DatePicker
     const createdDiv = document.createElement('div');
-    createdDiv.className = 'nest-post-date';
-    const createdInput = document.createElement('input');
-    createdInput.type = 'text';
-    createdInput.className = 'nest-post-created-date-input';
-    createdInput.placeholder = 'Дата создания (опционально)';
-    createdInput.dataset.postId = post.id;
-    if (post.created_date) {
-      createdInput.value = this.formatStaticDate(post.created_date);
-    }
+    createdDiv.className = 'nest-post-date nest-post-date-editable';
+
+    // Container for HeroUI DatePicker
+    const datePickerContainer = document.createElement('div');
+    datePickerContainer.className = 'heroui-datepicker-container';
+    datePickerContainer.dataset.postId = post.id;
+
     createdDiv.innerHTML = `
       <img src="assets/date-create.svg" alt="Создано" class="nest-post-date-icon">
     `;
-    createdDiv.appendChild(createdInput);
+    createdDiv.appendChild(datePickerContainer);
     datesSection.appendChild(createdDiv);
+
+    // Initialize HeroUI DatePicker after element is in DOM
+    setTimeout(() => {
+      if (window.HeroUI && window.HeroUI.renderDatePicker) {
+        const cleanup = window.HeroUI.renderDatePicker(datePickerContainer, {
+          value: post.created_date || null,
+          label: '',
+          onChange: (isoDate) => {
+            this.saveMetadata(post.id, { created_date: isoDate });
+          }
+        });
+        // Store cleanup function
+        this.datePickers.set(post.id, { destroy: cleanup });
+      }
+    }, 0);
 
     // Published date - READ-ONLY with live format
     if (post.created_at) {
@@ -1344,23 +1357,6 @@ export class NestPostsManager {
       }, 1000);
     });
 
-    // Initialize Flatpickr date picker for created_date
-    if (window.flatpickr && createdInput) {
-      const picker = flatpickr(createdInput, {
-        dateFormat: 'j F Y',
-        locale: 'ru',
-        allowInput: true,
-        onClose: (selectedDates, dateStr, instance) => {
-          // Save as ISO date string to database
-          const isoDate = selectedDates.length > 0
-            ? selectedDates[0].toISOString()
-            : null;
-          this.saveMetadata(post.id, { created_date: isoDate });
-        }
-      });
-      this.datePickers.set(post.id, picker);
-    }
-
     // Handle tag button click to show dropdown
     tagButton.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1388,9 +1384,9 @@ export class NestPostsManager {
         return; // Click inside editor - do nothing
       }
 
-      // Check if click is on Flatpickr calendar (it's rendered outside editor in body)
-      const flatpickrCalendar = e.target.closest('.flatpickr-calendar');
-      if (flatpickrCalendar) {
+      // Check if click is on HeroUI popover (DatePicker calendar, rendered in portal)
+      const heroUIPopover = e.target.closest('[data-slot="popover"]') || e.target.closest('[data-slot="calendar"]');
+      if (heroUIPopover) {
         return; // Click on date picker - do nothing
       }
 
@@ -1450,10 +1446,14 @@ export class NestPostsManager {
     editor.destroy();
     this.editors.delete(postId);
 
-    // Cleanup date picker if exists
+    // Cleanup HeroUI date picker if exists
     const picker = this.datePickers.get(postId);
     if (picker) {
-      picker.destroy();
+      if (typeof picker.destroy === 'function') {
+        picker.destroy();
+      } else if (typeof picker === 'function') {
+        picker(); // HeroUI returns cleanup function directly
+      }
       this.datePickers.delete(postId);
     }
 
