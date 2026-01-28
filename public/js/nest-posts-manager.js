@@ -870,8 +870,8 @@ export class NestPostsManager {
         titleLink.href = this.apiPath + '/nest/' + this.config.urlUsername + '/' + post.slug;
         titleLink.textContent = post.title;
         titleLink.style.cssText = 'color:inherit;text-decoration:none;transition:color 0.2s;';
-        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#788C5D'; titleLink.style.textDecoration = 'underline'; });
-        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = 'inherit'; titleLink.style.textDecoration = 'none'; });
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#788C5D'; ; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = 'inherit'; ; });
         titleEl.appendChild(titleLink);
       } else {
         titleEl.textContent = post.title;
