@@ -379,11 +379,11 @@ if ($telegramUserId && $urlUsername) {
 <link rel="modulepreload" href="js/music.js?v=9">
 <link rel="modulepreload" href="js/image-zoom.js?v=12">
 <link rel="modulepreload" href="js/nest-posts-manager.js?v=28">
-<link rel="modulepreload" href="js/discussions.js?v=2">
+<link rel="modulepreload" href="js/discussions.js?v=16">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 
-<script type="module" src="js/nest.js?v=154"></script>
+<script type="module" src="js/nest.js?v=158"></script>
 <?php
 // Use 'nest' variant when sidebar is present (urlUsername is set)
 $buttonVariant = $urlUsername ? 'nest' : 'default';

@@ -9,12 +9,43 @@ require_once __DIR__ . '/../../server/db.php';
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 $db = get_db();
 
-// Helper function to get user session info
-function getUserSessionInfo() {
-    $sessionId = session_id();
-    $emoji = $_SESSION['emoji'] ?? '🦔';
-    $name = $_SESSION['name'] ?? 'Аноним';
-    return ['session_id' => $sessionId, 'emoji' => $emoji, 'name' => $name];
+// Helper function to get user session info from animal profile
+function getUserSessionInfo($chatSessionId = null) {
+    // Use chat_session_id from cookie if not provided
+    if (!$chatSessionId) {
+        $chatSessionId = $_COOKIE['chat_session_id'] ?? null;
+    }
+
+    // Try to get profile from animal.sqlite
+    $animalDbPath = __DIR__ . '/../data/animal.sqlite';
+    if ($chatSessionId && file_exists($animalDbPath)) {
+        try {
+            $animalDb = new PDO('sqlite:' . $animalDbPath);
+            $animalDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // Get the most recent profile for this session
+            $stmt = $animalDb->prepare('
+                SELECT emoji, kind FROM animal_profiles
+                WHERE session_id = ?
+                ORDER BY updated_at DESC
+                LIMIT 1
+            ');
+            $stmt->execute([$chatSessionId]);
+            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($profile) {
+                $emoji = $profile['emoji'] ?: '🦔';
+                $name = $profile['kind'] ?: 'Аноним';
+                return ['session_id' => $chatSessionId, 'emoji' => $emoji, 'name' => $name];
+            }
+        } catch (Exception $e) {
+            // Fallback to defaults
+        }
+    }
+
+    // Fallback to defaults
+    $sessionId = $chatSessionId ?: session_id();
+    return ['session_id' => $sessionId, 'emoji' => '🦔', 'name' => 'Аноним'];
 }
 
 try {

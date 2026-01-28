@@ -9,7 +9,7 @@ import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=9';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
 import { NestPostsManager } from './nest-posts-manager.js?v=23';
-import { DiscussionsManager } from './discussions.js?v=2';
+import { DiscussionsManager } from './discussions.js?v=18';
 import { logToServer, alignUserHeader, setupHeaderAlignment, loadTipTap, suppressYouTubeErrors, capitalize } from './nest-utils.js?v=1';
 import { createSectionsManager, showInputModal, showSectionContextMenu } from './nest-sections.js?v=1';
 
@@ -44,7 +44,8 @@ async function loadTipTapModules() {
   const API = CONFIG.API_PATH;
   const COOKIE_NAME = 'chat_session_id';
   let sessionId = getCookie(COOKIE_NAME) || null;
-  let postsManager = null; // Global postsManager instance for filtering
+  let postsManager = null;
+  let discussionsManager = null; // Global postsManager instance for filtering
   const userEmojiEl = document.getElementById('user-emoji');
 
   // Инициализация NightShift
@@ -1712,10 +1713,16 @@ async function loadTipTapModules() {
           const container = document.querySelector('.nest-tabs-content');
           const discussions = document.createElement('div');
           discussions.className = 'nest-discussions-content';
-          discussions.innerHTML = '<div class="nav-empty">Пока пусто</div>';
           container.appendChild(discussions);
-        } else {
-          discussionsContent.style.display = 'block';
+        }
+        const discContainer = document.querySelector('.nest-discussions-content');
+        if (discContainer) {
+          discContainer.style.display = 'block';
+          if (discussionsManager) {
+            discussionsManager.renderDiscussionsList(discContainer);
+          } else {
+            discContainer.innerHTML = '<div class="nav-empty">Выберите пост для просмотра обсуждений</div>';
+          }
         }
       }
     };
@@ -1854,6 +1861,39 @@ async function loadTipTapModules() {
       if (!nestConfig.isOwnNest) {
         watchForImages();
       }
+
+      // Initialize discussions for posts list (for everyone)
+      setTimeout(() => {
+        const initDiscussionsForList = () => {
+          const container = document.getElementById('nest-editor-container');
+          if (!container) return;
+
+          // Find all posts with content
+          const posts = container.querySelectorAll('.nest-post');
+
+          posts.forEach(postEl => {
+            const contentEl = postEl.querySelector('.nest-post-content');
+            const postId = postEl.dataset.postId;
+            if (contentEl && postId && !contentEl._discussionsInitialized) {
+              contentEl._discussionsInitialized = true;
+              if (!discussionsManager) {
+                discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
+              }
+              discussionsManager.initializeTextSelection(parseInt(postId), contentEl);
+            }
+          });
+        };
+        initDiscussionsForList();
+
+        // Re-init on infinite scroll (new posts loaded)
+        const observer = new MutationObserver(() => {
+          setTimeout(initDiscussionsForList, 100);
+        });
+        const container = document.getElementById('nest-editor-container');
+        if (container) {
+          observer.observe(container, { childList: true, subtree: true });
+        }
+      }, 300);
     } else {
       // Load single post from nest_posts by slug using API
       postsManager = new NestPostsManager(nestConfig, CONFIG.BASE_PATH);
@@ -1872,21 +1912,26 @@ async function loadTipTapModules() {
       if (result.success && result.post) {
         postsManager.renderSinglePost(document.getElementById('nest-editor-container'), result.post);
 
-        // Initialize discussions for text quotation (only for viewing mode)
-        if (!nestConfig.isOwnNest) {
-          // Wait for DOM to be ready
-          setTimeout(() => {
-            const contentElement = document.querySelector('.nest-post-content');
-            if (contentElement) {
-              console.log('[Nest] Initializing discussions for post:', result.post.id);
-              const discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
-              discussionsManager.initializeTextSelection(result.post.id, contentElement);
-              console.log('[Nest] Discussions initialized');
-            } else {
-              console.error('[Nest] Content element not found for discussions');
-            }
-          }, 100);
-        }
+        // Initialize discussions for text quotation (for everyone)
+        // Wait for DOM to be ready with retry
+        const initDiscussions = (attempt = 1) => {
+          const contentElement = document.querySelector('.nest-post-content');
+          if (contentElement) {
+            discussionsManager = new DiscussionsManager(nestConfig, CONFIG.BASE_PATH);
+            discussionsManager.initializeTextSelection(result.post.id, contentElement);
+            discussionsManager.onDiscussionsUpdate = (discussions) => {
+              const container = document.querySelector('.nest-discussions-content');
+              if (container) discussionsManager.renderDiscussionsList(container);
+            };
+            console.log('[Nest] Discussions initialized successfully');
+          } else if (attempt < 5) {
+            console.log('[Nest] Content element not found, retrying...', attempt);
+            setTimeout(() => initDiscussions(attempt + 1), 200);
+          } else {
+            console.error('[Nest] Content element not found after 5 attempts');
+          }
+        };
+        setTimeout(initDiscussions, 100);
       } else {
         // Post not found, show 404 or redirect
         document.getElementById('nest-editor-container').innerHTML = '<p>Пост не найден</p>';
