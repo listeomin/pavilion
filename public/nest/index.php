@@ -261,12 +261,19 @@ if ($telegramUserId && $urlUsername) {
     <?php include_partial('user-header.php'); ?>
     <?php endif; ?>
     <h1><?php
+      $blogTitle = '';
       if ($urlUsername === 'developer') {
-        echo '🍃 Гнездо разработчика';
+        $blogTitle = '🍃 Гнездо разработчика';
       } elseif ($profileOwnerFirstName) {
-        echo $profileOwnerEmoji ? htmlspecialchars($profileOwnerEmoji) . ' ' . htmlspecialchars($profileOwnerFirstName) : htmlspecialchars($profileOwnerFirstName);
+        $blogTitle = $profileOwnerEmoji ? htmlspecialchars($profileOwnerEmoji) . ' ' . htmlspecialchars($profileOwnerFirstName) : htmlspecialchars($profileOwnerFirstName);
       } else {
-        echo 'Гнездо';
+        $blogTitle = 'Гнездо';
+      }
+      // Make title a link to blog home if viewing a specific username's nest
+      if ($urlUsername) {
+        echo '<a href="/nest/' . htmlspecialchars($urlUsername) . '" class="nest-blog-title-link">' . $blogTitle . '</a>';
+      } else {
+        echo $blogTitle;
       }
     ?></h1>
   </div>

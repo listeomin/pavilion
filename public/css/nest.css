@@ -554,3 +554,14 @@ code.inline-code,
   background: #dc3545;
   border-color: #dc3545;
 }
+
+/* Blog title link hover */
+.nest-blog-title-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nest-blog-title-link:hover {
+  color: #788C5D;
+  text-decoration: underline;
+}

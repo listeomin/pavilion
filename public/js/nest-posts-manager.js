@@ -859,11 +859,24 @@ export class NestPostsManager {
     postEl.dataset.postId = post.id;
     postEl.dataset.position = post.position;
 
-    // Title display (read-only)
+    // Title display (read-only) - make it a link to the post
     if (post.title && post.title.trim() !== '' && post.title !== 'Новая статья') {
       const titleEl = document.createElement('h1');
       titleEl.className = 'nest-post-title-display';
-      titleEl.textContent = post.title;
+
+      // Make title a clickable link (for all users viewing posts list)
+      if (post.slug && this.config.urlUsername) {
+        const titleLink = document.createElement('a');
+        titleLink.href = this.apiPath + '/nest/' + this.config.urlUsername + '/' + post.slug;
+        titleLink.textContent = post.title;
+        titleLink.style.cssText = 'color:inherit;text-decoration:none;transition:color 0.2s;';
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#788C5D'; titleLink.style.textDecoration = 'underline'; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = 'inherit'; titleLink.style.textDecoration = 'none'; });
+        titleEl.appendChild(titleLink);
+      } else {
+        titleEl.textContent = post.title;
+      }
+
       postEl.appendChild(titleEl);
     }
 

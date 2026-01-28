@@ -16,14 +16,42 @@ function getUserSessionInfo($chatSessionId = null) {
         $chatSessionId = $_COOKIE['chat_session_id'] ?? null;
     }
 
-    // Try to get profile from animal.sqlite
     $animalDbPath = __DIR__ . '/../data/animal.sqlite';
+
+    // First check if user is authorized via Telegram
+    $telegramUserId = $_SESSION['telegram_user']['user_id'] ?? null;
+
+    if ($telegramUserId && file_exists($animalDbPath)) {
+        try {
+            $animalDb = new PDO('sqlite:' . $animalDbPath);
+            $animalDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // For authorized users: look up by user_id
+            $stmt = $animalDb->prepare('
+                SELECT emoji, kind FROM animal_profiles
+                WHERE user_id = ?
+                ORDER BY updated_at DESC
+                LIMIT 1
+            ');
+            $stmt->execute([$telegramUserId]);
+            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($profile) {
+                $emoji = $profile['emoji'] ?: '🦔';
+                $name = $profile['kind'] ?: 'Аноним';
+                return ['session_id' => $chatSessionId ?: session_id(), 'emoji' => $emoji, 'name' => $name, 'user_id' => $telegramUserId];
+            }
+        } catch (Exception $e) {
+            // Fallback to session-based lookup
+        }
+    }
+
+    // Fallback: Try to get profile by session_id
     if ($chatSessionId && file_exists($animalDbPath)) {
         try {
             $animalDb = new PDO('sqlite:' . $animalDbPath);
             $animalDb->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Get the most recent profile for this session
             $stmt = $animalDb->prepare('
                 SELECT emoji, kind FROM animal_profiles
                 WHERE session_id = ?
@@ -46,6 +74,23 @@ function getUserSessionInfo($chatSessionId = null) {
     // Fallback to defaults
     $sessionId = $chatSessionId ?: session_id();
     return ['session_id' => $sessionId, 'emoji' => '🦔', 'name' => 'Аноним'];
+}
+
+// Get current logged in user_id (from Telegram auth)
+function getCurrentUserId() {
+    return $_SESSION['telegram_user']['user_id'] ?? null;
+}
+
+// Check if current user is the author of the post
+function isPostAuthor($db, $postId) {
+    $currentUserId = getCurrentUserId();
+    if (!$currentUserId) return false;
+
+    $stmt = $db->prepare('SELECT user_id FROM nest_posts WHERE id = ?');
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $post && intval($post['user_id']) === intval($currentUserId);
 }
 
 try {
@@ -148,6 +193,12 @@ try {
             exit;
         }
 
+        // Check if current user is author of any of these posts
+        $canDelete = false;
+        if ($postId) {
+            $canDelete = isPostAuthor($db, $postId);
+        }
+
         if ($postId) {
             $stmt = $db->prepare('
                 SELECT d.*,
@@ -179,7 +230,8 @@ try {
 
         echo json_encode([
             'success' => true,
-            'discussions' => $discussions
+            'discussions' => $discussions,
+            'can_delete' => $canDelete
         ]);
     }
 
@@ -202,6 +254,9 @@ try {
             exit;
         }
 
+        // Check if current user is the post author
+        $canDelete = isPostAuthor($db, $discussion['post_id']);
+
         // Get comments
         $stmt = $db->prepare('
             SELECT * FROM nest_discussion_comments
@@ -214,7 +269,8 @@ try {
         echo json_encode([
             'success' => true,
             'discussion' => $discussion,
-            'comments' => $comments
+            'comments' => $comments,
+            'can_delete' => $canDelete
         ]);
     }
 
@@ -252,6 +308,49 @@ try {
         echo json_encode([
             'success' => true,
             'comment_id' => $commentId
+        ]);
+    }
+
+    // DELETE: Delete a discussion (only for post author)
+    elseif ($action === 'delete') {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $discussionId = $data['discussion_id'] ?? $_GET['id'] ?? null;
+
+        if (!$discussionId) {
+            echo json_encode(['success' => false, 'error' => 'discussion_id required']);
+            exit;
+        }
+
+        // Get discussion to check post_id
+        $stmt = $db->prepare('SELECT post_id FROM nest_discussions WHERE id = ?');
+        $stmt->execute([$discussionId]);
+        $discussion = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$discussion) {
+            echo json_encode(['success' => false, 'error' => 'Discussion not found']);
+            exit;
+        }
+
+        // Check if current user is the post author
+        if (!isPostAuthor($db, $discussion['post_id'])) {
+            echo json_encode(['success' => false, 'error' => 'Permission denied. Only the post author can delete discussions.']);
+            exit;
+        }
+
+        // Delete comments first, then discussion
+        $db->beginTransaction();
+
+        $stmt = $db->prepare('DELETE FROM nest_discussion_comments WHERE discussion_id = ?');
+        $stmt->execute([$discussionId]);
+
+        $stmt = $db->prepare('DELETE FROM nest_discussions WHERE id = ?');
+        $stmt->execute([$discussionId]);
+
+        $db->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Discussion deleted'
         ]);
     }
 

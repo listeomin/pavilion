@@ -1,10 +1,11 @@
-// discussions.js v18 - Fixed highlighting across element boundaries
+// discussions.js v19 - Added delete button for post authors
 export class DiscussionsManager {
   constructor(config, apiPath) {
     this.config = config;
     this.apiPath = apiPath;
     this.currentPostId = null;
     this.discussions = [];
+    this.canDelete = false;
     this.contextMenu = null;
     this.quoteModal = null;
     this.quoteButton = null;
@@ -278,14 +279,36 @@ export class DiscussionsManager {
 
     container.innerHTML = '';
 
-    // Back button
+    // Header with back button and delete button
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+
     const backBtn = document.createElement('button');
     backBtn.innerHTML = '← Все обсуждения';
-    backBtn.style.cssText = 'background:none;border:none;color:#87867F;font-size:13px;cursor:pointer;padding:8px 0;margin-bottom:8px;font-family:Ubuntu Sans,sans-serif;';
+    backBtn.style.cssText = 'background:none;border:none;color:#87867F;font-size:13px;cursor:pointer;padding:8px 0;font-family:Ubuntu Sans,sans-serif;';
     backBtn.addEventListener('mouseenter', () => backBtn.style.color = '#5E5D59');
     backBtn.addEventListener('mouseleave', () => backBtn.style.color = '#87867F');
     backBtn.addEventListener('click', () => this.renderDiscussionsList(container));
-    container.appendChild(backBtn);
+    header.appendChild(backBtn);
+
+    // Show delete button if user can delete (is post author)
+    if (result.can_delete) {
+      const deleteBtn = document.createElement('button');
+      deleteBtn.innerHTML = '🗑️';
+      deleteBtn.title = 'Удалить обсуждение';
+      deleteBtn.style.cssText = 'background:none;border:none;font-size:16px;cursor:pointer;padding:4px 8px;opacity:0.5;transition:opacity 0.2s;';
+      deleteBtn.addEventListener('mouseenter', () => deleteBtn.style.opacity = '1');
+      deleteBtn.addEventListener('mouseleave', () => deleteBtn.style.opacity = '0.5');
+      deleteBtn.addEventListener('click', async () => {
+        const deleted = await this.deleteDiscussion(discussionId);
+        if (deleted) {
+          // Already handled in deleteDiscussion
+        }
+      });
+      header.appendChild(deleteBtn);
+    }
+
+    container.appendChild(header);
 
     // Quote section - clickable to scroll
     const quoteSection = document.createElement('div');
@@ -418,10 +441,18 @@ export class DiscussionsManager {
       return;
     }
 
+    // Find the postId from the contentElement's parent post
+    let postId = this.currentPostId;
+    const postEl = contentElement.closest('.nest-post');
+    if (postEl && postEl.dataset.postId) {
+      postId = postEl.dataset.postId;
+    }
+
     this.currentSelection = {
       text: selectedText,
       range: selection.getRangeAt(0),
-      contentElement: contentElement
+      contentElement: contentElement,
+      postId: postId
     };
 
     this.showQuoteButton(event);
@@ -568,11 +599,27 @@ export class DiscussionsManager {
   }
 
   async createDiscussion(initialComment) {
-    if (!this.currentSelection || !this.currentPostId) {
-      throw new Error('No selection or post ID');
+    if (!this.currentSelection) {
+      throw new Error('No selection');
     }
 
     const contentElement = this.currentSelection.contentElement;
+
+    // Use postId from selection (which was determined when text was selected)
+    let postId = this.currentSelection.postId || this.currentPostId;
+
+    // Fallback: find from DOM
+    if (!postId) {
+      const postEl = contentElement.closest('.nest-post');
+      if (postEl && postEl.dataset.postId) {
+        postId = postEl.dataset.postId;
+      }
+    }
+
+    if (!postId) {
+      throw new Error('No post ID found');
+    }
+
     const plainText = contentElement.textContent;
     const range = this.currentSelection.range;
 
@@ -586,7 +633,7 @@ export class DiscussionsManager {
     const contextAfter = plainText.substring(positionEnd, Math.min(plainText.length, positionEnd + 15));
 
     const data = {
-      post_id: this.currentPostId,
+      post_id: postId,
       quote_text: this.currentSelection.text,
       position_start: positionStart,
       position_end: positionEnd,
@@ -610,7 +657,8 @@ export class DiscussionsManager {
     window.getSelection().removeAllRanges();
     this.currentSelection = null;
 
-    await this.loadDiscussions(this.currentPostId);
+    // Reload discussions for the post where we created the discussion
+    await this.loadDiscussions(postId);
     this.highlightQuotesInContent();
 
     const discContainer = document.querySelector('.nest-discussions-content');
@@ -644,12 +692,60 @@ export class DiscussionsManager {
 
     if (result.success) {
       this.discussions = result.discussions;
+      this.canDelete = result.can_delete || false;
       return this.discussions;
     } else {
       console.error('[Discussions] API error:', result.error);
     }
 
     return [];
+  }
+
+  async deleteDiscussion(discussionId) {
+    if (!confirm('Удалить это обсуждение? Это действие нельзя отменить.')) {
+      return false;
+    }
+
+    const response = await fetch(this.apiPath + '/api/discussions.php?action=delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ discussion_id: discussionId })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      // Remove highlight from content
+      const highlights = document.querySelectorAll('.discussion-highlight[data-discussion-id="' + discussionId + '"]');
+      highlights.forEach(el => {
+        const parent = el.parentNode;
+        if (parent) {
+          while (el.firstChild) {
+            parent.insertBefore(el.firstChild, el);
+          }
+          parent.removeChild(el);
+          parent.normalize();
+        }
+      });
+
+      // Reload discussions
+      await this.loadDiscussions(this.currentPostId);
+      this.highlightQuotesInContent();
+
+      // Update sidebar
+      const container = document.querySelector('.nest-discussions-content');
+      if (container) {
+        this.renderDiscussionsList(container);
+      }
+
+      if (this.onDiscussionsUpdate) {
+        this.onDiscussionsUpdate(this.discussions);
+      }
+
+      return true;
+    } else {
+      alert('Ошибка: ' + (result.error || 'Не удалось удалить'));
+      return false;
+    }
   }
 
   escapeHtml(text) {

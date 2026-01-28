@@ -8,8 +8,8 @@ import { renderGitHubPreview } from './github.js?v=5';
 import { parseYouTubeUrl } from './youtube.js?v=2';
 import { renderMusicPlayer } from './music.js?v=9';
 import { initImageZoom, makeImageZoomable, watchForImages } from './image-zoom.js?v=12';
-import { NestPostsManager } from './nest-posts-manager.js?v=23';
-import { DiscussionsManager } from './discussions.js?v=18';
+import { NestPostsManager } from './nest-posts-manager.js?v=24';
+import { DiscussionsManager } from './discussions.js?v=20';
 import { logToServer, alignUserHeader, setupHeaderAlignment, loadTipTap, suppressYouTubeErrors, capitalize } from './nest-utils.js?v=1';
 import { createSectionsManager, showInputModal, showSectionContextMenu } from './nest-sections.js?v=1';
 
@@ -1784,7 +1784,7 @@ async function loadTipTapModules() {
         switchTab('discussions');
         // Show whale on discussions tab
         const whale = document.getElementById('discussion-whale');
-        if (whale) whale.style.display = 'block';
+        if (whale) whale.style.display = 'none';
       });
     }
 
