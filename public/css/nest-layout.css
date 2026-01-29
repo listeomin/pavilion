@@ -650,3 +650,16 @@ button#sidebar-toggle.sidebar-toggle:hover {
   border-color: #87867F;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+/* Expand content area when sidebar is collapsed */
+body.sidebar-collapsed .wrap {
+  max-width: calc(100vw - 80px - 80px - 32px) !important; /* viewport - sidebar - left margin - padding */
+}
+
+body.sidebar-collapsed .main-column {
+  margin-right: 80px !important;
+}
+
+body.sidebar-collapsed .nest-sidebar {
+  width: 80px !important;
+}

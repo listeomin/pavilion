@@ -5,6 +5,7 @@ export function initSidebarToggle() {
   const toggleBtn = document.getElementById('sidebar-toggle');
   const collapsedSections = document.getElementById('sidebar-collapsed-sections');
   const mainColumn = document.querySelector('.main-column');
+  const wrap = document.querySelector('.wrap');
   
   if (!sidebar || !toggleBtn) return;
   
@@ -13,23 +14,34 @@ export function initSidebarToggle() {
   function collapse() {
     sidebar.classList.add('collapsed');
     document.body.classList.add('sidebar-collapsed');
+    
+    // Direct style changes
     if (mainColumn) {
       mainColumn.style.marginRight = '80px';
     }
     if (sidebar) {
       sidebar.style.width = '80px';
     }
+    if (wrap) {
+      wrap.style.maxWidth = 'calc(100vw - 80px - 80px - 32px)';
+    }
+    
     updateCollapsedSections();
   }
   
   function expand() {
     sidebar.classList.remove('collapsed');
     document.body.classList.remove('sidebar-collapsed');
+    
+    // Reset styles
     if (mainColumn) {
       mainColumn.style.marginRight = '';
     }
     if (sidebar) {
       sidebar.style.width = '';
+    }
+    if (wrap) {
+      wrap.style.maxWidth = '';
     }
   }
   
