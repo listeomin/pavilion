@@ -31,37 +31,98 @@ export class ContextMenu {
 
   showTextMenu() {
     this.currentMenuType = 'text';
+    
     this.menu.innerHTML = `
-      <div class="context-menu-reactions">
-        <span class="context-menu-reaction" data-emoji="😂">😂</span>
-        <span class="context-menu-reaction" data-emoji="❤️">❤️</span>
-        <span class="context-menu-reaction" data-emoji="🔥">🔥</span>
-        <span class="context-menu-reaction" data-emoji="👍">👍</span>
-        <span class="context-menu-reaction" data-emoji="💯">💯</span>
-        <span class="context-menu-reaction" data-emoji="🍋">🍋</span>
-        <span class="context-menu-reaction" data-emoji="😳">😳</span>
+      <div class=context-menu-reactions>
+        <span class=context-menu-reaction>😂</span>
+        <span class=context-menu-reaction>❤️</span>
+        <span class=context-menu-reaction>🔥</span>
+        <span class=context-menu-reaction>👍</span>
+        <span class=context-menu-reaction>💯</span>
+        <span class=context-menu-reaction>🍋</span>
+        <span class=context-menu-reaction>😳</span>
       </div>
-      <div class="context-menu-item" data-action="copy">Скопировать</div>
-      <div class="context-menu-item" data-action="quote">Цитировать</div>
-      <div class="context-menu-item" data-action="branch">Создать ветку</div>
+      <div class=context-menu-quote>
+        <div class=context-menu-quote-title>Цитировать</div>
+        <input type=text id=context-menu-quote-input class=context-menu-quote-input placeholder=Комментарий... autocomplete=off />
+      </div>
+      <div class=context-menu-item data-action=copy>Скопировать текст</div>
+      <div class=context-menu-item data-action=branch>Создать ветку</div>
     `;
+    
+    // Attach enter handler to input
+    setTimeout(() => {
+      const input = this.menu.querySelector('.context-menu-quote-input');
+      if (input) {
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.handleQuoteSubmit(input.value);
+          }
+        });
+        // Prevent menu close when clicking input
+        input.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+    }, 0);
   }
 
   showMessageMenu() {
     this.currentMenuType = 'message';
     this.menu.innerHTML = `
-      <div class="context-menu-item" data-action="edit">Редактировать</div>
-      <div class="context-menu-item context-menu-item-danger" data-action="delete">Удалить</div>
+      <div class=context-menu-item data-action=edit>Редактировать</div>
+      <div class=context-menu-item context-menu-item-danger data-action=delete>Удалить</div>
     `;
   }
 
+  handleQuoteSubmit(comment) {
+    if (this.editor) {
+      // Insert quote tag
+      this.editor.insertQuoteTag({ text: this.selectedText });
+      
+      // If there's a comment, add it to the input and submit
+      if (comment && comment.trim()) {
+        // Add comment text after the quote tag
+        const textNode = document.createTextNode(comment);
+        this.editor.inputEl.appendChild(textNode);
+        this.editor.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // Submit the form
+        const sendForm = document.getElementById('sendForm');
+        if (sendForm) {
+          sendForm.dispatchEvent(new Event('submit'));
+        }
+      }
+    }
+    this.hide();
+  }
+
   attachListeners() {
-    // Block default context menu for text selection and own messages
+    // Show menu on text selection (mouseup)
+    document.addEventListener('mouseup', (e) => {
+      // Ignore if clicking inside the menu
+      if (this.menu.contains(e.target)) return;
+      
+      // Small delay to let selection complete
+      setTimeout(() => {
+        const selection = window.getSelection();
+        const text = selection.toString().trim();
+        
+        if (text && text.length > 0) {
+          this.selectedText = text;
+          this.showTextMenu();
+          this.show(e.clientX, e.clientY);
+        }
+      }, 10);
+    });
+
+    // Also show on right-click (contextmenu) for own messages
     document.addEventListener('contextmenu', (e) => {
       const selection = window.getSelection();
       const text = selection.toString().trim();
 
-      // Check if right-clicking on own message
+      // Check if right-clicking on own message without selection
       const messageEl = e.target.closest('.msg');
       const isOwnMessage = messageEl &&
                           this.myName &&
@@ -85,16 +146,24 @@ export class ContextMenu {
       }
     });
 
-    // Menu item clicks
+    // Menu item clicks (only for items with data-action)
     this.menu.addEventListener('click', (e) => {
       const item = e.target.closest('[data-action]');
       if (item && !item.classList.contains('disabled')) {
         this.handleAction(item.dataset.action);
       }
+      
+      // Handle quote block click (but not input)
+      const quoteBlock = e.target.closest('.context-menu-quote');
+      const isInput = e.target.classList.contains('context-menu-quote-input');
+      if (quoteBlock && !isInput) {
+        const input = this.menu.querySelector('.context-menu-quote-input');
+        this.handleQuoteSubmit(input ? input.value : '');
+      }
     });
 
     // Hide on click outside
-    document.addEventListener('click', (e) => {
+    document.addEventListener('mousedown', (e) => {
       if (!this.menu.contains(e.target)) {
         this.hide();
       }
@@ -135,12 +204,6 @@ export class ContextMenu {
           await navigator.clipboard.writeText(this.selectedText);
         } catch (err) {
           console.error('Failed to copy:', err);
-        }
-        break;
-
-      case 'quote':
-        if (this.editor) {
-          this.editor.insertQuoteTag({ text: this.selectedText });
         }
         break;
 

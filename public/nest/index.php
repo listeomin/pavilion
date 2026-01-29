@@ -230,7 +230,12 @@ if ($telegramUserId && $urlUsername) {
 <link rel="stylesheet" href="css/audio-player.css?v=9">
 <link rel="stylesheet" href="css/nightshift.css?v=4">
 <link rel="stylesheet" href="css/animalProfile.css?v=20">
-<link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/contextMenu.css?v=3">
+<script>
+if ("paintWorklet" in CSS) {
+  CSS.paintWorklet.addModule("https://unpkg.com/css-houdini-squircle@0.2.1/squircle.min.js");
+}
+</script>
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">

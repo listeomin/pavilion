@@ -67,7 +67,12 @@ if (!$telegramUserId && !$recipientUsername) {
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
-<link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/contextMenu.css?v=3">
+<script>
+if ("paintWorklet" in CSS) {
+  CSS.paintWorklet.addModule("https://unpkg.com/css-houdini-squircle@0.2.1/squircle.min.js");
+}
+</script>
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/empty-state.css?v=1">
@@ -210,7 +215,12 @@ if ($recipientUserId && $recipientUserId == $telegramUserId) {
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=17">
-<link rel="stylesheet" href="css/contextMenu.css?v=1">
+<link rel="stylesheet" href="css/contextMenu.css?v=3">
+<script>
+if ("paintWorklet" in CSS) {
+  CSS.paintWorklet.addModule("https://unpkg.com/css-houdini-squircle@0.2.1/squircle.min.js");
+}
+</script>
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/skeleton.css?v=3">

@@ -37,7 +37,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/audio-player.css?v=1">
 <link rel="stylesheet" href="css/nightshift.css?v=1">
 <link rel="stylesheet" href="css/animalProfile.css?v=18">
-<link rel="stylesheet" href="css/contextMenu.css?v=2">
+<link rel="stylesheet" href="css/contextMenu.css?v=3">
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/image-zoom.css?v=1">
@@ -84,6 +84,6 @@ $basePath = get_base_path();
 
 <div id="telegram-auth-container" style="display: none;"></div>
 <?php include_partial('utility-buttons.php'); ?>
-<script type="module" src="js/main.js?v=42"></script>
+<script type="module" src="js/main.js?v=43"></script>
 </body>
 </html>
