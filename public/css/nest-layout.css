@@ -473,6 +473,10 @@
   z-index: 10;
   padding: 0;
   outline: none;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .sidebar-toggle:hover {
@@ -504,8 +508,16 @@
 }
 
 /* Adjust main column margin when sidebar is collapsed */
+/* Adjust main column when sidebar is collapsed - use high specificity */
+body.page-nest.sidebar-collapsed .main-column,
 body.sidebar-collapsed .main-column {
   margin-right: 80px !important;
+}
+
+/* Also adjust sidebar width */
+body.page-nest.sidebar-collapsed .nest-sidebar,
+body.sidebar-collapsed .nest-sidebar {
+  width: 80px !important;
 }
 
 /* Hide navigation tabs when collapsed */
