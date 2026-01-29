@@ -219,7 +219,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=6">
+<link rel="stylesheet" href="css/base.css?v=7">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
@@ -239,8 +239,8 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=27">
-<link rel="stylesheet" href="css/nest-layout.css?v=39">
+<link rel="stylesheet" href="css/nest.css?v=28">
+<link rel="stylesheet" href="css/nest-layout.css?v=41">
 <link rel="stylesheet" href="css/nest-posts.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
@@ -250,7 +250,7 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="js/lib/hero-ui-components.css?v=1">
 </head>
 <body<?php
-  $classes = ['no-js']; // Remove via JavaScript when loaded
+  $classes = ['page-nest', 'no-js']; // Remove no-js via JavaScript when loaded
   if ($urlUsername === 'developer') $classes[] = 'developer-page';
   echo ' class="' . implode(' ', $classes) . '"';
 ?>>
@@ -345,6 +345,12 @@ if ("paintWorklet" in CSS) {
 <?php if ($urlUsername): ?>
   </div><!-- .main-column -->
   <aside class="nest-sidebar">
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Свернуть/развернуть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M3 6c3 2 6-2 9 0s6-2 9 0"/><path d="M3 12c3 2 6-2 9 0s6-2 9 0"/><path d="M3 18c3 2 6-2 9 0s6-2 9 0"/>
+      </svg>
+    </button>
+    <div class="sidebar-collapsed-sections" id="sidebar-collapsed-sections"></div>
     <nav class="nest-nav">
       <a href="#navigation" class="nest-nav-item active">Рубрики</a>
       <span class="nest-nav-separator">|</span>
@@ -394,8 +400,9 @@ if ("paintWorklet" in CSS) {
 <link rel="modulepreload" href="js/discussions.js?v=16">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
+<link rel="modulepreload" href="js/sidebar-toggle.js?v=1">
 
-<script type="module" src="js/nest.js?v=158"></script>
+<script type="module" src="js/nest.js?v=159"></script>
 <?php
 // Use 'nest' variant when sidebar is present (urlUsername is set)
 $buttonVariant = $urlUsername ? 'nest' : 'default';

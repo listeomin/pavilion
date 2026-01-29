@@ -12,6 +12,7 @@ import { NestPostsManager } from './nest-posts-manager.js?v=25';
 import { DiscussionsManager } from './discussions.js?v=20';
 import { logToServer, alignUserHeader, setupHeaderAlignment, loadTipTap, suppressYouTubeErrors, capitalize } from './nest-utils.js?v=1';
 import { createSectionsManager, showInputModal, showSectionContextMenu } from './nest-sections.js?v=1';
+import { initSidebarToggle } from './sidebar-toggle.js?v=1';
 
 // Tiptap modules will be loaded dynamically when needed (only for single post view with TipTap editor)
 // This prevents blocking the page load for list view
@@ -50,6 +51,9 @@ async function loadTipTapModules() {
 
   // Инициализация NightShift
   NightShift.init();
+
+  // Инициализация toggle сайдбара
+  initSidebarToggle();
 
   // Инициализация API чтобы получить session_id и emoji
   const data = await apiInit(API, sessionId, COOKIE_NAME);

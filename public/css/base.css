@@ -1,3 +1,4 @@
+html { background: var(--color-cloud-light); }
 body {
   font-family: Georgia, serif;
   margin: 0;

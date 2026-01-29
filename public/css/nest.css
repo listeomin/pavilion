@@ -565,3 +565,15 @@ code.inline-code,
   color: #788C5D;
   
 }
+
+/* Page nest - match other pages layout */
+body.page-nest {
+  height: 100vh;
+  overflow: hidden;
+}
+
+body.page-nest .wrap {
+  height: 100vh;
+  min-height: auto;
+  overflow-y: auto;
+}

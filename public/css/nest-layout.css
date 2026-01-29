@@ -445,3 +445,161 @@
     margin-right: 0;
   }
 }
+
+/* =================================
+   Sidebar Collapse/Expand Feature
+   ================================= */
+
+/* Toggle button */
+.sidebar-toggle {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  border: 2px solid var(--color-nimbus-light);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.sidebar-toggle:hover {
+  border-color: var(--color-nimbus-dark);
+}
+
+.sidebar-toggle svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--color-nimbus-dark);
+}
+
+/* Collapsed sidebar state */
+.nest-sidebar.collapsed {
+  width: 80px;
+  padding: 16px 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Adjust main column margin when sidebar is collapsed */
+body.sidebar-collapsed .main-column {
+  margin-right: 80px;
+}
+
+/* Hide navigation tabs when collapsed */
+.nest-sidebar.collapsed .nest-nav {
+  display: none;
+}
+
+/* Hide discussions whale when collapsed */
+.nest-sidebar.collapsed .discussion-whale {
+  display: none !important;
+}
+
+/* Hide full navigation content when collapsed */
+.nest-sidebar.collapsed #nest-navigation-content {
+  display: none;
+}
+
+/* Collapsed sections container */
+.sidebar-collapsed-sections {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.nest-sidebar.collapsed .sidebar-collapsed-sections {
+  display: flex;
+}
+
+/* Collapsed section item */
+.collapsed-section-item {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background: #FFFFFF;
+  border: 1px solid var(--color-cloud-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.collapsed-section-item:hover {
+  border-color: var(--color-nimbus-light);
+  box-shadow: 0px 4px 16px rgba(188, 209, 202, 0.5);
+}
+
+.collapsed-section-item.active {
+  border-color: #BCD1CA;
+  border-width: 2px;
+  box-shadow: 0px 4px 16px rgba(188, 209, 202, 1);
+}
+
+/* Section icon/emoji */
+.collapsed-section-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* Section image */
+.collapsed-section-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+/* Tooltip for collapsed sections */
+.collapsed-section-item::after {
+  content: attr(data-title);
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-cumulonimbus-medium);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 100;
+}
+
+.collapsed-section-item:hover::after {
+  opacity: 1;
+}
+
+/* Toggle button position in expanded sidebar */
+.nest-sidebar:not(.collapsed) .sidebar-toggle {
+  position: absolute;
+  top: 40px;
+  left: 32px;
+}
+
+/* Hide collapsed sections in expanded state */
+.nest-sidebar:not(.collapsed) .sidebar-collapsed-sections {
+  display: none;
+}
+
+/* Adjust nav position to account for toggle button */
+.nest-sidebar:not(.collapsed) .nest-nav {
+  margin-top: 80px;
+}
