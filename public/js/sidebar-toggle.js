@@ -18,6 +18,9 @@ export function initSidebarToggle() {
   const EXPAND_BREAKPOINT = COLLAPSE_BREAKPOINT + 50;
 
   function collapse() {
+    // Update collapsed sections BEFORE hiding navigation content
+    updateCollapsedSections();
+
     sidebar.classList.add('collapsed');
     document.body.classList.add('sidebar-collapsed');
 
@@ -31,8 +34,6 @@ export function initSidebarToggle() {
     if (wrap) {
       wrap.style.maxWidth = 'calc(100vw - 80px - 80px - 32px)';
     }
-
-    updateCollapsedSections();
   }
 
   function expand() {
@@ -105,37 +106,35 @@ export function initSidebarToggle() {
     resizeTimeout = setTimeout(checkViewportWidth, 100);
   });
   
-  // Update collapsed sections from full navigation (only Рубрики)
+  // Update collapsed sections from category tiles (Рубрики)
   function updateCollapsedSections() {
     if (!collapsedSections) return;
-    
-    // Get all section headers from Рубрики tab only
+
+    // Get all category tiles from navigation content
     const navContent = document.getElementById('nest-navigation-content');
     if (!navContent) return;
-    
-    const sections = navContent.querySelectorAll('.nav-section-header');
-    
+
+    const tiles = navContent.querySelectorAll('.category-tile');
+
     collapsedSections.innerHTML = '';
-    
-    sections.forEach(section => {
-      const title = section.textContent.trim();
-      const isActive = section.classList.contains('active');
-      const sectionId = section.dataset.tagId || section.dataset.section || '';
-      
-      // Try to get cover image from section
-      const coverImg = section.querySelector('img');
-      const coverUrl = coverImg ? coverImg.src : null;
-      
+
+    tiles.forEach(tile => {
+      const nameEl = tile.querySelector('.category-tile-name');
+      const imgEl = tile.querySelector('.category-tile-image');
+      const title = nameEl ? nameEl.textContent.trim() : '';
+      const isActive = tile.classList.contains('active');
+      const sectionName = tile.dataset.section || '';
+
       const item = document.createElement('div');
       item.className = 'collapsed-section-item' + (isActive ? ' active' : '');
       item.dataset.title = title;
-      item.dataset.tagId = sectionId;
-      
-      if (coverUrl) {
-        // Use cover image
+      item.dataset.section = sectionName;
+
+      if (imgEl && imgEl.src) {
+        // Use category image
         const img = document.createElement('img');
         img.className = 'collapsed-section-img';
-        img.src = coverUrl;
+        img.src = imgEl.src;
         img.alt = title;
         item.appendChild(img);
       } else {
@@ -146,35 +145,73 @@ export function initSidebarToggle() {
         icon.textContent = firstChar.toUpperCase();
         item.appendChild(icon);
       }
-      
-      // Click handler - same as full section
+
+      // Click handler - trigger the original tile click
       item.addEventListener('click', () => {
-        section.click();
+        tile.click();
         // Update active state
         collapsedSections.querySelectorAll('.collapsed-section-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
       });
-      
+
       collapsedSections.appendChild(item);
     });
   }
   
+  // Sync active state from category-tile to collapsed-section-item
+  function syncActiveState() {
+    const tiles = document.querySelectorAll('.category-tile');
+    const items = collapsedSections?.querySelectorAll('.collapsed-section-item');
+    if (!items) return;
+
+    tiles.forEach(tile => {
+      const sectionName = tile.dataset.section;
+      const isActive = tile.classList.contains('active');
+      const item = Array.from(items).find(i => i.dataset.section === sectionName);
+      if (item) {
+        item.classList.toggle('active', isActive);
+      }
+    });
+  }
+
   // Watch for section changes (when sections are loaded dynamically)
-  const observer = new MutationObserver(() => {
-    if (sidebar.classList.contains('collapsed')) {
+  const observer = new MutationObserver((mutations) => {
+    let needsUpdate = false;
+    let needsSync = false;
+
+    mutations.forEach(mutation => {
+      if (mutation.type === 'childList') {
+        needsUpdate = true;
+      }
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        needsSync = true;
+      }
+    });
+
+    if (needsUpdate && sidebar.classList.contains('collapsed')) {
       updateCollapsedSections();
+    } else if (needsSync) {
+      syncActiveState();
     }
   });
-  
+
   const navContent = document.getElementById('nest-navigation-content');
   if (navContent) {
-    observer.observe(navContent, { childList: true, subtree: true });
+    observer.observe(navContent, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
-  
+
   // Update when sections might have loaded
   setTimeout(() => {
     if (sidebar.classList.contains('collapsed')) {
       updateCollapsedSections();
     }
   }, 1000);
+
+  // Also update collapsed sections when sidebar is collapsed
+  const collapseObserver = new MutationObserver(() => {
+    if (sidebar.classList.contains('collapsed')) {
+      updateCollapsedSections();
+    }
+  });
+  collapseObserver.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
 }
