@@ -240,8 +240,8 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=29">
-<link rel="stylesheet" href="css/nest-layout.css?v=56">
-<link rel="stylesheet" href="css/nest-posts.css?v=26">
+<link rel="stylesheet" href="css/nest-layout.css?v=46">
+<link rel="stylesheet" href="css/nest-posts.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
@@ -398,7 +398,7 @@ if ("paintWorklet" in CSS) {
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 <link rel="modulepreload" href="js/sidebar-toggle.js?v=5">
 
-<script type="module" src="js/nest.js?v=165"></script>
+<script type="module" src="js/nest.js?v=164"></script>
 <?php
 // Use 'nest' variant when sidebar is present (urlUsername is set)
 $buttonVariant = $urlUsername ? 'nest' : 'default';

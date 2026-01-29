@@ -1,19 +1,13 @@
 // sidebar-toggle.js - Sidebar collapse/expand functionality
 
 export function initSidebarToggle() {
-  console.log('[Sidebar] initSidebarToggle called');
   const sidebar = document.querySelector('.nest-sidebar');
   const toggleBtn = document.getElementById('sidebar-toggle');
   const collapsedSections = document.getElementById('sidebar-collapsed-sections');
   const mainColumn = document.querySelector('.main-column');
   const wrap = document.querySelector('.wrap');
 
-  console.log('[Sidebar] Elements found:', { sidebar: !!sidebar, toggleBtn: !!toggleBtn, collapsedSections: !!collapsedSections });
-
-  if (!sidebar || !toggleBtn) {
-    console.log('[Sidebar] Missing required elements, exiting');
-    return;
-  }
+  if (!sidebar || !toggleBtn) return;
 
   const STORAGE_KEY = 'nest-sidebar-collapsed';
   const AUTO_COLLAPSED_KEY = 'nest-sidebar-auto-collapsed';
@@ -65,11 +59,8 @@ export function initSidebarToggle() {
     const userManuallyCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
     const wasAutoCollapsed = sessionStorage.getItem(AUTO_COLLAPSED_KEY) === 'true';
 
-    console.log('[Sidebar] checkViewportWidth:', { viewportWidth, isCollapsed, userManuallyCollapsed, wasAutoCollapsed, COLLAPSE_BREAKPOINT });
-
     if (viewportWidth < COLLAPSE_BREAKPOINT && !isCollapsed) {
       // Viewport too narrow - auto-collapse
-      console.log('[Sidebar] Auto-collapsing...');
       collapse();
       sessionStorage.setItem(AUTO_COLLAPSED_KEY, 'true');
     } else if (viewportWidth >= EXPAND_BREAKPOINT && isCollapsed) {
@@ -119,13 +110,11 @@ export function initSidebarToggle() {
   function updateCollapsedSections() {
     if (!collapsedSections) return;
 
-    // Get all category tiles from navigation content (it's a class, not ID)
-    const navContent = document.querySelector('.nest-navigation-content');
-    console.log('[Sidebar] updateCollapsedSections, navContent:', navContent);
+    // Get all category tiles from navigation content
+    const navContent = document.getElementById('nest-navigation-content');
     if (!navContent) return;
 
     const tiles = navContent.querySelectorAll('.category-tile');
-    console.log('[Sidebar] Found tiles:', tiles.length);
 
     collapsedSections.innerHTML = '';
 
@@ -206,26 +195,17 @@ export function initSidebarToggle() {
     }
   });
 
-  // Observe sidebar for dynamically loaded content
-  const tabsContent = document.querySelector('.nest-tabs-content');
-  if (tabsContent) {
-    observer.observe(tabsContent, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  const navContent = document.getElementById('nest-navigation-content');
+  if (navContent) {
+    observer.observe(navContent, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
 
-  // Update when sections might have loaded (categories load async)
-  setTimeout(() => {
-    console.log('[Sidebar] Delayed update check');
-    if (sidebar.classList.contains('collapsed')) {
-      updateCollapsedSections();
-    }
-  }, 1500);
-
-  // Also retry after more time for slow connections
+  // Update when sections might have loaded
   setTimeout(() => {
     if (sidebar.classList.contains('collapsed')) {
       updateCollapsedSections();
     }
-  }, 3000);
+  }, 1000);
 
   // Also update collapsed sections when sidebar is collapsed
   const collapseObserver = new MutationObserver(() => {

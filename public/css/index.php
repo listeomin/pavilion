@@ -240,8 +240,8 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=29">
-<link rel="stylesheet" href="css/nest-layout.css?v=56">
-<link rel="stylesheet" href="css/nest-posts.css?v=26">
+<link rel="stylesheet" href="css/nest-layout.css?v=49">
+<link rel="stylesheet" href="css/nest-posts.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">

@@ -14,7 +14,7 @@
 $variant = $variant ?? 'default';
 $variantClass = $variant === 'nest' ? 'utility-buttons-nest' : '';
 ?>
-<link rel="stylesheet" href="css/utility-buttons.css?v=2">
+<link rel="stylesheet" href="css/utility-buttons.css?v=3">
 <div id="utility-buttons-group" class="<?php echo $variantClass; ?>">
   <button id="animal-profile-btn" title="Звериный профиль"></button>
   <button id="nightshift-toggle" title="Ночной режим"></button>

@@ -17,6 +17,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
+  outline: none;
+  box-shadow: none;
+}
+
+.nest-create-post-btn:focus,
+.nest-insert-zone:focus {
+  outline: none;
 }
 
 /* Insert zones between posts - hidden by default, show on hover */
@@ -48,6 +55,8 @@ body.editor-active .nest-insert-zone {
   margin: 0 auto 30px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  border: none;
+  box-shadow: none;
 }
 
 /* Hover state for editable posts */
@@ -55,6 +64,8 @@ body.editor-active .nest-insert-zone {
   outline: 2px dashed var(--color-nimbus-light);
   outline-offset: 20px;
   cursor: pointer;
+  border: none;
+  border-bottom: none;
 }
 
 /* Active editing state */
