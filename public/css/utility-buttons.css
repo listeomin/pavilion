@@ -63,6 +63,12 @@
 #utility-buttons-group.utility-buttons-nest {
   /* Position at the right edge of main-column (before sidebar) */
   right: calc(420px + 32px); /* sidebar width + gap */
+  transition: right 0.3s ease;
+}
+
+/* When sidebar is collapsed, move buttons closer to right edge */
+body.sidebar-collapsed #utility-buttons-group.utility-buttons-nest {
+  right: calc(80px + 32px); /* collapsed sidebar width + gap */
 }
 
 /* On small screens without sidebar, use default positioning */

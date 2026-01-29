@@ -6,15 +6,21 @@ export function initSidebarToggle() {
   const collapsedSections = document.getElementById('sidebar-collapsed-sections');
   const mainColumn = document.querySelector('.main-column');
   const wrap = document.querySelector('.wrap');
-  
+
   if (!sidebar || !toggleBtn) return;
-  
+
   const STORAGE_KEY = 'nest-sidebar-collapsed';
-  
+  const AUTO_COLLAPSED_KEY = 'nest-sidebar-auto-collapsed';
+
+  // Breakpoint: wrap margin-left (80) + wrap max-width (720) + sidebar expanded (420) = 1220px
+  const COLLAPSE_BREAKPOINT = 1220;
+  // Add some buffer before auto-expanding (e.g. 50px extra space)
+  const EXPAND_BREAKPOINT = COLLAPSE_BREAKPOINT + 50;
+
   function collapse() {
     sidebar.classList.add('collapsed');
     document.body.classList.add('sidebar-collapsed');
-    
+
     // Direct style changes
     if (mainColumn) {
       mainColumn.style.marginRight = '80px';
@@ -25,14 +31,14 @@ export function initSidebarToggle() {
     if (wrap) {
       wrap.style.maxWidth = 'calc(100vw - 80px - 80px - 32px)';
     }
-    
+
     updateCollapsedSections();
   }
-  
+
   function expand() {
     sidebar.classList.remove('collapsed');
     document.body.classList.remove('sidebar-collapsed');
-    
+
     // Reset styles
     if (mainColumn) {
       mainColumn.style.marginRight = '';
@@ -44,25 +50,59 @@ export function initSidebarToggle() {
       wrap.style.maxWidth = '';
     }
   }
-  
-  // Restore state from localStorage
+
+  // Check viewport and auto-collapse/expand
+  function checkViewportWidth() {
+    const viewportWidth = window.innerWidth;
+    const isCollapsed = sidebar.classList.contains('collapsed');
+    const userManuallyCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+    const wasAutoCollapsed = sessionStorage.getItem(AUTO_COLLAPSED_KEY) === 'true';
+
+    if (viewportWidth < COLLAPSE_BREAKPOINT && !isCollapsed) {
+      // Viewport too narrow - auto-collapse
+      collapse();
+      sessionStorage.setItem(AUTO_COLLAPSED_KEY, 'true');
+    } else if (viewportWidth >= EXPAND_BREAKPOINT && isCollapsed) {
+      // Viewport wide enough - auto-expand only if it was auto-collapsed
+      // Don't expand if user manually collapsed it
+      if (wasAutoCollapsed && !userManuallyCollapsed) {
+        expand();
+        sessionStorage.removeItem(AUTO_COLLAPSED_KEY);
+      }
+    }
+  }
+
+  // Restore state from localStorage (user preference)
   const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
   if (isCollapsed) {
     collapse();
+  } else {
+    // Check if we need to auto-collapse on load
+    checkViewportWidth();
   }
-  
+
   // Toggle click handler
   toggleBtn.addEventListener('click', () => {
     const willCollapse = !sidebar.classList.contains('collapsed');
-    
+
     if (willCollapse) {
       collapse();
     } else {
       expand();
     }
-    
-    // Save state
+
+    // Save state as user preference (manual action)
     localStorage.setItem(STORAGE_KEY, willCollapse ? 'true' : 'false');
+    // Clear auto-collapsed flag since this is a manual action
+    sessionStorage.removeItem(AUTO_COLLAPSED_KEY);
+  });
+
+  // Listen for viewport resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    // Debounce resize handler
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(checkViewportWidth, 100);
   });
   
   // Update collapsed sections from full navigation (only Рубрики)

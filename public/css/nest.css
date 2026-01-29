@@ -572,8 +572,13 @@ body.page-nest {
   overflow: hidden;
 }
 
-body.page-nest .wrap {
+body.page-nest .main-column {
   height: 100vh;
-  min-height: auto;
   overflow-y: auto;
+}
+
+body.page-nest .wrap {
+  height: auto;
+  min-height: auto;
+  overflow-y: visible;
 }
