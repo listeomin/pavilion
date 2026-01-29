@@ -14,7 +14,8 @@ export function initSidebarToggle() {
   if (isCollapsed) {
     sidebar.classList.add('collapsed');
     document.body.classList.add('sidebar-collapsed');
-    updateCollapsedSections();
+    // Wait for sections to load before updating
+    setTimeout(updateCollapsedSections, 500);
   }
   
   // Toggle click handler
@@ -32,34 +33,47 @@ export function initSidebarToggle() {
     }
   });
   
-  // Update collapsed sections from full navigation
+  // Update collapsed sections from full navigation (only Рубрики)
   function updateCollapsedSections() {
     if (!collapsedSections) return;
     
-    // Get all section headers from the full navigation
-    const sections = document.querySelectorAll('.nav-section-header');
+    // Get all section headers from Рубрики tab only
+    const navContent = document.getElementById('nest-navigation-content');
+    if (!navContent) return;
+    
+    const sections = navContent.querySelectorAll('.nav-section-header');
     
     collapsedSections.innerHTML = '';
     
     sections.forEach(section => {
       const title = section.textContent.trim();
       const isActive = section.classList.contains('active');
-      const sectionId = section.dataset.tagId || '';
+      const sectionId = section.dataset.tagId || section.dataset.section || '';
       
-      // Get first letter or emoji for icon
-      const firstChar = title.charAt(0);
-      const isEmoji = /\p{Emoji}/u.test(firstChar);
+      // Try to get cover image from section
+      const coverImg = section.querySelector('img');
+      const coverUrl = coverImg ? coverImg.src : null;
       
       const item = document.createElement('div');
       item.className = 'collapsed-section-item' + (isActive ? ' active' : '');
       item.dataset.title = title;
       item.dataset.tagId = sectionId;
       
-      // Use first letter as icon
-      const icon = document.createElement('span');
-      icon.className = 'collapsed-section-icon';
-      icon.textContent = isEmoji ? firstChar : firstChar.toUpperCase();
-      item.appendChild(icon);
+      if (coverUrl) {
+        // Use cover image
+        const img = document.createElement('img');
+        img.className = 'collapsed-section-img';
+        img.src = coverUrl;
+        img.alt = title;
+        item.appendChild(img);
+      } else {
+        // Use first letter as icon
+        const firstChar = title.charAt(0);
+        const icon = document.createElement('span');
+        icon.className = 'collapsed-section-icon';
+        icon.textContent = firstChar.toUpperCase();
+        item.appendChild(icon);
+      }
       
       // Click handler - same as full section
       item.addEventListener('click', () => {
@@ -85,14 +99,10 @@ export function initSidebarToggle() {
     observer.observe(navContent, { childList: true, subtree: true });
   }
   
-  // Also update when switching tabs
-  document.querySelectorAll('.nest-nav-item').forEach(navItem => {
-    navItem.addEventListener('click', () => {
-      setTimeout(() => {
-        if (sidebar.classList.contains('collapsed')) {
-          updateCollapsedSections();
-        }
-      }, 100);
-    });
-  });
+  // Update when sections might have loaded
+  setTimeout(() => {
+    if (sidebar.classList.contains('collapsed')) {
+      updateCollapsedSections();
+    }
+  }, 1000);
 }

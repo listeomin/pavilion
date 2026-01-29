@@ -240,7 +240,7 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/navigation.css?v=7">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=28">
-<link rel="stylesheet" href="css/nest-layout.css?v=41">
+<link rel="stylesheet" href="css/nest-layout.css?v=42">
 <link rel="stylesheet" href="css/nest-posts.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
@@ -345,11 +345,7 @@ if ("paintWorklet" in CSS) {
 <?php if ($urlUsername): ?>
   </div><!-- .main-column -->
   <aside class="nest-sidebar">
-    <button class="sidebar-toggle" id="sidebar-toggle" title="Свернуть/развернуть">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M3 6c3 2 6-2 9 0s6-2 9 0"/><path d="M3 12c3 2 6-2 9 0s6-2 9 0"/><path d="M3 18c3 2 6-2 9 0s6-2 9 0"/>
-      </svg>
-    </button>
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Свернуть/развернуть"><img src="assets/icons/waves.svg" alt="Toggle"></button>
     <div class="sidebar-collapsed-sections" id="sidebar-collapsed-sections"></div>
     <nav class="nest-nav">
       <a href="#navigation" class="nest-nav-item active">Рубрики</a>
@@ -400,9 +396,9 @@ if ("paintWorklet" in CSS) {
 <link rel="modulepreload" href="js/discussions.js?v=16">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
-<link rel="modulepreload" href="js/sidebar-toggle.js?v=1">
+<link rel="modulepreload" href="js/sidebar-toggle.js?v=2">
 
-<script type="module" src="js/nest.js?v=159"></script>
+<script type="module" src="js/nest.js?v=160"></script>
 <?php
 // Use 'nest' variant when sidebar is present (urlUsername is set)
 $buttonVariant = $urlUsername ? 'nest' : 'default';
