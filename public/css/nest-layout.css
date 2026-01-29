@@ -463,18 +463,21 @@
   width: 48px;
   height: 48px;
   border-radius: 24px;
-  border: 2px solid var(--color-nimbus-light);
-  background: transparent;
+  border: 2px solid #D1CFC5 !important;
+  background: #FFFFFF !important;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   z-index: 10;
+  padding: 0;
+  outline: none;
 }
 
 .sidebar-toggle:hover {
-  border-color: var(--color-nimbus-dark);
+  border-color: #87867F !important;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-toggle img {
@@ -502,7 +505,7 @@
 
 /* Adjust main column margin when sidebar is collapsed */
 body.sidebar-collapsed .main-column {
-  margin-right: 80px;
+  margin-right: 80px !important;
 }
 
 /* Hide navigation tabs when collapsed */
