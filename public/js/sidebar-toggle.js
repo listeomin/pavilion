@@ -4,33 +4,53 @@ export function initSidebarToggle() {
   const sidebar = document.querySelector('.nest-sidebar');
   const toggleBtn = document.getElementById('sidebar-toggle');
   const collapsedSections = document.getElementById('sidebar-collapsed-sections');
+  const mainColumn = document.querySelector('.main-column');
   
   if (!sidebar || !toggleBtn) return;
   
   const STORAGE_KEY = 'nest-sidebar-collapsed';
   
+  function collapse() {
+    sidebar.classList.add('collapsed');
+    document.body.classList.add('sidebar-collapsed');
+    if (mainColumn) {
+      mainColumn.style.marginRight = '80px';
+    }
+    if (sidebar) {
+      sidebar.style.width = '80px';
+    }
+    updateCollapsedSections();
+  }
+  
+  function expand() {
+    sidebar.classList.remove('collapsed');
+    document.body.classList.remove('sidebar-collapsed');
+    if (mainColumn) {
+      mainColumn.style.marginRight = '';
+    }
+    if (sidebar) {
+      sidebar.style.width = '';
+    }
+  }
+  
   // Restore state from localStorage
   const isCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
   if (isCollapsed) {
-    sidebar.classList.add('collapsed');
-    document.body.classList.add('sidebar-collapsed');
-    // Wait for sections to load before updating
-    setTimeout(updateCollapsedSections, 500);
+    collapse();
   }
   
   // Toggle click handler
   toggleBtn.addEventListener('click', () => {
     const willCollapse = !sidebar.classList.contains('collapsed');
     
-    sidebar.classList.toggle('collapsed');
-    document.body.classList.toggle('sidebar-collapsed');
+    if (willCollapse) {
+      collapse();
+    } else {
+      expand();
+    }
     
     // Save state
     localStorage.setItem(STORAGE_KEY, willCollapse ? 'true' : 'false');
-    
-    if (willCollapse) {
-      updateCollapsedSections();
-    }
   });
   
   // Update collapsed sections from full navigation (only Рубрики)
