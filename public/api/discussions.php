@@ -196,7 +196,7 @@ try {
         if ($username) {
             // Get all discussions for a blog by username
             // First, get user_id from username
-            $userStmt = $db->prepare('SELECT id FROM users WHERE username = ? OR telegram_id = ?');
+            $userStmt = $db->prepare('SELECT id FROM users WHERE telegram_username = ? OR telegram_id = ?');
             $userStmt->execute([$username, $username]);
             $user = $userStmt->fetch(PDO::FETCH_ASSOC);
 
