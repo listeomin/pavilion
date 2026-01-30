@@ -71,6 +71,10 @@ export class DiscussionsManager {
 
     if (result.success) {
       this.allDiscussions = result.discussions;
+      // Also update main discussions array for highlights
+      if (this.discussions.length === 0) {
+        this.discussions = result.discussions;
+      }
       this.canDelete = result.can_delete || false;
       this.isOwner = result.is_owner || false;
 
@@ -80,6 +84,8 @@ export class DiscussionsManager {
         if (container) {
           this.renderDiscussionsList(container);
         }
+        // Also highlight quotes in content
+        this.highlightQuotesInContent();
       }
 
       return this.allDiscussions;
@@ -226,7 +232,12 @@ export class DiscussionsManager {
   }
 
   highlightQuotesInContent() {
-    if (this.discussions.length === 0) return;
+    // Use allDiscussions for owner if discussions is empty
+    const discussionsToHighlight = this.discussions.length > 0
+      ? this.discussions
+      : (this.allDiscussions.length > 0 ? this.allDiscussions : []);
+
+    if (discussionsToHighlight.length === 0) return;
 
     // Remove existing highlights first
     for (const [postId, contentEl] of this.contentElements) {
@@ -237,7 +248,7 @@ export class DiscussionsManager {
     }
 
     // Highlight each discussion
-    for (const discussion of this.discussions) {
+    for (const discussion of discussionsToHighlight) {
       this.highlightQuote(discussion);
     }
   }
