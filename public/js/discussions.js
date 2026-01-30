@@ -622,9 +622,15 @@ export class DiscussionsManager {
   // Create a discussion item element
   _createDiscussionItem(discussion) {
     const item = document.createElement('div');
-    item.style.cssText = 'padding:8px 0;cursor:pointer;transition:background 0.2s;';
-    item.addEventListener('mouseenter', () => item.style.background = 'rgba(106,155,204,0.1)');
-    item.addEventListener('mouseleave', () => item.style.background = 'transparent');
+    item.style.cssText = 'padding:8px;margin:0 -8px;cursor:pointer;transition:background 0.2s,outline 0.2s;border-radius:8px;';
+    item.addEventListener('mouseenter', () => {
+      item.style.background = 'rgba(106,155,204,0.1)';
+      item.style.outline = '1px dashed #B0AEA5';
+    });
+    item.addEventListener('mouseleave', () => {
+      item.style.background = 'transparent';
+      item.style.outline = 'none';
+    });
 
     // Quote preview - always show the quote text as discussion title
     let previewText = discussion.quote_text;
@@ -910,8 +916,9 @@ export class DiscussionsManager {
 
     const discContainer = document.querySelector('.nest-discussions-content');
     if (discContainer) {
-      this.renderDiscussionsList(discContainer);
       this.switchToDiscussionsTab();
+      // Open the newly created discussion panel
+      await this.showDiscussionPanel(result.discussion_id);
     }
 
     if (this.onDiscussionsUpdate) {
