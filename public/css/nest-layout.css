@@ -109,8 +109,17 @@
 .nest-meta-content,
 .nest-discussions-content {
   padding-left: 32px; /* Consistent left padding for all sidebar tabs */
+  padding-right: 32px;
   background: transparent;
   border: none;
+}
+
+/* Discussion input placeholder */
+.nest-discussions-content input::placeholder,
+.discussion-input-fixed input::placeholder {
+  color: #B0AEA5;
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 16px;
 }
 
 /* Single category view - posts list */
@@ -702,4 +711,9 @@ body.sidebar-collapsed .main-column {
 
 body.sidebar-collapsed .nest-sidebar {
   width: 80px !important;
+}
+
+/* Hide fixed discussion input when sidebar is collapsed */
+body.sidebar-collapsed .discussion-input-fixed {
+  display: none !important;
 }

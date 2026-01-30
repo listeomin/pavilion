@@ -1,4 +1,4 @@
-// discussions.js v19 - Added delete button for post authors
+// discussions.js v20 - Updated design: chat-style messages, Cascadia Code font, simpler input
 export class DiscussionsManager {
   constructor(config, apiPath) {
     this.config = config;
@@ -279,98 +279,118 @@ export class DiscussionsManager {
 
     container.innerHTML = '';
 
-    // Header with back button and delete button
-    const header = document.createElement('div');
-    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    // Header row: back button (left) + delete button (right)
+    const headerRow = document.createElement('div');
+    headerRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;';
 
+    // Back button - Garden/Olive color, Ubuntu Mono font
     const backBtn = document.createElement('button');
     backBtn.innerHTML = '← Все обсуждения';
-    backBtn.style.cssText = 'background:none;border:none;color:#87867F;font-size:13px;cursor:pointer;padding:8px 0;font-family:Ubuntu Sans,sans-serif;';
+    backBtn.style.cssText = 'background:none;border:none;color:#788C5D;font-size:15px;line-height:1.6;cursor:pointer;padding:0;font-family:"Ubuntu Mono",monospace;font-weight:380;';
     backBtn.addEventListener('mouseenter', () => backBtn.style.color = '#5E5D59');
-    backBtn.addEventListener('mouseleave', () => backBtn.style.color = '#87867F');
-    backBtn.addEventListener('click', () => this.renderDiscussionsList(container));
-    header.appendChild(backBtn);
+    backBtn.addEventListener('mouseleave', () => backBtn.style.color = '#788C5D');
+    backBtn.addEventListener('click', () => {
+      // Remove fixed input when going back
+      const fixedInput = document.querySelector('.discussion-input-fixed');
+      if (fixedInput) fixedInput.remove();
+      this.renderDiscussionsList(container);
+    });
+    headerRow.appendChild(backBtn);
 
-    // Show delete button if user can delete (is post author)
+    // Delete button for post authors - in header row (right side)
     if (result.can_delete) {
       const deleteBtn = document.createElement('button');
       deleteBtn.innerHTML = '🗑️';
       deleteBtn.title = 'Удалить обсуждение';
-      deleteBtn.style.cssText = 'background:none;border:none;font-size:16px;cursor:pointer;padding:4px 8px;opacity:0.5;transition:opacity 0.2s;';
-      deleteBtn.addEventListener('mouseenter', () => deleteBtn.style.opacity = '1');
-      deleteBtn.addEventListener('mouseleave', () => deleteBtn.style.opacity = '0.5');
+      deleteBtn.style.cssText = 'background:none;border:none;font-size:18px;cursor:pointer;padding:0;color:#B0AEA5;';
+      deleteBtn.addEventListener('mouseenter', () => deleteBtn.style.color = '#87867F');
+      deleteBtn.addEventListener('mouseleave', () => deleteBtn.style.color = '#B0AEA5');
       deleteBtn.addEventListener('click', async () => {
-        const deleted = await this.deleteDiscussion(discussionId);
-        if (deleted) {
-          // Already handled in deleteDiscussion
-        }
+        const fixedInput = document.querySelector('.discussion-input-fixed');
+        if (fixedInput) fixedInput.remove();
+        await this.deleteDiscussion(discussionId);
       });
-      header.appendChild(deleteBtn);
+      headerRow.appendChild(deleteBtn);
     }
 
-    container.appendChild(header);
+    container.appendChild(headerRow);
 
-    // Quote section - clickable to scroll
+    // Quote section - Cloud/Medium bg, Cactus border, Ubuntu Mono font
     const quoteSection = document.createElement('div');
-    quoteSection.style.cssText = 'background:#F5F4F0;border-left:4px solid #BCD1CA;padding:12px;margin-bottom:16px;border-radius:4px;cursor:pointer;transition:background 0.2s;';
-    quoteSection.innerHTML = '<div style="font-style:italic;color:#5E5D59;font-size:14px;line-height:1.5;">"' + this.escapeHtml(discussion.quote_text) + '"</div><div style="font-size:11px;color:#A9A8A3;margin-top:8px;">' + (discussion.created_by_emoji || '🦔') + ' ' + this.escapeHtml(discussion.created_by_name || 'Аноним') + ' · ' + this.formatDate(discussion.created_at) + '</div>';
+    quoteSection.style.cssText = 'background:#F0EEE6;border-left:3px solid #BCD1CA;padding:12px 16px;margin-bottom:16px;cursor:pointer;transition:background 0.2s;';
+    quoteSection.innerHTML = '<div style="font-family:\'Noto Serif\',serif;font-style:italic;font-size:15px;line-height:1.33;color:#141413;">' + this.escapeHtml(discussion.quote_text) + '</div>';
     quoteSection.title = 'Нажмите, чтобы перейти к цитате';
-    quoteSection.addEventListener('mouseenter', () => quoteSection.style.background = '#EAE9E5');
-    quoteSection.addEventListener('mouseleave', () => quoteSection.style.background = '#F5F4F0');
+    quoteSection.addEventListener('mouseenter', () => quoteSection.style.background = '#E8E6DC');
+    quoteSection.addEventListener('mouseleave', () => quoteSection.style.background = '#F0EEE6');
     quoteSection.addEventListener('click', () => this.scrollToQuote(discussionId));
     container.appendChild(quoteSection);
 
-    // Comments
+    // Comments - chat style with Cascadia Code font (with bottom padding for fixed input)
     const commentsSection = document.createElement('div');
-    commentsSection.style.cssText = 'margin-bottom:16px;';
+    commentsSection.style.cssText = 'display:flex;flex-direction:column;gap:8px;padding-bottom:80px;';
 
     if (comments.length === 0) {
-      commentsSection.innerHTML = '<div style="text-align:center;color:#A9A8A3;padding:32px 0;">Пока нет комментариев</div>';
+      commentsSection.innerHTML = '<div style="text-align:center;color:#B0AEA5;padding:32px 0;font-family:\'Ubuntu Mono\',monospace;font-size:16px;">Пока нет комментариев</div>';
     } else {
       comments.forEach(comment => {
         const commentEl = document.createElement('div');
-        commentEl.style.cssText = 'padding:12px 0;border-bottom:1px solid #F0EFE9;';
-        commentEl.innerHTML = '<div style="display:flex;align-items:center;margin-bottom:8px;"><span style="font-size:16px;margin-right:8px;">' + (comment.created_by_emoji || '🦔') + '</span><span style="font-weight:500;color:#5E5D59;">' + this.escapeHtml(comment.created_by_name || 'Аноним') + '</span><span style="color:#A9A8A3;font-size:12px;margin-left:auto;">' + this.formatDate(comment.created_at) + '</span></div><div style="color:#5E5D59;line-height:1.5;padding-left:28px;">' + this.escapeHtml(comment.comment_text) + '</div>';
+        commentEl.style.cssText = 'padding:8px 0;font-family:\'Ubuntu Mono\',monospace;font-size:16px;line-height:1.6;color:#141413;';
+        commentEl.textContent = (comment.created_by_emoji || '🦔') + ' ' + (comment.created_by_name || 'Аноним') + ': ' + comment.comment_text;
         commentsSection.appendChild(commentEl);
       });
     }
     container.appendChild(commentsSection);
 
-    // Comment input
+    // Remove any existing fixed input
+    const existingInput = document.querySelector('.discussion-input-fixed');
+    if (existingInput) existingInput.remove();
+
+    // Input section - fixed to bottom of sidebar (like messenger)
     const inputSection = document.createElement('div');
-    inputSection.style.cssText = 'padding:16px 0;border-top:1px solid #E5E4E0;';
+    inputSection.className = 'discussion-input-fixed';
+    inputSection.style.cssText = 'position:fixed;bottom:0;right:0;width:420px;padding:16px 32px;box-sizing:border-box;display:flex;align-items:center;gap:4px;font-family:\'Ubuntu Mono\',monospace;font-size:16px;line-height:1.6;z-index:100;';
 
-    const textarea = document.createElement('textarea');
-    textarea.placeholder = 'Написать комментарий...';
-    textarea.style.cssText = 'width:100%;min-height:80px;padding:12px;border:1px solid #D1CFC5;border-radius:8px;font-family:Ubuntu Sans,sans-serif;font-size:14px;color:#5E5D59;resize:none;box-sizing:border-box;margin-bottom:12px;';
+    const youLabel = document.createElement('span');
+    youLabel.textContent = 'Вы:';
+    youLabel.style.cssText = 'color:#141413;flex-shrink:0;';
 
-    const submitBtn = document.createElement('button');
-    submitBtn.textContent = 'Отправить';
-    submitBtn.style.cssText = 'width:100%;padding:12px;background:#BCD1CA;border:none;border-radius:8px;font-family:Ubuntu Sans,sans-serif;font-size:14px;font-weight:600;color:#5E5D59;cursor:pointer;';
-    submitBtn.addEventListener('mouseenter', () => submitBtn.style.background = '#A8C0B8');
-    submitBtn.addEventListener('mouseleave', () => submitBtn.style.background = '#BCD1CA');
-    submitBtn.addEventListener('click', async () => {
-      const text = textarea.value.trim();
-      if (!text) return;
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.cssText = 'flex:1;position:relative;';
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Отправка...';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Напишите что-нибудь';
+    input.style.cssText = 'width:100%;background:none;border:none;outline:none;font-family:\'Ubuntu Mono\',monospace;font-size:16px;line-height:1.6;color:#141413;padding:0;';
 
-      try {
-        await this.addComment(discussionId, text);
-        await this.loadDiscussions(this.currentPostId);
-        this.highlightQuotesInContent();
-        this.showDiscussionPanel(discussionId);
-      } catch (err) {
-        alert('Ошибка: ' + err.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Отправить';
+    // Submit on Enter
+    input.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.disabled = true;
+        input.placeholder = 'Отправка...';
+
+        try {
+          await this.addComment(discussionId, text);
+          await this.loadDiscussions(this.currentPostId);
+          this.highlightQuotesInContent();
+          this.showDiscussionPanel(discussionId);
+        } catch (err) {
+          alert('Ошибка: ' + err.message);
+          input.disabled = false;
+          input.placeholder = 'Напишите что-нибудь';
+        }
       }
     });
 
-    inputSection.appendChild(textarea);
-    inputSection.appendChild(submitBtn);
-    container.appendChild(inputSection);
+    inputWrapper.appendChild(input);
+    inputSection.appendChild(youLabel);
+    inputSection.appendChild(inputWrapper);
+
+    // Append to body (fixed positioning)
+    document.body.appendChild(inputSection);
 
     // Scroll to quote in post
     setTimeout(() => this.scrollToQuote(discussionId), 150);
@@ -390,30 +410,45 @@ export class DiscussionsManager {
   renderDiscussionsList(container) {
     if (!container) return;
 
+    // Remove fixed input when showing list
+    const fixedInput = document.querySelector('.discussion-input-fixed');
+    if (fixedInput) fixedInput.remove();
+
     const whale = document.getElementById('discussion-whale');
     if (whale) whale.style.display = this.discussions.length > 0 ? 'none' : 'block';
 
     container.innerHTML = '';
 
     if (this.discussions.length === 0) {
-      container.innerHTML = '<div style="text-align:center;color:#A9A8A3;padding:32px 16px;"><div style="font-size:32px;margin-bottom:12px;">💬</div><div>Пока нет обсуждений</div><div style="font-size:12px;margin-top:8px;">Выделите текст в посте, чтобы начать обсуждение</div></div>';
+      container.innerHTML = '<div style="text-align:center;color:#B0AEA5;padding:32px 0;font-family:\'Ubuntu Mono\',monospace;font-size:16px;"><div style="font-size:32px;margin-bottom:12px;">💬</div><div>Пока нет обсуждений</div><div style="font-size:14px;margin-top:8px;color:#B0AEA5;">Выделите текст в посте, чтобы начать</div></div>';
       return;
     }
 
     const list = document.createElement('div');
-    list.style.cssText = 'padding:8px 0;';
+    list.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
 
     this.discussions.forEach(discussion => {
       const item = document.createElement('div');
-      item.style.cssText = 'padding:12px 16px;border-bottom:1px solid #F0EFE9;cursor:pointer;transition:background 0.2s;';
-      item.addEventListener('mouseenter', () => item.style.background = '#F5F4F0');
+      item.style.cssText = 'padding:8px 0;cursor:pointer;transition:background 0.2s;';
+      item.addEventListener('mouseenter', () => item.style.background = 'rgba(106,155,204,0.1)');
       item.addEventListener('mouseleave', () => item.style.background = 'transparent');
 
-      const quotePreview = discussion.quote_text.length > 60
-        ? discussion.quote_text.substring(0, 60) + '...'
-        : discussion.quote_text;
+      // Quote preview - always show the quote text as discussion title
+      let previewText = discussion.quote_text;
 
-      item.innerHTML = '<div style="font-style:italic;color:#5E5D59;font-size:14px;line-height:1.4;margin-bottom:8px;">"' + this.escapeHtml(quotePreview) + '"</div><div style="display:flex;align-items:center;font-size:12px;color:#A9A8A3;"><span style="margin-right:8px;">💬 ' + (discussion.comment_count || 0) + '</span><span>' + (discussion.created_by_emoji || '🦔') + ' ' + this.escapeHtml(discussion.created_by_name || 'Аноним') + '</span><span style="margin-left:auto;">' + this.formatDate(discussion.created_at) + '</span></div>';
+      // Truncate if too long
+      if (previewText.length > 50) {
+        previewText = previewText.substring(0, 50) + '...';
+      }
+
+      // Comment count
+      const commentCount = discussion.comment_count || 0;
+
+      // Format: quote text + comment count
+      item.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">' +
+        '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:15px;line-height:1.6;color:#141413;">' + this.escapeHtml(previewText) + '</span>' +
+        '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:14px;color:#B0AEA5;flex-shrink:0;">' + commentCount + '</span>' +
+        '</div>';
 
       item.addEventListener('click', () => {
         this.showDiscussionPanel(discussion.id);
