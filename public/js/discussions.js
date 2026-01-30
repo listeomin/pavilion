@@ -84,8 +84,10 @@ export class DiscussionsManager {
         if (container) {
           this.renderDiscussionsList(container);
         }
-        // Also highlight quotes in content
-        this.highlightQuotesInContent();
+        // Highlight quotes only if contentElements is ready
+        if (this.contentElements.size > 0) {
+          this.highlightQuotesInContent();
+        }
       }
 
       return this.allDiscussions;
