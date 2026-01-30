@@ -1,14 +1,11 @@
-// discussions.js v21 - Context-aware discussions for readers, all discussions for authors
+// discussions.js v20 - Updated design: chat-style messages, Cascadia Code font, simpler input
 export class DiscussionsManager {
   constructor(config, apiPath) {
     this.config = config;
     this.apiPath = apiPath;
     this.currentPostId = null;
     this.discussions = [];
-    this.allDiscussions = []; // All discussions for blog owner
-    this.visiblePostIds = new Set(); // Currently visible posts (for readers)
     this.canDelete = false;
-    this.isOwner = config.isOwnNest || false;
     this.contextMenu = null;
     this.quoteModal = null;
     this.quoteButton = null;
@@ -17,166 +14,8 @@ export class DiscussionsManager {
     this.discussionPanel = null;
     this.onDiscussionsUpdate = null;
     this._loadDebounceTimer = null;
-    this._visibilityObserver = null;
-    this._lastSeenComments = this._loadLastSeenComments(); // For "new" indicators
 
     this.initializeContextMenu();
-
-    // For blog owner, load all discussions immediately
-    if (this.isOwner && this.config.urlUsername) {
-      this.loadAllBlogDiscussions();
-    }
-  }
-
-  // Load/save last seen comment counts for "new" indicators
-  _loadLastSeenComments() {
-    try {
-      const data = localStorage.getItem('discussions_last_seen_' + (this.config.urlUsername || ''));
-      return data ? JSON.parse(data) : {};
-    } catch (e) {
-      return {};
-    }
-  }
-
-  _saveLastSeenComments() {
-    try {
-      localStorage.setItem('discussions_last_seen_' + (this.config.urlUsername || ''), JSON.stringify(this._lastSeenComments));
-    } catch (e) {}
-  }
-
-  // Mark discussion as seen (update last seen comment count)
-  markDiscussionSeen(discussionId) {
-    const discussion = this.discussions.find(d => String(d.id) === String(discussionId))
-                    || this.allDiscussions.find(d => String(d.id) === String(discussionId));
-    if (discussion) {
-      this._lastSeenComments[discussionId] = parseInt(discussion.comment_count) || 0;
-      this._saveLastSeenComments();
-    }
-  }
-
-  // Get new comments count for a discussion
-  getNewCommentsCount(discussion) {
-    const lastSeen = this._lastSeenComments[discussion.id] || 0;
-    const current = parseInt(discussion.comment_count) || 0;
-    return Math.max(0, current - lastSeen);
-  }
-
-  // Load all discussions for the blog (for owner)
-  async loadAllBlogDiscussions() {
-    if (!this.config.urlUsername) return [];
-
-    const url = this.apiPath + '/api/discussions.php?action=list&username=' + encodeURIComponent(this.config.urlUsername);
-    const response = await fetch(url);
-    const result = await response.json();
-
-    if (result.success) {
-      this.allDiscussions = result.discussions;
-      // Also update main discussions array for highlights
-      if (this.discussions.length === 0) {
-        this.discussions = result.discussions;
-      }
-      this.canDelete = result.can_delete || false;
-      this.isOwner = result.is_owner || false;
-
-      // Update sidebar if owner
-      if (this.isOwner) {
-        const container = document.querySelector('.nest-discussions-content');
-        if (container) {
-          this.renderDiscussionsList(container);
-        }
-        // Highlight quotes only if contentElements is ready
-        if (this.contentElements.size > 0) {
-          this.highlightQuotesInContent();
-        }
-      }
-
-      return this.allDiscussions;
-    }
-    return [];
-  }
-
-  // Setup visibility observer for posts (for readers - contextual discussions)
-  setupVisibilityObserver() {
-    if (this._visibilityObserver) return;
-
-    this._visibilityObserver = new IntersectionObserver((entries) => {
-      let changed = false;
-
-      entries.forEach(entry => {
-        const postEl = entry.target;
-        const postId = postEl.dataset.postId;
-        if (!postId) return;
-
-        if (entry.isIntersecting) {
-          if (!this.visiblePostIds.has(postId)) {
-            this.visiblePostIds.add(postId);
-            changed = true;
-          }
-        } else {
-          if (this.visiblePostIds.has(postId)) {
-            this.visiblePostIds.delete(postId);
-            changed = true;
-          }
-        }
-      });
-
-      // Update discussions list when visible posts change (only for readers)
-      if (changed && !this.isOwner) {
-        this._updateContextualDiscussions();
-      }
-    }, {
-      rootMargin: '100px 0px',
-      threshold: 0.1
-    });
-  }
-
-  // Observe a post element for visibility
-  observePost(postElement) {
-    if (!this._visibilityObserver) {
-      this.setupVisibilityObserver();
-    }
-    this._visibilityObserver.observe(postElement);
-  }
-
-  // Update discussions shown to readers based on visible posts
-  _updateContextualDiscussions() {
-    if (this.isOwner) return; // Owner sees all discussions
-
-    // Filter discussions to only those for visible posts
-    const visibleDiscussions = this.discussions.filter(d =>
-      this.visiblePostIds.has(String(d.post_id)) || this.visiblePostIds.has(d.post_id)
-    );
-
-    const container = document.querySelector('.nest-discussions-content');
-    if (container) {
-      this._renderFilteredDiscussions(container, visibleDiscussions);
-    }
-  }
-
-  // Render filtered discussions (for readers)
-  _renderFilteredDiscussions(container, filteredDiscussions) {
-    // Similar to renderDiscussionsList but with filtered data
-    const fixedInput = document.querySelector('.discussion-input-fixed');
-    if (fixedInput) fixedInput.remove();
-
-    const whale = document.getElementById('discussion-whale');
-    if (whale) whale.style.display = filteredDiscussions.length > 0 ? 'none' : 'block';
-
-    container.innerHTML = '';
-
-    if (filteredDiscussions.length === 0) {
-      container.innerHTML = '<div style="text-align:center;color:#B0AEA5;padding:32px 0;font-family:\'Ubuntu Mono\',monospace;font-size:16px;"><div style="font-size:32px;margin-bottom:12px;">💬</div><div>Пока нет обсуждений</div><div style="font-size:14px;margin-top:8px;color:#B0AEA5;">Выделите текст в посте, чтобы начать</div></div>';
-      return;
-    }
-
-    const list = document.createElement('div');
-    list.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
-
-    filteredDiscussions.forEach(discussion => {
-      list.appendChild(this._createDiscussionItem(discussion));
-    });
-
-    container.appendChild(list);
   }
 
   initializeTextSelection(postId, contentElement) {
@@ -185,14 +24,6 @@ export class DiscussionsManager {
     this.contentElements.set(postId, contentElement);
     this.contentElements.set(parseInt(postId), contentElement);
     this.contentElements.set(String(postId), contentElement);
-
-    // For readers: observe post visibility for contextual discussions
-    if (!this.isOwner) {
-      const postEl = contentElement.closest('.nest-post');
-      if (postEl) {
-        this.observePost(postEl);
-      }
-    }
 
     if (contentElement._discussionListeners) {
       contentElement.removeEventListener('mouseup', contentElement._discussionListeners.mouseup);
@@ -234,12 +65,7 @@ export class DiscussionsManager {
   }
 
   highlightQuotesInContent() {
-    // Use allDiscussions for owner if discussions is empty
-    const discussionsToHighlight = this.discussions.length > 0
-      ? this.discussions
-      : (this.allDiscussions.length > 0 ? this.allDiscussions : []);
-
-    if (discussionsToHighlight.length === 0) return;
+    if (this.discussions.length === 0) return;
 
     // Remove existing highlights first
     for (const [postId, contentEl] of this.contentElements) {
@@ -250,7 +76,7 @@ export class DiscussionsManager {
     }
 
     // Highlight each discussion
-    for (const discussion of discussionsToHighlight) {
+    for (const discussion of this.discussions) {
       this.highlightQuote(discussion);
     }
   }
@@ -451,12 +277,6 @@ export class DiscussionsManager {
     const discussion = result.discussion;
     const comments = result.comments || [];
 
-    // Mark as seen for owner (update last seen comment count)
-    if (this.isOwner) {
-      this._lastSeenComments[discussionId] = comments.length;
-      this._saveLastSeenComments();
-    }
-
     container.innerHTML = '';
 
     // Header row: back button (left) + delete button (right)
@@ -555,10 +375,6 @@ export class DiscussionsManager {
         try {
           await this.addComment(discussionId, text);
           await this.loadDiscussions(this.currentPostId);
-          // Also reload all discussions for owner
-          if (this.isOwner && this.config.urlUsername) {
-            await this.loadAllBlogDiscussions();
-          }
           this.highlightQuotesInContent();
           this.showDiscussionPanel(discussionId);
         } catch (err) {
@@ -598,26 +414,12 @@ export class DiscussionsManager {
     const fixedInput = document.querySelector('.discussion-input-fixed');
     if (fixedInput) fixedInput.remove();
 
-    // Determine which discussions to show
-    let discussionsToShow;
-    if (this.isOwner) {
-      // Owner sees all discussions (from allDiscussions, sorted by last activity)
-      discussionsToShow = this.allDiscussions.length > 0 ? this.allDiscussions : this.discussions;
-    } else {
-      // Reader sees only discussions for visible posts
-      discussionsToShow = this.discussions.filter(d =>
-        this.visiblePostIds.size === 0 || // Show all if no visibility tracking yet
-        this.visiblePostIds.has(String(d.post_id)) ||
-        this.visiblePostIds.has(d.post_id)
-      );
-    }
-
     const whale = document.getElementById('discussion-whale');
-    if (whale) whale.style.display = discussionsToShow.length > 0 ? 'none' : 'block';
+    if (whale) whale.style.display = this.discussions.length > 0 ? 'none' : 'block';
 
     container.innerHTML = '';
 
-    if (discussionsToShow.length === 0) {
+    if (this.discussions.length === 0) {
       container.innerHTML = '<div style="text-align:center;color:#B0AEA5;padding:32px 0;font-family:\'Ubuntu Mono\',monospace;font-size:16px;"><div style="font-size:32px;margin-bottom:12px;">💬</div><div>Пока нет обсуждений</div><div style="font-size:14px;margin-top:8px;color:#B0AEA5;">Выделите текст в посте, чтобы начать</div></div>';
       return;
     }
@@ -625,63 +427,37 @@ export class DiscussionsManager {
     const list = document.createElement('div');
     list.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
 
-    discussionsToShow.forEach(discussion => {
-      list.appendChild(this._createDiscussionItem(discussion));
+    this.discussions.forEach(discussion => {
+      const item = document.createElement('div');
+      item.style.cssText = 'padding:8px 0;cursor:pointer;transition:background 0.2s;';
+      item.addEventListener('mouseenter', () => item.style.background = 'rgba(106,155,204,0.1)');
+      item.addEventListener('mouseleave', () => item.style.background = 'transparent');
+
+      // Quote preview - always show the quote text as discussion title
+      let previewText = discussion.quote_text;
+
+      // Truncate if too long
+      if (previewText.length > 50) {
+        previewText = previewText.substring(0, 50) + '...';
+      }
+
+      // Comment count
+      const commentCount = discussion.comment_count || 0;
+
+      // Format: quote text + comment count
+      item.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">' +
+        '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:15px;line-height:1.6;color:#141413;">' + this.escapeHtml(previewText) + '</span>' +
+        '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:14px;color:#B0AEA5;flex-shrink:0;">' + commentCount + '</span>' +
+        '</div>';
+
+      item.addEventListener('click', () => {
+        this.showDiscussionPanel(discussion.id);
+      });
+
+      list.appendChild(item);
     });
 
     container.appendChild(list);
-  }
-
-  // Create a discussion item element
-  _createDiscussionItem(discussion) {
-    const item = document.createElement('div');
-    item.style.cssText = 'padding:8px;margin:0 -8px;cursor:pointer;transition:background 0.2s;border-radius:8px;';
-    item.addEventListener('mouseenter', () => {
-      item.style.background = 'rgba(106,155,204,0.1)';
-    });
-    item.addEventListener('mouseleave', () => {
-      item.style.background = 'transparent';
-    });
-
-    // Quote preview - always show the quote text as discussion title
-    let previewText = discussion.quote_text;
-
-    // Truncate if too long
-    if (previewText.length > 50) {
-      previewText = previewText.substring(0, 50) + '...';
-    }
-
-    // Comment count and new indicator
-    const commentCount = parseInt(discussion.comment_count) || 0;
-    const newCount = this.isOwner ? this.getNewCommentsCount(discussion) : 0;
-
-    // Format: quote text + comment count (with new indicator for owner)
-    let countHtml;
-    if (this.isOwner && newCount > 0) {
-      // Show new count in accent color for owner
-      countHtml = '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:14px;color:#788C5D;flex-shrink:0;font-weight:600;">+' + newCount + '</span>';
-    } else {
-      countHtml = '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:14px;color:#B0AEA5;flex-shrink:0;">' + commentCount + '</span>';
-    }
-
-    item.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">' +
-      '<span style="font-family:\'Ubuntu Mono\',monospace;font-size:15px;line-height:1.6;color:#141413;">' + this.escapeHtml(previewText) + '</span>' +
-      countHtml +
-      '</div>';
-
-    item.addEventListener('click', () => {
-      // For owner: if we have post_slug and we're on the main blog page (not on individual post),
-      // navigate to the post page directly instead of scrolling
-      if (this.isOwner && discussion.post_slug && !this.config.postSlug) {
-        // Navigate to post page with discussion hash
-        const url = '/nest/' + this.config.urlUsername + '/' + discussion.post_slug + '#discussion-' + discussion.id;
-        window.location.href = url;
-      } else {
-        this.showDiscussionPanel(discussion.id);
-      }
-    });
-
-    return item;
   }
 
   handleTextSelection(event, contentElement) {
@@ -920,19 +696,10 @@ export class DiscussionsManager {
     await this.loadDiscussions(postId);
     this.highlightQuotesInContent();
 
-    // Also reload all discussions for owner
-    if (this.isOwner && this.config.urlUsername) {
-      await this.loadAllBlogDiscussions();
-    }
-
     const discContainer = document.querySelector('.nest-discussions-content');
     if (discContainer) {
       this.renderDiscussionsList(discContainer);
       this.switchToDiscussionsTab();
-      // Open the newly created discussion panel
-      setTimeout(() => {
-        this.showDiscussionPanel(result.discussion_id);
-      }, 100);
     }
 
     if (this.onDiscussionsUpdate) {
@@ -997,10 +764,6 @@ export class DiscussionsManager {
 
       // Reload discussions
       await this.loadDiscussions(this.currentPostId);
-      // Also reload all discussions for owner
-      if (this.isOwner && this.config.urlUsername) {
-        await this.loadAllBlogDiscussions();
-      }
       this.highlightQuotesInContent();
 
       // Update sidebar
