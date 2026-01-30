@@ -237,7 +237,7 @@ try {
                        MAX(c.created_at) as last_comment_at
                 FROM nest_discussions d
                 LEFT JOIN nest_discussion_comments c ON d.id = c.discussion_id
-                INNER JOIN nest_posts p ON d.post_id = p.id
+                LEFT JOIN nest_posts p ON d.post_id = p.id
                 WHERE d.post_id = ?
                 GROUP BY d.id
                 ORDER BY d.created_at DESC
@@ -252,7 +252,7 @@ try {
                        MAX(c.created_at) as last_comment_at
                 FROM nest_discussions d
                 LEFT JOIN nest_discussion_comments c ON d.id = c.discussion_id
-                INNER JOIN nest_posts p ON d.post_id = p.id
+                LEFT JOIN nest_posts p ON d.post_id = p.id
                 WHERE d.post_id IN ($placeholders)
                 GROUP BY d.id
                 ORDER BY last_comment_at DESC, d.created_at DESC
