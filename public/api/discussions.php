@@ -183,23 +183,52 @@ try {
         ]);
     }
 
-    // LIST: Get discussions for post(s)
+    // LIST: Get discussions for post(s) or all discussions for a blog
     elseif ($action === 'list') {
         $postId = $_GET['post_id'] ?? null;
         $postIds = isset($_GET['post_ids']) ? explode(',', $_GET['post_ids']) : null;
+        $username = $_GET['username'] ?? null; // For getting all discussions in a blog
 
-        if (!$postId && !$postIds) {
-            echo json_encode(['success' => false, 'error' => 'post_id or post_ids required']);
-            exit;
-        }
-
-        // Check if current user is author of any of these posts
+        // Check if current user is author of the blog
         $canDelete = false;
-        if ($postId) {
-            $canDelete = isPostAuthor($db, $postId);
-        }
+        $isOwner = false;
 
-        if ($postId) {
+        if ($username) {
+            // Get all discussions for a blog by username
+            // First, get user_id from username
+            $userStmt = $db->prepare('SELECT id FROM users WHERE username = ? OR telegram_id = ?');
+            $userStmt->execute([$username, $username]);
+            $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                echo json_encode(['success' => false, 'error' => 'User not found']);
+                exit;
+            }
+
+            $blogUserId = $user['id'];
+            $currentUserId = getCurrentUserId();
+            $isOwner = $currentUserId && intval($currentUserId) === intval($blogUserId);
+            $canDelete = $isOwner;
+
+            // Get all discussions for posts owned by this user, sorted by last activity
+            $stmt = $db->prepare('
+                SELECT d.*,
+                       COUNT(c.id) as comment_count,
+                       MAX(c.created_at) as last_comment_at,
+                       COALESCE(MAX(c.created_at), d.created_at) as last_activity
+                FROM nest_discussions d
+                LEFT JOIN nest_discussion_comments c ON d.id = c.discussion_id
+                INNER JOIN nest_posts p ON d.post_id = p.id
+                WHERE p.user_id = ?
+                GROUP BY d.id
+                ORDER BY last_activity DESC
+            ');
+            $stmt->execute([$blogUserId]);
+        } elseif (!$postId && !$postIds) {
+            echo json_encode(['success' => false, 'error' => 'post_id, post_ids, or username required']);
+            exit;
+        } elseif ($postId) {
+            $canDelete = isPostAuthor($db, $postId);
             $stmt = $db->prepare('
                 SELECT d.*,
                        COUNT(c.id) as comment_count,
@@ -228,10 +257,26 @@ try {
 
         $discussions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Get latest comment for each discussion (for preview)
+        foreach ($discussions as &$discussion) {
+            $latestStmt = $db->prepare('
+                SELECT comment_text, created_by_emoji, created_by_name, created_at
+                FROM nest_discussion_comments
+                WHERE discussion_id = ?
+                ORDER BY created_at DESC
+                LIMIT 1
+            ');
+            $latestStmt->execute([$discussion['id']]);
+            $latestComment = $latestStmt->fetch(PDO::FETCH_ASSOC);
+            $discussion['latest_comment'] = $latestComment ?: null;
+        }
+        unset($discussion);
+
         echo json_encode([
             'success' => true,
             'discussions' => $discussions,
-            'can_delete' => $canDelete
+            'can_delete' => $canDelete,
+            'is_owner' => $isOwner ?? false
         ]);
     }
 
