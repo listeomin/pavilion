@@ -29,6 +29,7 @@
 /* Insert zones between posts - hidden by default, show on hover */
 .nest-insert-zone {
   opacity: 0;
+  border-color: transparent;
 }
 
 .nest-insert-zone:hover {
@@ -64,8 +65,6 @@ body.editor-active .nest-insert-zone {
   outline: 2px dashed var(--color-nimbus-light);
   outline-offset: 20px;
   cursor: pointer;
-  border: none;
-  border-bottom: none;
 }
 
 /* Active editing state */

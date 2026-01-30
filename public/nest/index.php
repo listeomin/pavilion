@@ -393,7 +393,7 @@ if ("paintWorklet" in CSS) {
 <link rel="modulepreload" href="js/music.js?v=9">
 <link rel="modulepreload" href="js/image-zoom.js?v=12">
 <link rel="modulepreload" href="js/nest-posts-manager.js?v=28">
-<link rel="modulepreload" href="js/discussions.js?v=16">
+<link rel="modulepreload" href="js/discussions.js?v=20">
 <link rel="modulepreload" href="js/nest-utils.js?v=1">
 <link rel="modulepreload" href="js/nest-sections.js?v=1">
 <link rel="modulepreload" href="js/sidebar-toggle.js?v=5">

@@ -213,6 +213,7 @@ try {
             // Get all discussions for posts owned by this user, sorted by last activity
             $stmt = $db->prepare('
                 SELECT d.*,
+                       p.slug as post_slug,
                        COUNT(c.id) as comment_count,
                        MAX(c.created_at) as last_comment_at,
                        COALESCE(MAX(c.created_at), d.created_at) as last_activity

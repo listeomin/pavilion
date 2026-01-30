@@ -653,7 +653,15 @@ export class DiscussionsManager {
       '</div>';
 
     item.addEventListener('click', () => {
-      this.showDiscussionPanel(discussion.id);
+      // For owner: if we have post_slug and we're on the main blog page (not on individual post),
+      // navigate to the post page directly instead of scrolling
+      if (this.isOwner && discussion.post_slug && !this.config.postSlug) {
+        // Navigate to post page with discussion hash
+        const url = '/nest/' + this.config.urlUsername + '/' + discussion.post_slug + '#discussion-' + discussion.id;
+        window.location.href = url;
+      } else {
+        this.showDiscussionPanel(discussion.id);
+      }
     });
 
     return item;

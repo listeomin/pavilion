@@ -1928,6 +1928,16 @@ async function loadTipTapModules() {
               if (container) discussionsManager.renderDiscussionsList(container);
             };
             console.log('[Nest] Discussions initialized successfully');
+
+            // Check for #discussion-ID hash and open that discussion
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#discussion-')) {
+              const discussionId = hash.replace('#discussion-', '');
+              // Wait a bit for discussions to load, then open the panel
+              setTimeout(() => {
+                discussionsManager.showDiscussionPanel(discussionId);
+              }, 500);
+            }
           } else if (attempt < 5) {
             console.log('[Nest] Content element not found, retrying...', attempt);
             setTimeout(() => initDiscussions(attempt + 1), 200);
