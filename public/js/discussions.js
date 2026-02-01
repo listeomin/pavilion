@@ -1,4 +1,4 @@
-// discussions.js v20 - Updated design: chat-style messages, Cascadia Code font, simpler input
+// discussions.js v21 - Navigate to post page + chat-style design
 export class DiscussionsManager {
   constructor(config, apiPath) {
     this.config = config;
@@ -58,10 +58,27 @@ export class DiscussionsManager {
     this._loadDebounceTimer = setTimeout(() => {
       this.loadDiscussions(postId).then(() => {
         this.highlightQuotesInContent();
+        this.checkHashAndOpenDiscussion();
       }).catch(err => {
         console.error('[Discussions] Failed to load:', err);
       });
     }, 100);
+  }
+
+  checkHashAndOpenDiscussion() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#discussion-')) {
+      const discussionId = hash.replace('#discussion-', '');
+      if (discussionId) {
+        // Switch to discussions tab and open the discussion
+        this.switchToDiscussionsTab();
+        setTimeout(() => {
+          this.showDiscussionPanel(discussionId);
+        }, 100);
+        // Clear hash to prevent re-opening on refresh
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
   }
 
   highlightQuotesInContent() {
@@ -451,7 +468,13 @@ export class DiscussionsManager {
         '</div>';
 
       item.addEventListener('click', () => {
-        this.showDiscussionPanel(discussion.id);
+        // Navigate to post page with discussion anchor
+        if (discussion.post_slug && this.config.urlUsername) {
+          window.location.href = this.apiPath + '/nest/' + this.config.urlUsername + '/' + discussion.post_slug + '#discussion-' + discussion.id;
+        } else {
+          // Fallback to showing panel directly
+          this.showDiscussionPanel(discussion.id);
+        }
       });
 
       list.appendChild(item);

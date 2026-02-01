@@ -202,9 +202,11 @@ try {
         if ($postId) {
             $stmt = $db->prepare('
                 SELECT d.*,
+                       p.slug as post_slug,
                        COUNT(c.id) as comment_count,
                        MAX(c.created_at) as last_comment_at
                 FROM nest_discussions d
+                LEFT JOIN nest_posts p ON d.post_id = p.id
                 LEFT JOIN nest_discussion_comments c ON d.id = c.discussion_id
                 WHERE d.post_id = ?
                 GROUP BY d.id
@@ -215,9 +217,11 @@ try {
             $placeholders = implode(',', array_fill(0, count($postIds), '?'));
             $stmt = $db->prepare("
                 SELECT d.*,
+                       p.slug as post_slug,
                        COUNT(c.id) as comment_count,
                        MAX(c.created_at) as last_comment_at
                 FROM nest_discussions d
+                LEFT JOIN nest_posts p ON d.post_id = p.id
                 LEFT JOIN nest_discussion_comments c ON d.id = c.discussion_id
                 WHERE d.post_id IN ($placeholders)
                 GROUP BY d.id
