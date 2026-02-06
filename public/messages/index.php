@@ -228,6 +228,7 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/weather.css?v=1">
 <link rel="stylesheet" href="css/dm.css?v=25">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
+<link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body class="page-dm<?php if ($recipientUsername) echo ' has-chat'; ?>">
 <img src="assets/bird.png" alt="" class="dm-background-bird" style="display: <?php echo $recipientUsername ? 'block' : 'none'; ?>;">

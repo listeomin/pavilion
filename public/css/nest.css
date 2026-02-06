@@ -582,3 +582,15 @@ body.page-nest .wrap {
   min-height: auto;
   overflow-y: visible;
 }
+
+/* Мобильная адаптация - на всю ширину */
+@media screen and (max-width: 768px) {
+  #nest-editor-container {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .ce-block__content {
+    max-width: 100% !important;
+  }
+}

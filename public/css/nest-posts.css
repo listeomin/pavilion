@@ -519,3 +519,73 @@ body.editor-active .nest-insert-zone {
     padding: 16px 20px;
   }
 }
+
+/* ========================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ - добавлено для телефонов
+   ======================================== */
+@media screen and (max-width: 768px) {
+  /* Текст постов - КРУПНЫЙ */
+  .nest-post-content p,
+  .nest-post-editor p {
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+  }
+  
+  /* Заголовки постов */
+  .nest-post-title-display {
+    font-size: 24px !important;
+  }
+  
+  /* Заголовки внутри постов */
+  .nest-post-content h1,
+  .nest-post-editor h1 {
+    font-size: 26px !important;
+  }
+  
+  .nest-post-content h2,
+  .nest-post-editor h2 {
+    font-size: 22px !important;
+  }
+  
+  .nest-post-content h3,
+  .nest-post-editor h3 {
+    font-size: 19px !important;
+  }
+  
+  /* Даты */
+  .nest-post-date {
+    font-size: 13px !important;
+  }
+  
+  /* Код */
+  .nest-post-content code,
+  .nest-post-editor code {
+    font-size: 15px !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .nest-post-content p,
+  .nest-post-editor p {
+    font-size: 17px !important;
+    line-height: 1.75 !important;
+  }
+  
+  .nest-post-title-display {
+    font-size: 22px !important;
+  }
+}
+
+/* Посты на всю ширину */
+@media screen and (max-width: 768px) {
+  .nest-post {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .nest-post-content,
+  .nest-post-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

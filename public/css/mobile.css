@@ -1,0 +1,115 @@
+/* mobile.css - Глобальные мобильные стили */
+
+/* Широкий breakpoint для всех мобильных */
+@media screen and (max-width: 1024px) {
+  /* Скрыть сайдбар */
+  .nest-sidebar,
+  .utility-buttons-nest,
+  .discussion-whale,
+  #toc-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  .main-column {
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* ВСЁ на полную ширину */
+  body,
+  html {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  .page-layout {
+    width: 100% !important;
+  }
+  
+  .main-column {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .wrap {
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 20px 16px 48px 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .main-nav {
+    margin: 20px 0 0 0 !important;
+    margin-left: 0 !important;
+    padding: 0 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Посты */
+  .nest-post,
+  .nest-post-content,
+  .nest-post-editor,
+  #nest-editor-container,
+  .ce-block__content,
+  .category-header-block,
+  #header-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Шрифты */
+  h1 {
+    font-size: 26px !important;
+  }
+  
+  .nest-post-title-display {
+    font-size: 22px !important;
+  }
+  
+  .nest-post-content p,
+  .nest-post-editor p {
+    font-size: 17px !important;
+    line-height: 1.75 !important;
+  }
+  
+  .nav-item {
+    font-size: 15px !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .wrap {
+    padding: 16px 12px 40px 12px !important;
+  }
+  
+  .main-nav {
+    padding: 0 12px !important;
+    gap: 8px !important;
+  }
+  
+  h1 {
+    font-size: 22px !important;
+  }
+  
+  .nav-item {
+    font-size: 14px !important;
+  }
+  
+  .nest-post-content p,
+  .nest-post-editor p {
+    font-size: 16px !important;
+  }
+}

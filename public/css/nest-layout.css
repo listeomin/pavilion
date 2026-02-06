@@ -455,11 +455,6 @@
   }
 }
 
-  display: none;
-}
-
-}
-
 /* =================================
    Sidebar Collapse/Expand Feature
    ================================= */
@@ -716,4 +711,30 @@ body.sidebar-collapsed .nest-sidebar {
 /* Hide fixed discussion input when sidebar is collapsed */
 body.sidebar-collapsed .discussion-input-fixed {
   display: none !important;
+}
+
+/* ========================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ v2
+   ======================================== */
+@media screen and (max-width: 768px) {
+  /* Скрыть сайдбар */
+  .nest-sidebar {
+    display: none !important;
+  }
+  
+  /* Основной контент на всю ширину */
+  .main-column {
+    margin-right: 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Кнопки утилит справа */
+  .utility-buttons-nest {
+    display: none !important;
+  }
+  
+  /* Кит */
+  .discussion-whale {
+    display: none !important;
+  }
 }

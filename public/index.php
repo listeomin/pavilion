@@ -45,6 +45,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/weather.css?v=5">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
+<link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body class="page-chat skeleton-active">
 <?php include_partial('main-nav.php', ['active' => 'home']); ?>

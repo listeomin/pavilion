@@ -48,3 +48,26 @@
   color: var(--color-nimbus-light);
   user-select: none;
 }
+
+/* ========================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ
+   ======================================== */
+@media screen and (max-width: 768px) {
+  .main-nav {
+    margin: 20px 0 0 0 !important;
+    margin-left: 0 !important;
+    padding: 0 16px !important;
+  }
+  
+  .nav-item {
+    font-size: 15px !important;
+  }
+}
+
+/* Навигация на всю ширину */
+@media screen and (max-width: 768px) {
+  .main-nav {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}

@@ -97,6 +97,7 @@ if ($branchId) {
 <link rel="stylesheet" href="css/weather.css?v=1">
 <link rel="stylesheet" href="css/branches.css?v=6">
 <link rel="stylesheet" href="css/image-zoom.css?v=2">
+<link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body class="page-branches<?php if ($branchId) echo ' has-chat'; ?>">
 <?php include_partial('main-nav.php', ['active' => 'branches']); ?>

@@ -40,6 +40,7 @@ $basePath = get_base_path();
 <link rel="stylesheet" href="css/empty-state.css?v=1">
 <link rel="stylesheet" href="css/skeleton.css?v=3">
 <link rel="stylesheet" href="css/dev-nest.css?v=2">
+<link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body class="page-chat skeleton-active">
 <nav class="main-nav">

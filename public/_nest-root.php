@@ -244,6 +244,7 @@ if ("paintWorklet" in CSS) {
 <link rel="stylesheet" href="css/tiptap.css?v=13">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/skeleton.css?v=3">
 <link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=6">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/mobile.css?v=3">
 </head>
 <body<?php
   $classes = ['no-js']; // Remove via JavaScript when loaded

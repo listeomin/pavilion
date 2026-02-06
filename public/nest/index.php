@@ -219,7 +219,7 @@ if ($telegramUserId && $urlUsername) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&family=Ubuntu+Sans:wght@400;500;600&family=Noto+Serif:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/base.css?v=7">
+<link rel="stylesheet" href="css/base.css?v=1770401011">
 <link rel="stylesheet" href="css/chat.css?v=5">
 <link rel="stylesheet" href="css/input.css?v=7">
 <link rel="stylesheet" href="css/format-menu.css?v=4">
@@ -237,17 +237,18 @@ if ("paintWorklet" in CSS) {
 }
 </script>
 <link rel="stylesheet" href="css/telegramAuth.css?v=1">
-<link rel="stylesheet" href="css/navigation.css?v=7">
+<link rel="stylesheet" href="css/navigation.css?v=1770401098">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
-<link rel="stylesheet" href="css/nest.css?v=29">
-<link rel="stylesheet" href="css/nest-layout.css?v=56">
-<link rel="stylesheet" href="css/nest-posts.css?v=26">
+<link rel="stylesheet" href="css/nest.css?v=1770401098">
+<link rel="stylesheet" href="css/nest-layout.css?v=1770400855">
+<link rel="stylesheet" href="css/nest-posts.css?v=1770401011">
 <link rel="stylesheet" href="css/image-zoom.css?v=3">
 <!-- Tiptap Editor -->
 <link rel="stylesheet" href="css/tiptap.css?v=15">
-<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=6">
+<link rel="stylesheet" href="<?php echo htmlspecialchars($basePath); ?>/css/dev-nest.css?v=1770401098">
 <!-- HeroUI Components (DatePicker) -->
 <link rel="stylesheet" href="js/lib/hero-ui-components.css?v=1">
+<link rel="stylesheet" href="css/mobile.css?v=1770401251">
 </head>
 <body<?php
   $classes = ['page-nest', 'no-js']; // Remove no-js via JavaScript when loaded

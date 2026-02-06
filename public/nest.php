@@ -82,6 +82,7 @@ if ($telegramUserId && !$urlUserId) {
 <link rel="stylesheet" href="css/navigation.css?v=6">
 <link rel="stylesheet" href="css/jp-window.css?v=1">
 <link rel="stylesheet" href="css/nest.css?v=1">
+<link rel="stylesheet" href="css/mobile.css?v=3">
 </head>
 <body>
 <nav class="main-nav">
